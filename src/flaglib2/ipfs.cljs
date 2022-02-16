@@ -10,14 +10,14 @@
 
 
 (defn opinion-data-url [iid itype]
-  (str "/ipns/" IPNSHOST "/opinions/" iid "/" itype ".data"))
+  (str "/ipns/" window.IPNSHOST "/opinions/" iid "/" itype ".data"))
 
 (defn rooturl-data-url [rooturl rtype]
-  (str "/ipns/" IPNSHOST "/rooturls/"
+  (str "/ipns/" window.IPNSHOST "/rooturls/"
        (.replaceAll (misc/encode-uri-component2 rooturl) "%" "*")
        "/" rtype ".data"))
 
-(reg-event-fx
+(rf/reg-event-fx
  ::request-rooturl-item
  (fn [{:keys [db]} [rooturl resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
@@ -31,7 +31,7 @@
                  ;; :on-failure []
                  }}))
 
-(reg-event-fx
+(rf/reg-event-fx
  ::received-rooturl-warstats
  (fn [{:keys [db]} [_ rooturl]]
    {:db
@@ -39,7 +39,7 @@
            ::warstats-tmp (assoc (::warstats-tmp db) rooturl ))
     :fx [ [:dispatch [::start-debounce]] ]}))
 
-(reg-event-fx
+(rf/reg-event-fx
  ::start-debounce
  (fn [{:keys [db]} _]
    (if (::debouncing db)
@@ -47,7 +47,7 @@
      {:db (assoc db ::debouncing true)
       :fx [ [:dispatch-later {:ms 500 :dispatch [::complete-debounce]}] ]})))
 
-(reg-event-db
+(rf/reg-event-db
  ::complete-debounce
  (fn [db _]
    {:warstats-store (merge (:warstats-store db) (::warstats-tmp db))
@@ -60,13 +60,14 @@
     ::opinion-tmp {}
     ::debouncing nil}))
 
-(reg-event-db
+(rf/reg-event-db
  ::received-rooturl-warstats
- (fn [db [_ rooturl]]
+ (fn [db [_ rooturl result]]
    {::warstats-tmp
-    (assoc (::warstats-tmp db) )}))
+    (assoc (::warstats-tmp db)
+           rooturl result)}))
 
-(reg-event-fx
+(rf/reg-event-fx
  :load-rooturl
  (fn [_ [_ rooturl & {:keys [no-text]}]]
    {:fx [ [::request-rooturl-item rooturl "warstats"]]}))
