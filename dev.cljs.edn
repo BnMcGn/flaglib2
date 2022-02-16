@@ -1,5 +1,9 @@
 ^{:watch-dirs ["test" "src"]
   :css-dirs ["resources/public/css"]
   :auto-testing true
+  :open-url ""
    }
-{:main flaglib2.core}
+{:main flaglib2.core
+ :asset-path "/static/cljs-out/dev"
+ :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
+ :preloads        [day8.re-frame-10x.preload]}
