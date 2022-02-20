@@ -19,7 +19,7 @@
 
 (rf/reg-event-fx
  ::request-rooturl-item
- (fn [{:keys [db]} [rooturl resource-type]]
+ (fn [{:keys [db]} [_ rooturl resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
    {:http-xhrio {:method :get
                  :uri (rooturl-data-url rooturl resource-type)
@@ -33,10 +33,14 @@
 
 (rf/reg-event-fx
  ::received-rooturl-warstats
- (fn [{:keys [db]} [_ rooturl]]
+ (fn [{:keys [db]} [_ rooturl result]]
    {:db
     (assoc db
-           ::warstats-tmp (assoc (::warstats-tmp db) rooturl ))
+           ::warstats-tmp (assoc (::warstats-tmp db)
+                                 rooturl
+                                 (let [{:as warstats} (cljs.reader/read-string result)]
+                                   (println (:direction warstats))
+                                   warstats)))
     :fx [ [:dispatch [::start-debounce]] ]}))
 
 (rf/reg-event-fx
@@ -46,6 +50,7 @@
      {}
      {:db (assoc db ::debouncing true)
       :fx [ [:dispatch-later {:ms 500 :dispatch [::complete-debounce]}] ]})))
+
 
 (rf/reg-event-db
  ::complete-debounce
@@ -60,16 +65,9 @@
     ::opinion-tmp {}
     ::debouncing nil}))
 
-(rf/reg-event-db
- ::received-rooturl-warstats
- (fn [db [_ rooturl result]]
-   {::warstats-tmp
-    (assoc (::warstats-tmp db)
-           rooturl result)}))
-
 (rf/reg-event-fx
  :load-rooturl
  (fn [_ [_ rooturl & {:keys [no-text]}]]
-   {:fx [ [::request-rooturl-item rooturl "warstats"]]}))
+   {:fx [[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]]]}))
 
 
