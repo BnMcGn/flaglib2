@@ -10,7 +10,8 @@
                  [org.clojure/clojurescript "1.10.773"]
                  [reagent "0.10.0" ]
                  [re-frame "1.2.0"]
-                 [day8.re-frame/http-fx "0.2.4"]]
+                 [day8.re-frame/http-fx "0.2.4"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]]
 
   :source-paths ["src"]
 

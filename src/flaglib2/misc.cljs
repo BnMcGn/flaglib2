@@ -1,4 +1,6 @@
-(ns flaglib2.misc)
+(ns flaglib2.misc
+  (:require
+   [cljs-time.format]))
 
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
@@ -9,3 +11,6 @@
                     (str "%" (.toUpperCase (.toString (.charCodeAt itm 0) 16)))))
                 (seq uri)))))
 
+(def formatter (cljs-time.format/formatters :date-time-no-ms))
+(defn parse-time [timestamp]
+  (cljs-time.format/parse formatter timestamp))

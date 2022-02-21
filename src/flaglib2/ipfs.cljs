@@ -6,7 +6,8 @@
    [ajax.core :as ajax]
    [clojure.string :as string]
    [clojure.edn :as edn]
-   [flaglib2.misc :as misc]))
+   [flaglib2.misc :as misc]
+   [cljs-time.core :as time]))
 
 
 (defn opinion-data-url [iid itype]
@@ -26,22 +27,73 @@
                  :timeout 6000
                  :response-format (ajax/text-response-format)
                  :on-success
-                 [(keyword 'flaglib2.ipfs (string/join ["received-rooturl-" resource-type]))
+                 [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))
                   rooturl]
                  ;; :on-failure []
                  }}))
 
 (rf/reg-event-fx
- ::received-rooturl-warstats
- (fn [{:keys [db]} [_ rooturl result]]
-   {:db
-    (assoc db
-           ::warstats-tmp (assoc (::warstats-tmp db)
-                                 rooturl
-                                 (let [{:as warstats} (cljs.reader/read-string result)]
-                                   (println (:direction warstats))
-                                   warstats)))
+ ::request-opinion-item
+ (fn [{:keys [db]} [_ iid resource-type]]
+   ;;FIXME: could add indicator to db that request is pending...
+   {:http-xhrio {:method :get
+                 :uri (opinion-data-url iid resource-type)
+                 :timeout 6000
+                 :response-format (ajax/text-response-format)
+                 :on-success
+                 [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))
+                  iid]
+                 ;; :on-failure []
+                 }}))
+
+(defn proc-warstat [data]
+  (let [{:as warstat} (cljs.reader/read-string data)]
+    (assoc
+     warstat
+     :tree-freshness (misc/parse-time (:tree-freshness warstat)))))
+
+(rf/reg-event-fx
+ ::received-warstats
+ (fn [{:keys [db]} [_ key result]]
+   {:db (assoc db ::warstats-tmp (assoc (::warstats-tmp db) key (proc-warstat result)))
     :fx [ [:dispatch [::start-debounce]] ]}))
+
+(defn proc-text [data]
+  (let [{:as text} (cljs.reader/read-string data)]
+   text))
+
+(rf/reg-event-fx
+ ::received-text
+ (fn [{:keys [db]} [_ key result]]
+   {:db (assoc db ::text-tmp (assoc (::text-tmp db) key (proc-text result)))
+    :fx [ [:dispatch [::start-debounce]] ]}))
+
+(defn proc-title [data]
+  (let [{:as title} (cljs.reader/read-string data)]
+    title))
+
+(rf/reg-event-fx
+ ::received-title
+ (fn [{:keys [db]} [_ key result]]
+   {:db (assoc db ::title-tmp (assoc (::title-tmp db) key (proc-title result)))
+    :fx [ [:dispatch [::start-debounce]] ]}))
+
+(defn proc-opinion [data]
+  (let [{:as opinion} (cljs.reader/read-string data)]
+    (assoc
+     opinion
+     :created (misc/parse-time (:created opinion)))))
+
+(rf/reg-event-fx
+ ::received-opinion
+ (fn [{:keys [db]} [_ key result]]
+   {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key (proc-title result)))
+    :fx [ [:dispatch [::start-debounce]] ]}))
+
+(rf/reg-event-db
+ ::received-references
+ (fn [db [_ key result]]
+   (assoc db :references (assoc (:references db) key (cljs.reader/read-string result)))))
 
 (rf/reg-event-fx
  ::start-debounce
@@ -50,7 +102,6 @@
      {}
      {:db (assoc db ::debouncing true)
       :fx [ [:dispatch-later {:ms 500 :dispatch [::complete-debounce]}] ]})))
-
 
 (rf/reg-event-db
  ::complete-debounce
@@ -68,6 +119,22 @@
 (rf/reg-event-fx
  :load-rooturl
  (fn [_ [_ rooturl & {:keys [no-text]}]]
-   {:fx [[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]]]}))
+   (let [dispatches
+         [:dispatch
+          [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]
+          [:flaglib2.ipfs/request-rooturl-item rooturl "title"]]
+         text-dispatch
+         [:flaglib2.ipfs/request-rooturl-item rooturl "text"]]
+     {:fx [(into dispatches (when-not no-text [text-dispatch]))]})))
+
+(rf/reg-event-fx
+ :load-opinion
+ (fn [_ [_ iid]]
+   {:fx [[:dispatch
+          [:flaglib2.ipfs/request-opinion-item iid "warstats"]
+          [:flaglib2.ipfs/request-opinion-item iid "title"]
+          [:flaglib2.ipfs/request-opinion-item iid "opinion"]]]}))
+
+
 
 
