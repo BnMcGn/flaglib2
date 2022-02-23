@@ -7,6 +7,7 @@
    [clojure.string :as string]
    [clojure.edn :as edn]
    [flaglib2.misc :as misc]
+   [flaglib2.fetchers :as fetchers]
    [cljs-time.core :as time]))
 
 
@@ -93,7 +94,7 @@
 (rf/reg-event-db
  ::received-references
  (fn [db [_ key result]]
-   (assoc db :references (assoc (:references db) key (cljs.reader/read-string result)))))
+   (assoc-in db [:references key] (cljs.reader/read-string result))))
 
 (rf/reg-event-fx
  ::start-debounce
@@ -119,22 +120,30 @@
 (rf/reg-event-fx
  :load-rooturl
  (fn [_ [_ rooturl & {:keys [no-text]}]]
-   (let [dispatches
-         [:dispatch
-          [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]
-          [:flaglib2.ipfs/request-rooturl-item rooturl "title"]]
-         text-dispatch
-         [:flaglib2.ipfs/request-rooturl-item rooturl "text"]]
-     {:fx [(into dispatches (when-not no-text [text-dispatch]))]})))
+   {:fx [[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]]
+         [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "title"]]
+         (when-not no-text
+           [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "text"]])]}))
 
 (rf/reg-event-fx
  :load-opinion
  (fn [_ [_ iid]]
-   {:fx [[:dispatch
-          [:flaglib2.ipfs/request-opinion-item iid "warstats"]
-          [:flaglib2.ipfs/request-opinion-item iid "title"]
-          [:flaglib2.ipfs/request-opinion-item iid "opinion"]]]}))
+   {:fx [[:dispatch [:flaglib2.ipfs/request-opinion-item iid "warstats"]]
+         [:dispatch [:flaglib2.ipfs/request-opinion-item iid "title"]]
+         [:dispatch [:flaglib2.ipfs/request-opinion-item iid "opinion"]]]}))
 
 
+;; Warstats requester
+;; High level multiple requester with safety features
 
+(rf/reg-event-fx
+ :load-rooturls
+ (fn [_ [_ rooturls & {:keys [no-text gently]}]]
+   {:fx
+    (into []
+          (for [url rooturls]
+            (let [ev [:load-rooturl url :no-text no-text]]
+              (if gently
+                [:dispatch [:text-status url :on-available ev]]
+                [:dispatch ev]))))}))
 
