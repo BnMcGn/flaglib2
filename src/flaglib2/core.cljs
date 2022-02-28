@@ -10,31 +10,6 @@
 
 (println "This text is printed from src/flaglib2/core.cljs. Go ahead and edit it and see reloading in action.")
 
-(defn multiply [a b] (* a b))
-
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/flaglib2/core.cljs and watch it change!"]])
-
-(defn mount [el]
-  (rdom/render [hello-world] el))
-
-(defn mount-app-element []
-  (when-let [el (get-app-element)]
-    (mount el)))
-
-;; conditionally start your application based on the presence of an "app" element
-;; this is particularly helpful for testing this ns without launching the app
-(mount-app-element)
-
-
 (rf/reg-event-db
  :initialize
  (fn [_ _]
@@ -56,14 +31,14 @@
 
 ;;FIXME: Need to handle multiple?
 (defn mount-registered-elements []
-  (let [spec @(rf/subscribe [:server-parameters])
-        func (:entry-point spec)]
-    (rdom/render [(:entry-point spec)] (js/document.getElementById (:mount-point spec)))))
+  (when-let [spec @(rf/subscribe [:server-parameters])]
+    (when-let [mp (js/document.getElementById (:mount-point spec))]
+      (rdom/render [(:entry-point spec)] mp))))
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
-  (mount-app-element)
+  (mount-registered-elements)
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
@@ -93,7 +68,7 @@
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
   ;;FIXME
-  (mount-make-opinion nil nil)
+  ;(mount-make-opinion nil nil)
 
   )
 
