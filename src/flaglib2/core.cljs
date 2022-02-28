@@ -4,6 +4,8 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
+   [flaglib2.ipfs :as ip]
+   [flaglib2.fabricate :as fab]
    [cljs.reader]))
 
 (println "This text is printed from src/flaglib2/core.cljs. Go ahead and edit it and see reloading in action.")
@@ -42,6 +44,22 @@
     :title-store {}
     }))
 
+(rf/reg-event-db
+ :store-server-parameters
+ (fn [db [_ params]]
+   (assoc db :server-parameters (js->clj params :keywordize-keys true))))
+
+(rf/reg-sub
+ :server-parameters
+ (fn [db _]
+   (:server-parameters db)))
+
+;;FIXME: Need to handle multiple?
+(defn mount-registered-elements []
+  (let [spec @(rf/subscribe [:server-parameters])
+        func (:entry-point spec)]
+    (rdom/render [(:entry-point spec)] (js/document.getElementById (:mount-point spec)))))
+
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
@@ -75,7 +93,12 @@
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
   ;;FIXME
-  (mount-make-opinion nil nil))
+  (mount-make-opinion nil nil)
+
+  )
+
+
+
 
 
 

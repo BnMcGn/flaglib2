@@ -11,7 +11,8 @@
                  [reagent "0.10.0" ]
                  [re-frame "1.2.0"]
                  [day8.re-frame/http-fx "0.2.4"]
-                 [com.andrewmcveigh/cljs-time "0.5.2"]]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
+                 [cljsjs/fuse "6.0.0-0"]]
 
   :source-paths ["src"]
 
