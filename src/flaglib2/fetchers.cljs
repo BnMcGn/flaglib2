@@ -22,6 +22,7 @@
 
 (rf/reg-event-db
  ::received-author-urls
+ [hook-inserter]
  (fn [db [_ result]]
    (assoc db ::author-urls result)))
 
@@ -70,4 +71,24 @@
              {:status "failure" :message (:last-error result) :text "" :title ""})))
 
 
+;; Hook inserter stuff
 
+(rf/reg-fx
+ ::hook-trigger
+ (fn [event]
+   (rf/dispatch event)))
+
+(def hook-inserter
+  (rf/->interceptor
+   :id :hook-inserter
+   :after (fn [context]
+            (let [evid (first (get-in context [:coeffects :event]))
+                  entry (get-in context [:effects :db ::hooks evid])]
+              (if entry
+                (assoc-in context [:effects ::hook-trigger] entry)
+                context)))))
+
+(rf/reg-event-db
+ :add-hooks
+ (fn [db [_ hookspecs]]
+   {:db (assoc db ::hooks (merge (::hooks db) hookspecs))}))
