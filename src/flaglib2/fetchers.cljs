@@ -25,7 +25,6 @@
  (fn [db [_ result]]
    (assoc db ::author-urls result)))
 
-
 ;; Text server
 
 (rf/reg-event-fx

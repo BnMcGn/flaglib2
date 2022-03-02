@@ -19,10 +19,11 @@
     :title-store {}
     }))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :store-server-parameters
- (fn [db [_ params]]
-   (assoc db :server-parameters (js->clj params :keywordize-keys true))))
+ (fn [{:keys [db]} [_ params]]
+   {:db (assoc db :server-parameters (js->clj params :keywordize-keys true))
+    :mount-registered nil}))
 
 (rf/reg-sub
  :server-parameters
@@ -35,6 +36,11 @@
     (when-let [mp (js/document.getElementById (:mount-point spec))]
       (rdom/render [(:entry-point spec)] mp))))
 
+(rf/reg-fx
+ :mount-registered
+ (fn [_]
+   (mount-registered-elements)))
+
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
@@ -46,7 +52,6 @@
 
 (defn make-opinion []
   [:span "here!"])
-
 
 ;;FIXME: temporary hack. Need a better way to store mount points.
 (defonce mount-point nil)
