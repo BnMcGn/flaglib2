@@ -12,7 +12,8 @@
    [cljsjs.fuse :as fuse]))
 
 (def fabricate-hooks
-  {:fetchers/received-author-urls [::get-stuff-for-author-urls]})
+  {:fetchers/received-author-urls [::get-stuff-for-author-urls]
+   ::search-provided [::get-stuff-for-selection]})
 
 (rf/reg-event-fx
  :make-opinion
@@ -28,11 +29,36 @@
  ::get-stuff-for-author-urls
  ;;We assume that author-urls are already in ipfs. No check.
  (fn [{:keys [db]} _]
-   {:dispatch [:load-rooturls (:fetchers/author-urls db) :no-text no-text]}))
+   {:dispatch [:load-rooturls
+               (fetchers/reformat-urls-lists-simple (:fetchers/author-urls db))
+               :no-text no-text]}))
 
 (rf/reg-event-db
  ::search-provided
+ [fetchers/hook-inserter]
  (fn [db [_ search]]
    (let [ndb (assoc db ::search search)]
-     (if ))
-   ))
+     (if (misc/url? search)
+       (assoc ndb ::selection search)
+       ndb))))
+
+;;FIXME: will load all of url data. No way to check if we already have it.
+(rf/reg-event-fx
+ ::get-stuff-for-selection
+ (fn [{:keys [db]} _]
+   {:dispatch [:load-rooturls [(::selection db)] :gently true]}))
+
+
+
+
+
+
+(rf/reg-sub
+ ::url-search-results
+ (fn [db _]
+   (let [search (::search db)
+         aurls (:fetchers/author-urls)]
+     (when (and search aurls)
+       (let [fus (fuse/fuse (fetchers/reformat-urls-lists aurls)
+                            (clj->js {:include-score t :keys (list :url)}))]
+         (fus.search search))))))

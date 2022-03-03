@@ -7,6 +7,19 @@
    [clojure.walk :as walk]
    [flaglib2.misc :as misc]))
 
+
+(defn reformat-urls-lists [lists]
+  (for [l lists
+        [k urls] l
+        url (or urls [])]
+    {:url url :category k}))
+
+(defn reformat-urls-lists-simple [lists]
+  (for [l lists
+        [k urls] (or l {})
+        url (or urls [])]
+    url))
+
 ;;FIXME: Should check if already loaded?
 (rf/reg-event-fx
  ::load-author-urls
