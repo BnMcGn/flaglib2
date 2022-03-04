@@ -15,13 +15,17 @@
   {:fetchers/received-author-urls [::get-stuff-for-author-urls]
    ::search-provided [::get-stuff-for-selection]})
 
+(defn make-opinion []
+  [:span "make-opinion root"])
+
 (rf/reg-event-fx
  :make-opinion
  (fn [{:keys [db]} _]
    (let [target (get-in db [:server-parameters :target])]
-     {:fx [ [:dispatch
+     {:db (assoc db :root-element make-opinion)
+      :fx [ [:dispatch
              (if target
-               [::search-provided target]
+               [::enter-search target]
                [:fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]]})))
 
@@ -31,10 +35,10 @@
  (fn [{:keys [db]} _]
    {:dispatch [:load-rooturls
                (fetchers/reformat-urls-lists-simple (:fetchers/author-urls db))
-               :no-text no-text]}))
+               :no-text true]}))
 
 (rf/reg-event-db
- ::search-provided
+ ::enter-search
  [fetchers/hook-inserter]
  (fn [db [_ search]]
    (let [ndb (assoc db ::search search)]
@@ -57,8 +61,8 @@
  ::url-search-results
  (fn [db _]
    (let [search (::search db)
-         aurls (:fetchers/author-urls)]
+         aurls (:fetchers/author-urls db)]
      (when (and search aurls)
        (let [fus (fuse/fuse (fetchers/reformat-urls-lists aurls)
-                            (clj->js {:include-score t :keys (list :url)}))]
+                            (clj->js {:include-score true :keys (list :url)}))]
          (fus.search search))))))
