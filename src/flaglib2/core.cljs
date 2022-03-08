@@ -4,7 +4,8 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
-   [flaglib2.init]
+   [flaglib2.init :as init]
+   [flaglib2.fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.fabricate :as fab]
    [cljs.reader]))
@@ -23,7 +24,7 @@
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
-  (mount-registered-elements)
+  (init/mount-registered-elements)
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)

@@ -2,6 +2,7 @@
   (:require
    [goog.dom :as gdom]
    [re-frame.core :as rf]
+   [reagent.core :as r]
 ;   [day8.re-frame.http-fx]
 ;   [ajax.core :as ajax]
 ;   [clojure.string :as string]

@@ -104,4 +104,4 @@
 (rf/reg-event-db
  :add-hooks
  (fn [db [_ hookspecs]]
-   {:db (assoc db ::hooks (merge (::hooks db) hookspecs))}))
+   (assoc db ::hooks (merge (::hooks db) hookspecs))))
