@@ -23,7 +23,7 @@
 (defn mount-registered-elements []
   (when-let [spec @(rf/subscribe [:server-parameters])]
     (when-let [mp (gdom/getElement (:mount-point spec))]
-      (rdom/render [@(rf/subscribe :root-element)] mp))))
+      (rdom/render [@(rf/subscribe [:root-element])] mp))))
 
 (rf/reg-fx
  :mount-registered

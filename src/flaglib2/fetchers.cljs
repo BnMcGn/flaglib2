@@ -7,6 +7,30 @@
    [clojure.walk :as walk]
    [flaglib2.misc :as misc]))
 
+;; Hook inserter stuff
+
+(rf/reg-fx
+ ::hook-trigger
+ (fn [event]
+   (rf/dispatch event)))
+
+(def hook-inserter
+  (rf/->interceptor
+   :id :hook-inserter
+   :after (fn [context]
+            (let [evid (first (get-in context [:coeffects :event]))
+                  entry (get-in context [:effects :db ::hooks evid])]
+              (if entry
+                (assoc-in context [:effects ::hook-trigger] entry)
+                context)))))
+
+(rf/reg-event-db
+ :add-hooks
+ (fn [db [_ hookspecs]]
+   (assoc db ::hooks (merge (::hooks db) hookspecs))))
+
+
+
 
 (defn reformat-urls-lists [lists]
   (for [l lists
@@ -84,24 +108,3 @@
              {:status "failure" :message (:last-error result) :text "" :title ""})))
 
 
-;; Hook inserter stuff
-
-(rf/reg-fx
- ::hook-trigger
- (fn [event]
-   (rf/dispatch event)))
-
-(def hook-inserter
-  (rf/->interceptor
-   :id :hook-inserter
-   :after (fn [context]
-            (let [evid (first (get-in context [:coeffects :event]))
-                  entry (get-in context [:effects :db ::hooks evid])]
-              (if entry
-                (assoc-in context [:effects ::hook-trigger] entry)
-                context)))))
-
-(rf/reg-event-db
- :add-hooks
- (fn [db [_ hookspecs]]
-   (assoc db ::hooks (merge (::hooks db) hookspecs))))

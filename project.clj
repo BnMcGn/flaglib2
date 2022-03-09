@@ -8,11 +8,15 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.773"]
-                 [reagent "1.1.0" ]
+                 [reagent "0.10.0" ]
                  [re-frame "1.2.0"]
                  [day8.re-frame/http-fx "0.2.4"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
-                 [cljsjs/fuse "6.0.0-0"]]
+                 [cljsjs/fuse "6.0.0-0"]
+                 [rgm/tailwind-hiccup "0.2.0"]
+                 [re-com "2.13.2"]]
+
+  :plugins [[lein-tailwind "0.1.2"]]
 
   :source-paths ["src"]
 
@@ -26,5 +30,12 @@
                                   [day8.re-frame/re-frame-10x "1.2.2"]]
                    :resource-paths ["target"]
                    ;; need to add the compiled assets to the :clean-targets
-                   :clean-targets ^{:protect false} ["target"]}})
+                   :clean-targets ^{:protect false} ["target"]}}
+
+  ;;Utterly ignorant so far
+  :tailwind {:tailwind-dir "src/css/tailwind"
+            :output-dir   "src/css"
+            :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value 
+            :styles [{:src "main.css"
+                      :dst "main.css"}]})
 
