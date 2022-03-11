@@ -10,25 +10,12 @@
    [flaglib2.fetchers :as fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
-   [cljsjs.fuse :as fuse]))
+   [cljsjs.fuse :as fuse]
+   [re-com.core :as rc]))
 
 (def fabricate-hooks
   {:fetchers/received-author-urls [::get-stuff-for-author-urls]
    ::search-provided [::get-stuff-for-selection]})
-
-(defn make-opinion []
-  [:span "make-opinion root"])
-
-(rf/reg-event-fx
- :make-opinion
- (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :target])]
-     {:db (assoc db :root-element make-opinion)
-      :fx [ [:dispatch
-             (if target
-               [::enter-search target]
-               [:fetchers/load-author-urls])]
-           [:dispatch [:add-hooks fabricate-hooks]]]})))
 
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
@@ -67,3 +54,38 @@
        (let [fus (fuse/fuse (fetchers/reformat-urls-lists aurls)
                             (clj->js {:include-score true :keys (list :url)}))]
          (fus.search search))))))
+
+(rf/reg-sub
+ ::search
+ (fn [db _]
+   (::search db)))
+
+
+
+
+
+
+(defn make-opinion []
+  (let [search @(rf/subscribe [::search])]
+    [:div
+     [rc/input-text
+      :placeholder "Enter a Target URL or search terms"
+      :model search
+      :on-change (fn [ev] (println ev) (rf/dispatch [::enter-search ev.target.value]))]]))
+
+(rf/reg-event-fx
+ :make-opinion
+ (fn [{:keys [db]} _]
+   (let [target (get-in db [:server-parameters :target])]
+     {:db (assoc db :root-element make-opinion)
+      :fx [ [:dispatch
+             (if target
+               [::enter-search target]
+               [:fetchers/load-author-urls])]
+           [:dispatch [:add-hooks fabricate-hooks]]
+           ;;FIXME: is this the right place?
+           [:dispatch [:mount-registered]]]})))
+
+
+
+

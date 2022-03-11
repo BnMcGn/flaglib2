@@ -1,6 +1,7 @@
 (ns flaglib2.misc
   (:require
-   [cljs-time.format]))
+   [cljs-time.format]
+   [re-frame.registrar]))
 
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
@@ -19,3 +20,10 @@
 
 (defn url? [item]
   (re-matches url-pattern item))
+
+(defn list-events []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:event store))))
+
+
+
