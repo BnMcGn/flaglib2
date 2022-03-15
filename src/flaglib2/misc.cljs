@@ -25,5 +25,9 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:event store))))
 
+(defn list-subs []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:sub store))))
+
 
 

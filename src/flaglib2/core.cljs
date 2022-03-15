@@ -44,6 +44,7 @@
   (rdom/render [make-opinion] mount-point))
 
 (defonce startup (do (rf/dispatch-sync [:initialize])
+                     (rf/clear-subscription-cache!)
                      true))
 
 (defn ^:dev/after-load clear-cache-and-render!

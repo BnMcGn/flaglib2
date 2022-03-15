@@ -61,17 +61,41 @@
    (::search db)))
 
 
+(defn suggest-button [itm]
+  [rc/button
+   :label itm
+   :on-click (fn [] (rf/dispatch [::enter-search itm]))])
 
+(defn display-urls-in-categories []
+  (let [labels {:rooturls "Previous Targets"
+                :references "Previous References"
+                :replies "References from replies to your posts"}
+        aurls @(rf/subscribe [:fetchers/author-urls])]
+    [rc/v-box
+     (reduce into
+             (for [[cat items] aurls
+                   :when (seq items)]
+               (into [[rc/box (get labels cat)]]
+                     (for [itm items]
+                       [suggest-button itm]))))]))
 
-
+(defn display-searched-urls []
+  (let [aurls @(rf/subscribe [::url-search-results])]
+    [rc/v-box
+     (for [itm aurls]
+       [suggest-button (:url itm)])]))
 
 (defn make-opinion []
-  (let [search @(rf/subscribe [::search])]
+  (let [search @(rf/subscribe [::search])
+        search-res @(rf/subscribe [::url-search-results])]
     [:div
      [rc/input-text
       :placeholder "Enter a Target URL or search terms"
       :model search
-      :on-change (fn [ev] (println ev) (rf/dispatch [::enter-search ev.target.value]))]]))
+      :on-change (fn [ev] (println ev) (rf/dispatch [::enter-search ev]))]
+     (if search-res
+       [display-searched-urls]
+       [display-urls-in-categories])]))
 
 (rf/reg-event-fx
  :make-opinion

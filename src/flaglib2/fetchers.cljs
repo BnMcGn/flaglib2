@@ -63,6 +63,13 @@
  (fn [db [_ result]]
    (assoc db ::author-urls result)))
 
+
+
+(rf/reg-sub
+ ::author-urls
+ (fn [db _]
+   (::author-urls db)))
+
 ;; Text server
 
 (rf/reg-event-fx
