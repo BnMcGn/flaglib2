@@ -56,16 +56,18 @@
                 :replies "References from replies to your posts"}
         aurls @(rf/subscribe [:flaglib2.fetchers/author-urls])]
     [rc/v-box
+     :children
      (reduce into
              (for [[cat items] aurls
                    :when (seq items)]
-               (into [[rc/box (get labels cat)]]
+               (into [[rc/box :child (or (get labels cat) "")]]
                      (for [itm items]
                        [suggest-button itm]))))]))
 
 (defn display-searched-urls []
   (let [aurls @(rf/subscribe [::url-search-results])]
     [rc/v-box
+     :children
      (for [itm aurls]
        [suggest-button (:url itm)])]))
 
