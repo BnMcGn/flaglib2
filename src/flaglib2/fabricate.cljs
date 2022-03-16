@@ -22,7 +22,7 @@
  ;;We assume that author-urls are already in ipfs. No check.
  (fn [{:keys [db]} _]
    {:dispatch [:load-rooturls
-               (fetchers/reformat-urls-lists-simple (:fetchers/author-urls db))
+               (misc/reformat-urls-lists-simple (:fetchers/author-urls db))
                :no-text true]}))
 
 (rf/reg-event-db
@@ -45,22 +45,6 @@
 
 
 
-(rf/reg-sub
- ::url-search-results
- (fn [db _]
-   (let [search (::search db)
-         aurls (:fetchers/author-urls db)]
-     (when (and search aurls)
-       (let [fus (fuse/fuse (fetchers/reformat-urls-lists aurls)
-                            (clj->js {:include-score true :keys (list :url)}))]
-         (fus.search search))))))
-
-(rf/reg-sub
- ::search
- (fn [db _]
-   (::search db)))
-
-
 (defn suggest-button [itm]
   [rc/button
    :label itm
@@ -70,7 +54,7 @@
   (let [labels {:rooturls "Previous Targets"
                 :references "Previous References"
                 :replies "References from replies to your posts"}
-        aurls @(rf/subscribe [:fetchers/author-urls])]
+        aurls @(rf/subscribe [:flaglib2.fetchers/author-urls])]
     [rc/v-box
      (reduce into
              (for [[cat items] aurls
@@ -108,7 +92,7 @@
                [:fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]
            ;;FIXME: is this the right place?
-           [:dispatch [:mount-registered]]]})))
+           [:mount-registered]]})))
 
 
 

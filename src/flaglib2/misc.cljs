@@ -29,5 +29,21 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:sub store))))
 
+(defn list-fx []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:fx store))))
 
 
+
+
+(defn reformat-urls-lists [lists]
+  (for [l lists
+        [k urls] l
+        url (or urls [])]
+    {:url url :category k}))
+
+(defn reformat-urls-lists-simple [lists]
+  (for [l lists
+        [k urls] (or l {})
+        url (or urls [])]
+    url))

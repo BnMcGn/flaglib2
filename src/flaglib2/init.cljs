@@ -2,22 +2,14 @@
   (:require
    [goog.dom :as gdom]
    [reagent.dom :as rdom]
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [flaglib2.subscriptions]))
 
 (rf/reg-event-fx
  ::store-server-parameters
  (fn [{:keys [db]} [_ params]]
    {:db (assoc db :server-parameters params)}))
 
-(rf/reg-sub
- :server-parameters
- (fn [db _]
-   (:server-parameters db)))
-
-(rf/reg-sub
- :root-element
- (fn [db _]
-   (:root-element db)))
 
 ;;FIXME: Need to handle multiple?
 (defn mount-registered-elements []

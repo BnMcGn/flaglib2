@@ -32,18 +32,6 @@
 
 
 
-(defn reformat-urls-lists [lists]
-  (for [l lists
-        [k urls] l
-        url (or urls [])]
-    {:url url :category k}))
-
-(defn reformat-urls-lists-simple [lists]
-  (for [l lists
-        [k urls] (or l {})
-        url (or urls [])]
-    url))
-
 ;;FIXME: Should check if already loaded?
 (rf/reg-event-fx
  ::load-author-urls
@@ -64,11 +52,6 @@
    (assoc db ::author-urls result)))
 
 
-
-(rf/reg-sub
- ::author-urls
- (fn [db _]
-   (::author-urls db)))
 
 ;; Text server
 

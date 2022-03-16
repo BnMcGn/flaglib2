@@ -4,6 +4,7 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
+   [flaglib2.subscriptions]
    [flaglib2.init :as init]
    [flaglib2.fetchers]
    [flaglib2.ipfs :as ip]
@@ -53,6 +54,7 @@
   ;; after shadow-cljs hot-reloads code. We force a UI update by clearing
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
+  (init/mount-registered-elements)
   ;;FIXME
   ;(mount-make-opinion nil nil)
 
