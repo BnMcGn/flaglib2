@@ -1,7 +1,8 @@
 (ns flaglib2.misc
   (:require
    [cljs-time.format]
-   [re-frame.registrar]))
+   [re-frame.registrar]
+   [clojure.string :as str]))
 
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
@@ -20,6 +21,16 @@
 
 (defn url? [item]
   (re-matches url-pattern item))
+
+(defn url-domain [url]
+  (let [domain (-> url
+                   (str/split "//")
+                   second
+                   (str/split "/")
+                   first)]
+    (if (str/starts-with? domain "www.")
+      (subs domain 4)
+      domain)))
 
 (defn list-events []
   (let [store @re-frame.registrar/kind->id->handler]

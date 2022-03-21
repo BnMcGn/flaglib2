@@ -78,7 +78,7 @@
      [rc/input-text
       :placeholder "Target URL or search terms"
       :model search
-      :on-change (fn [ev] (println ev) (rf/dispatch [::enter-search ev]))]
+      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
      (if search-res
        [display-searched-urls]
        [display-urls-in-categories])]))
