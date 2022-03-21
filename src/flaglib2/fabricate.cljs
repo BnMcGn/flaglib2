@@ -76,7 +76,7 @@
         search-res @(rf/subscribe [::url-search-results])]
     [:div
      [rc/input-text
-      :placeholder "Enter a Target URL or search terms"
+      :placeholder "Target URL or search terms"
       :model search
       :on-change (fn [ev] (println ev) (rf/dispatch [::enter-search ev]))]
      (if search-res
@@ -99,3 +99,53 @@
 
 
 
+;;Decisioner: what to do if we don't have text
+
+(defn proceed-button [& alternate]
+  [rc/button
+   :label (or alternate "Next")
+   :on-click (fn [] (rf/dispatch [:opine]))])
+
+(defn review-text-button []
+  [rc/button
+   :label "Review Text"
+   :on-click (fn [] (rf/dispatch [::review-text]))])
+
+(defn supply-text-button []
+  [rc/button
+   :label "Supply Text"
+   :on-click (fn [] (rf/dispatch [::supply-text]))])
+
+(defn target-decision []
+  (let [selection @(rf/subscribe [::selection])
+        factors (and selection @(rf/subscribe [:target-decision selection]))]
+    (cond
+      (not factors) []
+      (and (:reviewed factors) (:available factors))
+      [rc/v-box [proceed-button]]
+      (:available factors)
+      [:div
+       [:h3 "Unreviewed article text"]
+       [:ul
+        [:li "The text of this article has not yet been reviewed for tidyness"]
+        [:li "You may review it for legibility and post an edited version using the 'Review Text' button"]
+        [:li "You may also skip to posting flags on the article"]]
+       [rc/v-box [review-text-button] [proceed-button "Skip to Flagging"]]]
+      (= (:status factors) "wait")
+      [:div
+       [:h3 "Waiting for text extraction"]
+       [:ul
+        [:li "Target text is being fetched and extracted"]
+        [:li "You may supply the article text manually"]
+        [:li "Skip to posting if you don't need the article text"]]
+       [rc/v-box [supply-text-button] [proceed-button "Skip to Flagging"]]]
+      (= (:status factors) "failure")
+      [:div
+       [:h3 "Text from article at " (misc/url-domain selection) " is not currently available."]
+       [:h4 "Reason: " (:message factors)]
+       [:ul
+        [:li "You may supply the article text manually"]
+        ;;FIXME
+        ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
+        [:li "You might not need the article text, for example, if you aren't using excerpts."]]
+       [rc/v-box [supply-text-button] [proceed-button "Flag Anyways"]]])))
