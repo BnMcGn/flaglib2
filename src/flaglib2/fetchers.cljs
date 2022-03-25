@@ -49,7 +49,7 @@
  ::received-author-urls
  [hook-inserter]
  (fn [db [_ result]]
-   (assoc db ::author-urls result)))
+   (assoc db ::author-urls (walk/keywordize-keys result))))
 
 
 

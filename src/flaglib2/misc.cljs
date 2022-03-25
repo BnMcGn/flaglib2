@@ -44,6 +44,9 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:fx store))))
 
+(defn say [itm]
+  (do (println itm)
+      itm))
 
 
 

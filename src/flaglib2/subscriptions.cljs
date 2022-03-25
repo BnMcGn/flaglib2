@@ -17,7 +17,7 @@
    (:root-element db)))
 
 (rf/reg-sub
- ::url-search-results
+ :url-search-results
  (fn [db _]
    (let [search (::search db)
          aurls (:fetchers/author-urls db)]
@@ -77,7 +77,7 @@
     (rf/subscribe [:text-status target])])
  (fn [[warstat text status] _]
    (let [have-text (and text (:text text))
-         responses (and warstat (not (zero? (:total-replies warstat))))]
+         responses (and warstat (not (zero? (:replies-total warstat))))]
      {:reviewed (when responses true)
       :available (when have-text true)
       :status (and status (:status status))

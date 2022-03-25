@@ -107,7 +107,9 @@
 (rf/reg-event-db
  ::complete-debounce
  (fn [db _]
-   {:warstats-store (merge (:warstats-store db) (::warstats-tmp db))
+   (assoc
+    db
+    :warstats-store (merge (:warstats-store db) (::warstats-tmp db))
     ::warstats-tmp {}
     :text-store (merge (:text-store db) (::text-tmp db))
     ::text-tmp {}
@@ -115,7 +117,7 @@
     ::title-tmp {}
     :opinion-store (merge (:opinion-store db) (::opinion-tmp db))
     ::opinion-tmp {}
-    ::debouncing nil}))
+    ::debouncing nil)))
 
 (rf/reg-event-fx
  :load-rooturl

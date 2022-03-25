@@ -14,7 +14,7 @@
    [re-com.core :as rc]))
 
 (def fabricate-hooks
-  {:fetchers/received-author-urls [::get-stuff-for-author-urls]
+  {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]
    ::search-provided [::get-stuff-for-selection]})
 
 (rf/reg-event-fx
@@ -22,7 +22,7 @@
  ;;We assume that author-urls are already in ipfs. No check.
  (fn [{:keys [db]} _]
    {:dispatch [:load-rooturls
-               (misc/reformat-urls-lists-simple (:fetchers/author-urls db))
+               (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
                :no-text true]}))
 
 (rf/reg-event-db
@@ -65,36 +65,15 @@
                        [suggest-button itm]))))]))
 
 (defn display-searched-urls []
-  (let [aurls @(rf/subscribe [::url-search-results])]
+  (let [aurls @(rf/subscribe [:url-search-results])]
     [rc/v-box
      :children
      (for [itm aurls]
        [suggest-button (:url itm)])]))
 
-(defn make-opinion []
-  (let [search @(rf/subscribe [::search])
-        search-res @(rf/subscribe [::url-search-results])]
-    [:div
-     [rc/input-text
-      :placeholder "Target URL or search terms"
-      :model search
-      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
-     (if search-res
-       [display-searched-urls]
-       [display-urls-in-categories])]))
 
-(rf/reg-event-fx
- :make-opinion
- (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :target])]
-     {:db (assoc db :root-element make-opinion)
-      :fx [ [:dispatch
-             (if target
-               [::enter-search target]
-               [:fetchers/load-author-urls])]
-           [:dispatch [:add-hooks fabricate-hooks]]
-           ;;FIXME: is this the right place?
-           [:mount-registered]]})))
+
+
 
 
 
@@ -120,7 +99,7 @@
   (let [selection @(rf/subscribe [::selection])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (cond
-      (not factors) []
+      (not factors) "nothing"
       (and (:reviewed factors) (:available factors))
       [rc/v-box [proceed-button]]
       (:available factors)
@@ -149,3 +128,33 @@
         ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
         [:li "You might not need the article text, for example, if you aren't using excerpts."]]
        [rc/v-box [supply-text-button] [proceed-button "Flag Anyways"]]])))
+
+
+;;Needs to be at bottom of file:
+
+
+(defn make-opinion []
+  (let [search @(rf/subscribe [::search])
+        search-res @(rf/subscribe [:url-search-results])]
+    [:div
+     [rc/input-text
+      :placeholder "Target URL or search terms"
+      :model search
+      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
+     (if search-res
+       [display-searched-urls]
+       [display-urls-in-categories])
+     [target-decision]]))
+
+(rf/reg-event-fx
+ :make-opinion
+ (fn [{:keys [db]} _]
+   (let [target (get-in db [:server-parameters :target])]
+     {:db (assoc db :root-element make-opinion)
+      :fx [ [:dispatch
+             (if target
+               [::enter-search target]
+               [:flaglib2.fetchers/load-author-urls])]
+           [:dispatch [:add-hooks fabricate-hooks]]
+           ;;FIXME: is this the right place?
+           [:mount-registered]]})))
