@@ -71,7 +71,7 @@
 
 (rf/reg-sub
  :target-decision
- (fn [_ target]
+ (fn [[_ target]]
    [(rf/subscribe [:warstats-store target])
     (rf/subscribe [:text-store target])
     (rf/subscribe [:text-status target])])
@@ -82,9 +82,6 @@
       :available (when have-text true)
       :status (and status (:status status))
       :message (and status (:message status))})))
-
-
-
 
 
 

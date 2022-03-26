@@ -138,6 +138,7 @@
 ;; Warstats requester
 ;; High level multiple requester with safety features
 
+;;FIXME: gently seems broken
 (rf/reg-event-fx
  :load-rooturls
  (fn [_ [_ rooturls & {:keys [no-text gently]}]]

@@ -15,7 +15,7 @@
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]
-   ::search-provided [::get-stuff-for-selection]})
+   ::enter-search [::get-stuff-for-selection]})
 
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
@@ -38,7 +38,7 @@
 (rf/reg-event-fx
  ::get-stuff-for-selection
  (fn [{:keys [db]} _]
-   {:dispatch [:load-rooturls [(::selection db)] :gently true]}))
+   {:dispatch [:load-rooturls [(::selection db)]]}))
 
 
 
@@ -80,7 +80,7 @@
 
 ;;Decisioner: what to do if we don't have text
 
-(defn proceed-button [& alternate]
+(defn proceed-button [& [alternate]]
   [rc/button
    :label (or alternate "Next")
    :on-click (fn [] (rf/dispatch [:opine]))])
@@ -101,7 +101,7 @@
     (cond
       (not factors) "nothing"
       (and (:reviewed factors) (:available factors))
-      [rc/v-box [proceed-button]]
+      [rc/h-box :children [[proceed-button]]]
       (:available factors)
       [:div
        [:h3 "Unreviewed article text"]
@@ -109,7 +109,7 @@
         [:li "The text of this article has not yet been reviewed for tidyness"]
         [:li "You may review it for legibility and post an edited version using the 'Review Text' button"]
         [:li "You may also skip to posting flags on the article"]]
-       [rc/v-box [review-text-button] [proceed-button "Skip to Flagging"]]]
+       [rc/h-box :children [[review-text-button] [proceed-button "Skip to Flagging"]]]]
       (= (:status factors) "wait")
       [:div
        [:h3 "Waiting for text extraction"]
@@ -117,7 +117,7 @@
         [:li "Target text is being fetched and extracted"]
         [:li "You may supply the article text manually"]
         [:li "Skip to posting if you don't need the article text"]]
-       [rc/v-box [supply-text-button] [proceed-button "Skip to Flagging"]]]
+       [rc/h-box :children [[supply-text-button] [proceed-button "Skip to Flagging"]]]]
       (= (:status factors) "failure")
       [:div
        [:h3 "Text from article at " (misc/url-domain selection) " is not currently available."]
@@ -127,7 +127,7 @@
         ;;FIXME
         ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
         [:li "You might not need the article text, for example, if you aren't using excerpts."]]
-       [rc/v-box [supply-text-button] [proceed-button "Flag Anyways"]]])))
+       [rc/h-box :children [[supply-text-button] [proceed-button "Flag Anyways"]]]])))
 
 
 ;;Needs to be at bottom of file:
