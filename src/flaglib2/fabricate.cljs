@@ -10,6 +10,7 @@
    [flaglib2.fetchers :as fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
+   [flaglib2.stepper :as step]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
@@ -83,51 +84,84 @@
 (defn proceed-button [& [alternate]]
   [rc/button
    :label (or alternate "Next")
-   :on-click (fn [] (rf/dispatch [:opine]))])
+   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :opine]))])
 
 (defn review-text-button []
   [rc/button
    :label "Review Text"
-   :on-click (fn [] (rf/dispatch [::review-text]))])
+   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :review-text]))])
 
 (defn supply-text-button []
   [rc/button
    :label "Supply Text"
-   :on-click (fn [] (rf/dispatch [::supply-text]))])
+   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :supply-text]))])
+
 
 (defn target-decision []
   (let [selection @(rf/subscribe [::selection])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
-    (cond
-      (not factors) "nothing"
-      (and (:reviewed factors) (:available factors))
-      [rc/h-box :children [[proceed-button]]]
-      (:available factors)
-      [:div
-       [:h3 "Unreviewed article text"]
-       [:ul
-        [:li "The text of this article has not yet been reviewed for tidyness"]
-        [:li "You may review it for legibility and post an edited version using the 'Review Text' button"]
-        [:li "You may also skip to posting flags on the article"]]
-       [rc/h-box :children [[review-text-button] [proceed-button "Skip to Flagging"]]]]
-      (= (:status factors) "wait")
-      [:div
-       [:h3 "Waiting for text extraction"]
-       [:ul
-        [:li "Target text is being fetched and extracted"]
-        [:li "You may supply the article text manually"]
-        [:li "Skip to posting if you don't need the article text"]]
-       [rc/h-box :children [[supply-text-button] [proceed-button "Skip to Flagging"]]]]
-      (= (:status factors) "failure")
-      [:div
-       [:h3 "Text from article at " (misc/url-domain selection) " is not currently available."]
-       [:h4 "Reason: " (:message factors)]
-       [:ul
-        [:li "You may supply the article text manually"]
-        ;;FIXME
-        ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
-        [:li "You might not need the article text, for example, if you aren't using excerpts."]]
-       [rc/h-box :children [[supply-text-button] [proceed-button "Flag Anyways"]]]])))
+    (if factors
+      (case (:status factors)
+        :reviewed ""
+        :available
+        [:div
+         [:h3 "Unreviewed article text"]
+         [:ul
+          [:li "The text of this article has not yet been reviewed for tidyness"]
+          [:li "You may review it for legibility and post an edited version using the 'Review Text' button"]
+          [:li "You may also skip to posting flags on the article"]]]
+        :wait
+        [:div
+         [:h3 "Waiting for text extraction"]
+         [:ul
+          [:li "Target text is being fetched and extracted"]
+          [:li "You may supply the article text manually"]
+          [:li "Skip to posting if you don't need the article text"]]]
+        :failure
+        [:div
+         [:h3 "Text from article at " (misc/url-domain selection) " is not currently available."]
+         [:h4 "Reason: " (:message factors)]
+         [:ul
+          [:li "You may supply the article text manually"]
+          ;;FIXME
+          ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
+          [:li "You might not need the article text, for example, if you aren't using excerpts."]]])
+      "")))
+
+
+(defn target-decision-buttons []
+  (let [selection @(rf/subscribe [::selection])
+        factors (and selection @(rf/subscribe [:target-decision selection]))]
+    (if factors
+      (case (:status factors)
+        :reviewed
+        (step/stepper-buttons
+         :next nil
+         :buttons [[proceed-button]])
+        :available
+        (step/stepper-buttons
+         :next nil
+         :buttons [[review-text-button] [proceed-button "Skip to Flagging"]])
+        :wait
+        (step/stepper-buttons
+         :next nil
+         :buttons [[supply-text-button] [proceed-button "Skip to Flagging"]])
+        :failure
+        (step/stepper-buttons
+         :next nil
+         :buttons [[supply-text-button] [proceed-button "Flag Anyways"]]))
+     [])))
+
+
+(def steps
+  [{:id :select-target
+    :label }
+   {:id :target-decision}
+   {:id :review-text}
+   {:id :supply-text}
+   {:id :opine}
+   
+            ])
 
 
 ;;Needs to be at bottom of file:

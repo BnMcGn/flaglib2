@@ -78,9 +78,9 @@
  (fn [[warstat text status] _]
    (let [have-text (and text (:text text))
          responses (and warstat (not (zero? (:replies-total warstat))))]
-     {:reviewed (when responses true)
-      :available (when have-text true)
-      :status (and status (:status status))
+     {:status (cond (and responses have-text) :reviewed
+                    have-text :available
+                    :else (keywordize (:status status)))
       :message (and status (:message status))})))
 
 
