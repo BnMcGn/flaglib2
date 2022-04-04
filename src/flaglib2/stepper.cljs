@@ -4,7 +4,20 @@
    [reagent.core :as r]
    [re-com.core :as rc]))
 
+;;;
 
+;; Data format for stepper:
+
+;; A vector of maps.
+;; each map describes a step
+
+;; Fields in the step:
+;; :id - name of the step, probably a keyword
+;; :page - hiccup description of the step, when active
+;; :buttons - optional navigation buttons to be placed at bottom of step
+;; :label - summary depiction of step when completed. Can be a string or hiccup.
+;; :every - an event to fire whenever the step is activated
+;; :once - an event that gets run on first load of the step
 
 (defn find-active-step [steps]
   (first
@@ -65,12 +78,15 @@
                  [[rc/gap :size "3em"] next]
                  [next]))])))
 
+(defn summary-button [id label]
+  [rc/button :label label
+   :on-click (fn [] (rf/dispatch [::goto id]))])
+
 (defn step-display [step]
   (cond
     (= :summary (:status step))
     (if (string? (:label step))
-      [rc/button :label (:label step)
-       :on-click (fn [] (rf/dispatch [::goto (:id step)]))]
+      [summary-button (:id step) (:label step)]
       (:label step))
     (= :active (:status step))
     [step-base (assoc step :buttons (or (:buttons step) (stepper-buttons)))]))
@@ -86,13 +102,22 @@
             [step-display step]))))
 
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::goto
- (fn [db [_ target]]
-   (let [old-active (find-active-step (::steps db))]
-     (assoc-in
-      (assoc-in db [::steps old-active :status] :summary)
-      [::steps target :status] :active))))
+ (fn [{:keys [db]} [_ target]]
+   (let [old-active (find-active-step (::steps db))
+         step (get-in db [::steps target])
+         once (:once step)
+         step (if once (dissoc step :once) step)
+         step (assoc step :status :active)
+         steps (assoc [::steps db]
+                      old-active
+                      (assoc (get-in db [::steps old-active]) :status :summary)
+                      target
+                      step)]
+     {:db (assoc db ::steps steps)
+      :fx [ (when (:every step) [:dispatch (:every step)])
+            (when once [:dispatch once])]})))
 
 (rf/reg-event-fx
  ::next
