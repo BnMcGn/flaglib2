@@ -43,9 +43,6 @@
 
 
 
-
-
-
 (defn suggest-button [itm]
   [rc/button
    :label itm
@@ -71,6 +68,25 @@
      :children
      (for [itm aurls]
        [suggest-button (:url itm)])]))
+
+
+
+(defn specify-target []
+  (let [search @(rf/subscribe [::search])
+        search-res @(rf/subscribe [:url-search-results])]
+    [:div
+     [rc/input-text
+      :placeholder "Target URL or search terms"
+      :model search
+      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
+     (if search-res
+       [display-searched-urls]
+       [display-urls-in-categories])]))
+
+(defn specify-target-summary []
+  (let [selection @(rf/subscribe [::selection])]
+    [step/summary-button :specify-target "Target: "]))
+
 
 
 
@@ -152,13 +168,68 @@
          :buttons [[supply-text-button] [proceed-button "Flag Anyways"]]))
      [])))
 
+(rf/reg-event-db
+ ::reset-review-text
+ (fn [db _]
+   (assoc db ::review-text (get-in db [:text-store (::selection db) :text]))))
+
+(rf/reg-event-db
+ ::set-review-text
+ (fn [db [_ text]]
+   (assoc db ::review-text text)))
+
+(defn review-text []
+  (let [
+        text @(rf/subscribe [::review-text])]
+    [:div
+     [:h3 "Review article text for tidyness"]
+     [:ul
+      [:li "This text is automatically extracted. Please ensure that it is formatted pleasantly."]
+      [:li "Remove extraneous text that is not part of the article (Eg. footer and sidebar text, unrelated links)"]
+      [:li "Check that the article text is complete."]
+      [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]]
+
+     [rc/input-textarea
+      :model :text
+      :rows 15
+      :on-change (fn [text] (rf/dispatch [::set-review-text text]))]]))
+
+(defn review-text-buttons []
+  (step/stepper-buttons
+   :next nil
+   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-review-text])]
+             [rc/gap :size "3em"]
+             [rc/button :label "Next" :on-click #(rf/dispatch [:flaglib2.stepper/goto :opine])]]))
+
+(rf/reg-event-db
+ ::set-supplied-text
+ (fn [db [_ text]]
+   (assoc db ::supplied-text text)))
+
+(defn supply-text []
+  [:div
+   [:h3 "Supply the article text"]
+   [:ul
+    [:li "The article text could not be automatically downloaded and extracted."]
+    [:li "You may supply the text by posting it into the box below."]
+    [:li "The text should be an accurate representation of the linked article. No spelling corrections or other edits."]]
+   [rc/input-textarea
+    :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]])
 
 (def steps
-  [{:id :select-target
-    :label }
-   {:id :target-decision}
-   {:id :review-text}
-   {:id :supply-text}
+  [{:id :specify-target
+    :label [specify-target-summary]
+    :page [specify-target]}
+   {:id :target-decision
+    :page [target-decision]
+    :buttons [target-decision-buttons]
+    :label "Article text options"}
+   {:id :review-text
+    :page [review-text]
+    :buttons [review-text-buttons]
+    :once [::reset-review-text]}
+   {:id :supply-text
+    :previous :target-decision}
    {:id :opine}
    
             ])
@@ -190,5 +261,6 @@
                [::enter-search target]
                [:flaglib2.fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]
+           [:dispatch [:flaglib2.stepper/initialize steps]]
            ;;FIXME: is this the right place?
            [:mount-registered]]})))

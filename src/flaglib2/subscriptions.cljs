@@ -3,7 +3,8 @@
    [re-frame.core :as rf]
    [flaglib2.misc :as misc]
    [cljsjs.fuse :as fuse]
-   ))
+
+   [clojure.walk :as walk]))
 
 
 (rf/reg-sub
@@ -35,6 +36,8 @@
  :flaglib2.fabricate/selection
  (fn [db _]
    (:flaglib2.fabricate/selection db)))
+
+(rf/reg-sub :flaglib2.fabricate/review-text :-> :flaglib2.fabricate/review-text)
 
 
 (rf/reg-sub
@@ -80,7 +83,7 @@
          responses (and warstat (not (zero? (:replies-total warstat))))]
      {:status (cond (and responses have-text) :reviewed
                     have-text :available
-                    :else (keywordize (:status status)))
+                    :else (walk/keywordize (:status status)))
       :message (and status (:message status))})))
 
 
