@@ -32,6 +32,9 @@
       (subs domain 4)
       domain)))
 
+(defn first-index [itm coll & {:keys [test] :or {test =}}]
+  (first (keep-indexed #(when (test %2 itm) %1) coll)))
+
 (defn list-events []
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:event store))))

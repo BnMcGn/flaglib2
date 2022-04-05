@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [flaglib2.misc :as misc]
    [re-com.core :as rc]))
 
 ;;;
@@ -18,15 +19,12 @@
 ;; :label - summary depiction of step when completed. Can be a string or hiccup.
 ;; :every - an event to fire whenever the step is activated
 ;; :once - an event that gets run on first load of the step
-
+;; :next, :previous - optional id of where the Next/Previous buttons should jump when 
 (defn find-active-step [steps]
   (first
    (for [[k settings] steps
          :when (= :active (:status settings))]
      k)))
-
-(defn active-step-index [steps steplist]
-  (first (keep-indexed #(when (= %2 (find-active-step steps) %1)) steplist)))
 
 (rf/reg-sub ::steplist :-> ::steplist)
 (rf/reg-sub ::steps :-> ::steps)
@@ -38,7 +36,7 @@
  (fn [[steps steplist] _]
    (let [count (count steplist)
          active (find-active-step steps)
-         index (active-step-index steps steplist)]
+         index (misc/first-index active steplist)]
      {:count count :active active :index index})))
 
 
@@ -122,16 +120,28 @@
 (rf/reg-event-fx
  ::next
  (fn [{:keys [db]} _]
-   (let [active (active-step-index (::steps db) (::steplist db))]
-     (when (and active (< active (count (::steplist db))))
-       {:dispatch [::goto (get (::steplist db) (+ 1 active))]}))))
+   (let [stepid (find-active-step (::steps db))
+         next (or (get-in db [::steps stepid :next])
+                  (let [steplist (::steplist db)
+                        stepind (misc/first-index stepid steplist)]
+                    (and stepind
+                         (< stepind (count steplist))
+                         (get steplist (+ 1 stepind)))))]
+     (when next
+       {:dispatch [::goto next]}))))
 
 (rf/reg-event-fx
  ::previous
  (fn [{:keys [db]} _]
-   (let [active (active-step-index (::steps db) (::steplist db))]
-     (when (and active (< 0 active))
-       {:dispatch [::goto (get (::steplist db) (- 1 active))]}))))
+   (let [stepid (find-active-step (::steps db))
+         previous (or (get-in db [::steps stepid :previous])
+                      (let [steplist (::steplist db)
+                            stepind (misc/first-index stepid steplist)]
+                        (and stepind
+                             (< 0 stepind)
+                             (get steplist (- stepind 1)))))]
+     (when previous
+       {:dispatch [::goto previous]}))))
 
 (rf/reg-event-db
  ::initialize
