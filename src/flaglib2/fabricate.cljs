@@ -97,11 +97,6 @@
 
 ;;Decisioner: what to do if we don't have text
 
-(defn proceed-button [& [alternate]]
-  [rc/button
-   :label (or alternate "Next")
-   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :opine]))])
-
 (defn review-text-button []
   [rc/button
    :label "Review Text"
@@ -151,21 +146,19 @@
     (if factors
       (case (:status factors)
         :reviewed
-        (step/stepper-buttons
-         :next nil
-         :buttons [[proceed-button]])
+        (step/stepper-buttons)
         :available
         (step/stepper-buttons
-         :next nil
-         :buttons [[review-text-button] [proceed-button "Skip to Flagging"]])
+         :next "Skip to Flagging"
+         :buttons [[review-text-button]])
         :wait
         (step/stepper-buttons
-         :next nil
-         :buttons [[supply-text-button] [proceed-button "Skip to Flagging"]])
+         :next "Skip to Flagging"
+         :buttons [[supply-text-button]])
         :failure
         (step/stepper-buttons
-         :next nil
-         :buttons [[supply-text-button] [proceed-button "Flag Anyways"]]))
+         :next "Flag Anyways"
+         :buttons [[supply-text-button]]))
      [])))
 
 (rf/reg-event-db
@@ -196,10 +189,7 @@
 
 (defn review-text-buttons []
   (step/stepper-buttons
-   :next nil
-   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-review-text])]
-             [rc/gap :size "3em"]
-             [rc/button :label "Next" :on-click #(rf/dispatch [:flaglib2.stepper/goto :opine])]]))
+   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-review-text])]]))
 
 (rf/reg-event-db
  ::set-supplied-text
@@ -223,11 +213,13 @@
    {:id :target-decision
     :page [target-decision]
     :buttons [target-decision-buttons]
-    :label "Article text options"}
+    :label "Article text options"
+    :next :opine}
    {:id :review-text
     :page [review-text]
     :buttons [review-text-buttons]
-    :once [::reset-review-text]}
+    :once [::reset-review-text]
+    :next :opine}
    {:id :supply-text
     :previous :target-decision}
    {:id :opine}
