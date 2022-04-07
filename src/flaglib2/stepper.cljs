@@ -92,12 +92,13 @@
 (defn wf-stepper []
   (let [steplist @(rf/subscribe [::steplist])
         steps @(rf/subscribe [::steps])]
-    (into []
+    (into [:div]
           (for [id steplist
-                step (get id steps)
-                :when (or (not (:status step))
-                          (not (= :hidden (:status step))))]
+                :let [step (get steps id)]
+                :when (and (:status step)
+                           (not (= :hidden (:status step))))]
             [step-display step]))))
+
 
 
 (rf/reg-event-fx
@@ -145,14 +146,17 @@
 
 (rf/reg-event-db
  ::initialize
- (fn [db params]
+ (fn [db [_ params]]
    (let [steplist (map :id params)
          active (first steplist)]
      (assoc
       db
       ::steps
-      (map #(assoc % :status (if (= (:id %) active) :active :hidden)) params)
+      (into {}
+            (for [step (map #(assoc % :status (if (= (:id %) active) :active :hidden)) params)]
+              [(:id step) step]))
       ::steplist steplist))))
+
 
 
 

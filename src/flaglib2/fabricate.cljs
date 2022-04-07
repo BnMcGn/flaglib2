@@ -90,11 +90,6 @@
 
 
 
-
-
-
-
-
 ;;Decisioner: what to do if we don't have text
 
 (defn review-text-button []
@@ -206,6 +201,9 @@
    [rc/input-textarea
     :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]])
 
+(defn opine []
+  )
+
 (def steps
   [{:id :specify-target
     :label [specify-target-summary]
@@ -233,15 +231,7 @@
 (defn make-opinion []
   (let [search @(rf/subscribe [::search])
         search-res @(rf/subscribe [:url-search-results])]
-    [:div
-     [rc/input-text
-      :placeholder "Target URL or search terms"
-      :model search
-      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
-     (if search-res
-       [display-searched-urls]
-       [display-urls-in-categories])
-     [target-decision]]))
+    [step/wf-stepper]))
 
 (rf/reg-event-fx
  :make-opinion
