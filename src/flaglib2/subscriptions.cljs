@@ -86,5 +86,11 @@
                     :else (walk/keywordize (:status status)))
       :message (and status (:message status))})))
 
-
+(rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
+(rf/reg-sub
+ :flaglib2.fabricate/flag-or-default
+ :<- [:flaglib2.fabricate/flag]
+ :<- [:server-parameters]
+ (fn [[flag params] _]
+   (or flag (:flag params))))
 

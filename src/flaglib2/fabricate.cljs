@@ -11,6 +11,8 @@
    [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
    [flaglib2.stepper :as step]
+   [flaglib2.flags :as flags]
+   [flaglib2.titlebar :as titlebar]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
@@ -69,7 +71,7 @@
      (for [itm aurls]
        [suggest-button (:url itm)])]))
 
-
+;;FIXME: what if user wants to start with reference, not target? way to switch?
 
 (defn specify-target []
   (let [search @(rf/subscribe [::search])
@@ -201,8 +203,46 @@
    [rc/input-textarea
     :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]])
 
+(rf/reg-event-db
+ ::set-flag
+ (fn [db [_ flag]]
+   (assoc db ::flag flag)))
+
+(defn flag-page []
+  (let [flag @(rf/subscribe [::flag-or-default])]
+    [:div
+     [rc/single-dropdown
+      :model flag
+      :choices flags/flags
+      :group-fn :category
+      :on-change (fn [flag] (rf/dispatch [::set-flag flag]))
+      :render-fn
+      (fn [item]
+        [:span
+         [:img :src (titlebar/flag-icon item)]
+         (str (:category item) " " (:description item))])]
+     ;;FIXME: Description shouldn't show if in summary mode
+     [:span (:description (get flag flags/flags))]]))
+
+(rf/reg-event-db
+ ::set-comment
+ (fn [db [_ comment]]
+   (assoc db ::comment comment)))
+(rf/reg-sub ::comment :-> ::comment)
+
 (defn opine []
-  )
+  (let [comment @(rf/subscribe [::comment])]
+    [rc/input-textarea
+     :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]))
+
+(rf/reg-event-fx
+ ::opine-initialize
+ (fn [[{:keys [db]} _]]
+   {:fx
+    [
+     [:dispatch [:flaglib2.stepper/set-summary :excerpt]]
+     [:dispatch [:flaglib2.stepper/set-summary :reference]]
+     [:dispatch [:flaglib2.stepper/set-summary :flag]]]}))
 
 (def steps
   [{:id :specify-target
@@ -220,7 +260,14 @@
     :next :opine}
    {:id :supply-text
     :previous :target-decision}
-   {:id :opine}
+   {:id :flag
+    :page [flag-page]}
+   {:id :excerpt}
+   {:id :reference}
+   {:id :opine
+    :label [opine]
+    :page [opine]
+    }
    
             ])
 

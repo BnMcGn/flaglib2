@@ -157,7 +157,10 @@
               [(:id step) step]))
       ::steplist steplist))))
 
-
+(rf/reg-event-db
+ ::set-summary
+ (fn [db [_ step]]
+   (assoc-in db [::steps step :status] :summary)))
 
 
 
