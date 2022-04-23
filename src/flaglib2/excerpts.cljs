@@ -1,14 +1,19 @@
 (ns flaglib2.excerpts
   (:require
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [flaglib2.misc :as misc]))
 
 
 ;;; Excerpt and text tools
 
+
 (defn- reformat-whitespace-data [data]
-  (reduce into {}
-        (for [group data]
-          (interleave group (range (count group) 0 -1)))))
+  (into {}
+        (for [group data
+              itm (map (fn [a b] [a b])
+                       group
+                       (range (count group) 0 -1))]
+          itm)))
 
 (defn create-textdata [text]
   ;;FIXME: trim not customized. Might not match other ws definitions
@@ -18,7 +23,7 @@
         [(white [i stor]
            (let [ct (misc/first-index nil (subs text i)
                                       :test #(not (contains? misc/whitespace-characters %1)))]
-             #(offwhite (+ i ct) (into stor (range i ct)))))
+             #(offwhite (+ i ct) (into stor [(range i (+ ct i))]))))
          (offwhite [i stor]
            (cond
              (>= i tlen) stor
@@ -57,17 +62,17 @@
            offset offset]
       (let [loc (excerpt-here? tdat exdat (first i))]
         (when i
-          (if loc
+          (if (integer? loc)
             (if (< 0 offset)
               (recur (rest i) (- offset 1))
               [(first i) (- loc (first i))])
             (recur (rest i) offset)))))))
 
 (defn previous-break [text index]
-  (last-index-of text \newline index))
+  (str/last-index-of text \newline index))
 
 (defn next-break [text index]
-  (index-of text \newline index))
+  (str/index-of text \newline index))
 
 (defn excerpt-context [text position1 position2]
   (let [text (str/trim text)
@@ -80,4 +85,6 @@
         excerpt (subs text estart eend)
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
+
+
 
