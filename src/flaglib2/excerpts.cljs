@@ -35,7 +35,7 @@
 (defn contiguous-whitespace? [tdat index]
   (get-in tdat [:whitespace index] 0))
 
-(defn excerpt-here? [tdat excerpt index]
+(defn some-excerpt-here? [tdat excerpt index]
   (let [[exdat excerpt] (if (string? excerpt) [(create-textdata excerpt) excerpt]
                             [excerpt (:text excerpt)])
         text (:text tdat)
@@ -44,17 +44,22 @@
     (loop [tind index
            eind 0]
       (cond
-        (= elen eind) tind
-        (= tlen tind) false
+        (= elen eind) {:remaining 0 :end-index tind}
+        (= tlen tind) {:remaining (- elen eind) :end-index tind}
         :else
         (let [ewhite (contiguous-whitespace? exdat eind)
               twhite (contiguous-whitespace? tdat tind)]
           (if (and (zero? ewhite) (zero? twhite) (= (get excerpt eind) (get text tind)))
             (recur (+ 1 tind) (+ 1 eind))
             (if (or (zero? ewhite) (zero? twhite))
-              false
+              {:remaining (+ 1 (- elen eind)):end-index (- tind 1)}
               (recur (+ tind twhite) (+ eind ewhite)))))))))
 
+(defn excerpt-here? [tdat excerpt index]
+  (let [res (some-excerpt-here? tdat excerpt index)]
+    (if (= 0 (:remaining res))
+      (:end-index res)
+      false)))
 
 (defn find-excerpt-position [tdat excerpt & {:keys [offset] :or {:offset 0}}]
   (let [exdat (create-textdata excerpt)]
