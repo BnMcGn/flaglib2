@@ -55,6 +55,7 @@
               {:remaining (+ 1 (- elen eind)):end-index (- tind 1)}
               (recur (+ tind twhite) (+ eind ewhite)))))))))
 
+
 (defn excerpt-here? [tdat excerpt index]
   (let [res (some-excerpt-here? tdat excerpt index)]
     (if (= 0 (:remaining res))

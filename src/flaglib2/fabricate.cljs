@@ -13,6 +13,7 @@
    [flaglib2.stepper :as step]
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
+   [flaglib2.excerpts :as excerpts]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
@@ -261,7 +262,9 @@
    {:id :supply-text
     :previous :target-decision}
    {:id :flag
-    :page [flag-page]}
+    :page [flag-page]
+    :label [flag-page]
+    :buttons ""}
    {:id :excerpt}
    {:id :reference}
    {:id :opine

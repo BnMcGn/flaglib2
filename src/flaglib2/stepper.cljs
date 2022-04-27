@@ -41,11 +41,11 @@
 
 
 (defn step-base [step]
-  (rc/box
+  [rc/box
    :child
    [:div
     (:page step)
-    [rc/h-box :children (:buttons step)]]))
+    [rc/h-box :children (:buttons step)]]])
 
 (defn next-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
@@ -61,7 +61,9 @@
      :on-click #(rf/dispatch [::previous])
      :disabled? (if (< (:index indpos) 1) true false)]))
 
-(defn stepper-buttons [& {:keys [next previous buttons]}]
+
+(defn stepper-buttons [& {:keys [next previous buttons]
+                          :or {previous true next true}}]
   (let [next (when next
                [next-button next])
         previous (when previous

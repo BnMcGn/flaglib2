@@ -83,7 +83,7 @@
          responses (and warstat (not (zero? (:replies-total warstat))))]
      {:status (cond (and responses have-text) :reviewed
                     have-text :available
-                    :else (walk/keywordize (:status status)))
+                    :else (walk/keywordize-keys (:status status)))
       :message (and status (:message status))})))
 
 (rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
