@@ -39,13 +39,12 @@
          index (misc/first-index active steplist)]
      {:count count :active active :index index})))
 
-
 (defn step-base [step]
   [rc/box
    :child
    [:div
     (:page step)
-    [rc/h-box :children (:buttons step)]]])
+    [rc/h-box :children [(:buttons step)]]]])
 
 (defn next-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
@@ -60,6 +59,7 @@
      :label (if (string? label) label "Previous")
      :on-click #(rf/dispatch [::previous])
      :disabled? (if (< (:index indpos) 1) true false)]))
+
 
 
 (defn stepper-buttons [& {:keys [next previous buttons]
@@ -111,7 +111,7 @@
          once (:once step)
          step (if once (dissoc step :once) step)
          step (assoc step :status :active)
-         steps (assoc [::steps db]
+         steps (assoc (::steps db)
                       old-active
                       (assoc (get-in db [::steps old-active]) :status :summary)
                       target
@@ -129,7 +129,7 @@
                         stepind (misc/first-index stepid steplist)]
                     (and stepind
                          (< stepind (count steplist))
-                         (get steplist (+ 1 stepind)))))]
+                         (nth steplist (+ 1 stepind)))))]
      (when next
        {:dispatch [::goto next]}))))
 

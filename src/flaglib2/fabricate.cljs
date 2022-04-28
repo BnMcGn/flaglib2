@@ -88,8 +88,7 @@
 
 (defn specify-target-summary []
   (let [selection @(rf/subscribe [::selection])]
-    [step/summary-button :specify-target "Target: "]))
-
+    [step/summary-button :specify-target (str "Target: " selection)]))
 
 
 
@@ -136,6 +135,7 @@
           ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
           [:li "You might not need the article text, for example, if you aren't using excerpts."]]])
       "")))
+
 
 
 (defn target-decision-buttons []

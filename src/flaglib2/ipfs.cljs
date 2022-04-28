@@ -49,9 +49,11 @@
 
 (defn proc-warstat [data]
   (let [{:as warstat} (cljs.reader/read-string data)]
-    (assoc
-     warstat
-     :tree-freshness (misc/parse-time (:tree-freshness warstat)))))
+    (if (:tree-freshness warstat)
+      (assoc
+       warstat
+       :tree-freshness (misc/parse-time (:tree-freshness warstat)))
+      warstat)))
 
 (rf/reg-event-fx
  ::received-warstats
