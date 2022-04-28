@@ -234,7 +234,9 @@
 (defn opine []
   (let [comment @(rf/subscribe [::comment])]
     [rc/input-textarea
+     :model ""
      :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]))
+
 
 (rf/reg-event-fx
  ::opine-initialize
