@@ -30,6 +30,7 @@
              (contains? misc/whitespace-characters (get text i)) #(white i stor)
              :else #(offwhite (+ 1 i) stor)))]
       {:text text
+       :text-length tlen
        :whitespace (reformat-whitespace-data (trampoline offwhite 0 []))})))
 
 (defn contiguous-whitespace? [tdat index]
@@ -39,7 +40,7 @@
   (let [[exdat excerpt] (if (string? excerpt) [(create-textdata excerpt) excerpt]
                             [excerpt (:text excerpt)])
         text (:text tdat)
-        tlen (count text)
+        tlen (:text-length tdat)
         elen (count excerpt)]
     (loop [tind index
            eind 0]
@@ -52,7 +53,7 @@
           (if (and (zero? ewhite) (zero? twhite) (= (get excerpt eind) (get text tind)))
             (recur (+ 1 tind) (+ 1 eind))
             (if (or (zero? ewhite) (zero? twhite))
-              {:remaining (+ 1 (- elen eind)):end-index (- tind 1)}
+              {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)}
               (recur (+ tind twhite) (+ eind ewhite)))))))))
 
 
@@ -91,6 +92,77 @@
         excerpt (subs text estart eend)
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
+
+
+;; Code for searching for excerpt.
+
+;; Ideas:
+;; - some sort of fuzzy search, so that user doesn't need to type out whole excerpt
+;; - Don't show whole text, because of copyright concerns
+;; - Start by assuming that first part of input should match start of excerpt.
+;;  - Order by largest match, or by first match in document order?
+;;  - If we have multiple matches, present them. User may select one.
+;;  - If user selects, or we are down to one, move on to selecting end.
+;;  - Minimum starting size, perhaps 5 characters. Must be contiguous. What about short excerpts?
+
+
+(defn find-possible-excerpt-starts [tdat excerpt]
+  (let [excerpt (create-textdata excerpt)
+        ;;Don't consider starts shorter than this...
+        minimum (min 5 (:text-length excerpt))]
+    (for [i (range (:text-length tdat))
+          :let [match (some-excerpt-here? tdat excerpt i)]
+          :when (> (- (:text-length excerpt) (:remaining match)) minimum)]
+      (assoc match :start-index i))))
+
+(defn find-possible-excerpt-ends [tdat end-of-start remainder]
+  "Find possible endings for an excerpt when start is already known.
+Decide before calling where the start has ended. Will return some-excerpt-here? style matches"
+  (let [excerpt (create-textdata remainder)]
+    (for [i (range end-of-start (:text-length tdat))
+          :let [match (some-excerpt-here? tdat excerpt i)]
+          :when (= (:remaining match) 0)]
+      (assoc match :start-index i))))
+
+(defn length-of-match [match]
+  (+ 1 (- (:end-index match) (:start-index match))))
+
+(defn split-search-on-double-space [srch]
+  ;;FIXME: is trim right thing to do?
+  (let [srch (str/trim srch)
+        res (str/index-of srch "  ")]
+    (if res
+      [(subs srch 0 res) (subs srch (+ res 2))]
+      [srch])))
+
+(defn remaining-portion-of-search [search res]
+  (let [slen (count search)
+        rindex (- slen (:remaining res))]
+    (when (pos? rindex)
+      (subs search rindex))))
+
+(defn excerpt-possibilities
+  ([tdat search]
+   (let [[seg1 seg2] (split-search-on-double-space search)
+         res (find-possible-excerpt-starts tdat seg1)
+         resc (count res)]
+     (cond
+       (zero? resc) [[] []]
+       (= 1 resc)
+       (if seg2
+         (if (= (count seg1) (length-of-match (get res 0)))
+           (excerpt-possibilities tdat search (get res 0))
+           [[] []])
+         (excerpt-possibilities tdat search (get res 0)))
+       :else [res []])))
+  ;;Handle end search
+  ([tdat search found-start]
+   (let [[seg1 seg2] (split-search-on-double-space search)
+         seg2 (or seg2
+                  (remaining-portion-of-search search found-start))]
+     (if seg2
+       [[found-start] (find-possible-excerpt-ends tdat (:end-index found-start) seg2)]
+       [[] []]))))
 
 
 
