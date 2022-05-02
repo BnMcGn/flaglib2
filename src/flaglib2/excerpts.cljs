@@ -53,14 +53,17 @@
           (if (and (zero? ewhite) (zero? twhite) (= (get excerpt eind) (get text tind)))
             (recur (+ 1 tind) (+ 1 eind))
             (if (or (zero? ewhite) (zero? twhite))
-              {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)}
+              (if (zero? eind)
+                false
+                {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)})
               (recur (+ tind twhite) (+ eind ewhite)))))))))
-
 
 (defn excerpt-here? [tdat excerpt index]
   (let [res (some-excerpt-here? tdat excerpt index)]
-    (if (= 0 (:remaining res))
-      (:end-index res)
+    (if res
+      (if (= 0 (:remaining res))
+       (:end-index res)
+       false)
       false)))
 
 (defn find-excerpt-position [tdat excerpt & {:keys [offset] :or {:offset 0}}]
@@ -112,7 +115,7 @@
         minimum (min 5 (:text-length excerpt))]
     (for [i (range (:text-length tdat))
           :let [match (some-excerpt-here? tdat excerpt i)]
-          :when (> (- (:text-length excerpt) (:remaining match)) minimum)]
+          :when (and match (> (- (:text-length excerpt) (:remaining match)) minimum))]
       (assoc match :start-index i))))
 
 (defn find-possible-excerpt-ends [tdat end-of-start remainder]
@@ -121,7 +124,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
   (let [excerpt (create-textdata remainder)]
     (for [i (range end-of-start (:text-length tdat))
           :let [match (some-excerpt-here? tdat excerpt i)]
-          :when (= (:remaining match) 0)]
+          :when (and match (= (:remaining match) 0))]
       (assoc match :start-index i))))
 
 (defn length-of-match [match]
