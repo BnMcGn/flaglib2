@@ -108,14 +108,15 @@
 ;;  - If user selects, or we are down to one, move on to selecting end.
 ;;  - Minimum starting size, perhaps 5 characters. Must be contiguous. What about short excerpts?
 
-
 (defn find-possible-excerpt-starts [tdat excerpt]
   (let [excerpt (create-textdata excerpt)
-        ;;Don't consider starts shorter than this...
+        ;;Don't consider starts shorter than this, but return complete matches
         minimum (min 5 (:text-length excerpt))]
     (for [i (range (:text-length tdat))
           :let [match (some-excerpt-here? tdat excerpt i)]
-          :when (and match (> (- (:text-length excerpt) (:remaining match)) minimum))]
+          :when (and match
+                     (or (zero? (:remaining match))
+                         (> (- (:text-length excerpt) (:remaining match)) minimum)))]
       (assoc match :start-index i))))
 
 (defn find-possible-excerpt-ends [tdat end-of-start remainder]
