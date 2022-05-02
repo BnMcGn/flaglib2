@@ -42,21 +42,23 @@
         text (:text tdat)
         tlen (:text-length tdat)
         elen (count excerpt)]
-    (loop [tind index
-           eind 0]
-      (cond
-        (= elen eind) {:remaining 0 :end-index tind}
-        (= tlen tind) {:remaining (- elen eind) :end-index tind}
-        :else
-        (let [ewhite (contiguous-whitespace? exdat eind)
-              twhite (contiguous-whitespace? tdat tind)]
-          (if (and (zero? ewhite) (zero? twhite) (= (get excerpt eind) (get text tind)))
-            (recur (+ 1 tind) (+ 1 eind))
-            (if (or (zero? ewhite) (zero? twhite))
-              (if (zero? eind)
-                false
-                {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)})
-              (recur (+ tind twhite) (+ eind ewhite)))))))))
+    (if (zero? elen)
+      false
+      (loop [tind index
+             eind 0]
+        (cond
+          (= elen eind) {:remaining 0 :end-index (- tind 1)}
+          (= tlen tind) {:remaining (- elen eind) :end-index (- tind 1)}
+          :else
+          (let [ewhite (contiguous-whitespace? exdat eind)
+                twhite (contiguous-whitespace? tdat tind)]
+            (if (and (zero? ewhite) (zero? twhite) (= (get excerpt eind) (get text tind)))
+              (recur (+ 1 tind) (+ 1 eind))
+              (if (or (zero? ewhite) (zero? twhite))
+                (if (zero? eind)
+                  false
+                  {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)})
+                (recur (+ tind twhite) (+ eind ewhite))))))))))
 
 (defn excerpt-here? [tdat excerpt index]
   (let [res (some-excerpt-here? tdat excerpt index)]
@@ -151,14 +153,14 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
          res (find-possible-excerpt-starts tdat seg1)
          resc (count res)]
      (cond
-       (zero? resc) [[] []]
+       (zero? resc) ['() '()]
        (= 1 resc)
        (if seg2
-         (if (= (count seg1) (length-of-match (get res 0)))
-           (excerpt-possibilities tdat search (get res 0))
-           [[] []])
-         (excerpt-possibilities tdat search (get res 0)))
-       :else [res []])))
+         (if (= (count seg1) (length-of-match (nth res 0)))
+           (excerpt-possibilities tdat search (nth res 0))
+           ['() '()])
+         (excerpt-possibilities tdat search (nth res 0)))
+       :else [res '()])))
   ;;Handle end search
   ([tdat search found-start]
    (let [[seg1 seg2] (split-search-on-double-space search)
@@ -166,7 +168,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
                   (remaining-portion-of-search search found-start))]
      (if seg2
        [[found-start] (find-possible-excerpt-ends tdat (:end-index found-start) seg2)]
-       [[] []]))))
+       ['() '()]))))
 
 
 
