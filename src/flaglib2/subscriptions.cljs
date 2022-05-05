@@ -86,6 +86,16 @@
                     :else (walk/keywordize-keys (:status status)))
       :message (and status (:message status))})))
 
+(rf/reg-sub
+ :flaglib2.fabricate/active-text
+ ;;FIXME: could consider caching a tdat?
+ (fn [db _]
+   (or
+    (:flaglib2.fabricate/supplied-text db)
+    (let [target (:flaglib2.fabricate/selection db)]
+      (when target
+        (get-in db [:text-store target]))))))
+
 (rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
 (rf/reg-sub
  :flaglib2.fabricate/flag-or-default
@@ -93,4 +103,13 @@
  :<- [:server-parameters]
  (fn [[flag params] _]
    (or flag (:flag params))))
+
+(rf/reg-sub :flaglib2.fabricate/excerpt :-> :flaglib2.fabricate/excerpt)
+(rf/reg-sub
+ :flaglib2.fabricate/excerpt-or-default
+ :<- [:flaglib2.fabricate/excerpt]
+ :<- [:server-parameters]
+ (fn [[excerpt params] _]
+   (or excerpt [(get params :excerpt "") (get params :offset nil)])))
+(rf/reg-sub :flaglib.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)
 

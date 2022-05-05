@@ -192,6 +192,7 @@
 (rf/reg-event-db
  ::set-supplied-text
  (fn [db [_ text]]
+   ;;FIXME: Perhaps some processing on text?
    (assoc db ::supplied-text text)))
 
 (defn supply-text []
@@ -224,6 +225,55 @@
          (str (:category item) " " (:description item))])]
      ;;FIXME: Description shouldn't show if in summary mode
      [:span (:description (get flag flags/flags))]]))
+
+(rf/reg-event-db
+ ::set-excerpt-start
+ (fn [db [_ start]]
+   (assoc db ::excerpt-start start)))
+
+(rf/reg-event-db
+ ::set-excerpt
+ (fn [db [_ [excerpt offset]]]
+   (assoc db ::excerpt [excerpt offset])))
+
+(defn render-start-suggestion [tdat start]
+  (let [text (excerpts/clean-string-for-excerpt
+              (subs (:text tdat) (:start-index start) (:end-index start)))]
+    [:span (str (:start-index start) ":" text)]))
+
+(defn render-end-suggestion [tdat start end]
+  (let [text (excerpts/clean-string-for-excerpt
+              (subs (:text tdat) (:start-index start) (:end-index end)))]
+    [:span (str (count text) " chars:" text)]))
+
+(defn excerpt-page []
+  (let [[excerpt offset] @(rf/subscribe [::excerpt-or-default])
+        start @(rf/subscribe [::excerpt-start])
+        text @(rf/subscribe [::active-text])
+        tdat (excerpts/create-textdata text)]
+    [:div
+     (if start
+       [rc/typeahead
+        :model excerpt
+        :data-source (fn [srch]
+                       (if (excerpts/excerpt-start-valid? tdat srch start)
+                         (get (excerpts/excerpt-possibilities tdat srch start) 1)
+                         (rf/dispatch [::set-excerpt-start nil])))
+        :on-change (fn [itm]
+                     (rf/dispatch [::set-excerpt (excerpts/start-end->excerpt-offset tdat start itm)]))
+        :rigid? false
+        :render-suggestion (fn [itm]
+                             (render-end-suggestion tdat start itm))
+        :immediate-model-update? true]
+       [rc/typeahead
+        :data-source (fn [srch]
+                       (get (excerpts/excerpt-possibilities tdat srch) 0))
+        :on-change (fn [itm]
+                     (rf/dispatch [::set-excerpt-start itm]))
+        :rigid? false
+        :render-suggestion (fn [itm]
+                             (render-start-suggestion tdat itm))
+        :immediate-model-update? true])]))
 
 (rf/reg-event-db
  ::set-comment
@@ -267,7 +317,8 @@
     :page [flag-page]
     :label [flag-page]
     :buttons ""}
-   {:id :excerpt}
+   {:id :excerpt
+    :page [excerpt-page]}
    {:id :reference}
    {:id :opine
     :label [opine]

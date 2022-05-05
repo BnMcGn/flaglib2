@@ -98,6 +98,23 @@
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
 
+(defn clean-string-for-excerpt [the-string]
+  (loop [res nil
+         last-was-white false
+         i (- (count the-string) 1)]
+    (cond
+      (> 0 i) (apply str res)
+      (contains? misc/whitespace-characters (get the-string i))
+      (if last-was-white
+        (recur res true (- i 1))
+        (recur (cons \space res) true (- i 1)))
+      :else
+      (recur (cons (get the-string i) res) false (- i 1)))))
+
+(defn calculate-offset [tdat excerpt startloc]
+  (if (zero? (count excerpt))
+    nil
+    (count (filter (fn [i] (excerpt-here? tdat excerpt i)) (range startloc)))))
 
 ;; Code for searching for excerpt.
 
@@ -167,8 +184,22 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
          seg2 (or seg2
                   (remaining-portion-of-search search found-start))]
      (if seg2
-       [[found-start] (find-possible-excerpt-ends tdat (:end-index found-start) seg2)]
+       [(list found-start) (find-possible-excerpt-ends tdat (:end-index found-start) seg2)]
        ['() '()]))))
 
+(defn excerpt-start-valid? [tdat search start]
+  (let [i (:start-index start)
+        match (some-excerpt-here? tdat search i)]
+    (when match
+      (>= (:end-index match) (:end-index start)))))
+
+(defn start-end->excerpt-offset [tdat start end]
+  (let [excerpt (subs (:text tdat) (:start-index start) (:end-index end))]
+    (clean-string-for-excerpt excerpt)))
+
+(defn excerpt-offset->start [tdat excerpt offset]
+  (let [res (find-excerpt-position tdat excerpt :offset offset)]
+    (when res
+      {:start-index (res 0) :end-index (res 1) :remaining 0})))
 
 
