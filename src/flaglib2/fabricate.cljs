@@ -210,19 +210,27 @@
  (fn [db [_ flag]]
    (assoc db ::flag flag)))
 
+(defn flag-options []
+  (into []
+        (for [flag flags/flag-src]
+          (into {}
+                (map #(apply vector %1) (partition 2 flag))))))
+
+
 (defn flag-page []
   (let [flag @(rf/subscribe [::flag-or-default])]
     [:div
      [rc/single-dropdown
       :model flag
-      :choices flags/flags
+      :placeholder "Choose a Flag"
+      :choices (flag-options)
       :group-fn :category
       :on-change (fn [flag] (rf/dispatch [::set-flag flag]))
       :render-fn
       (fn [item]
         [:span
-         [:img :src (titlebar/flag-icon item)]
-         (str (:category item) " " (:description item))])]
+         [:img {:src (titlebar/flag-icon (:id item))}]
+         (str (:label item) " " (:description item))])]
      ;;FIXME: Description shouldn't show if in summary mode
      [:span (:description (get flag flags/flags))]]))
 
@@ -275,6 +283,12 @@
                              (render-start-suggestion tdat itm))
         :immediate-model-update? true])]))
 
+(defn excerpt-summary []
+  (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])]
+    (if (or (not excerpt) (zero? (count excerpt)))
+      "(no excerpt)"
+      excerpt)))
+
 (rf/reg-event-db
  ::set-comment
  (fn [db [_ comment]]
@@ -287,13 +301,11 @@
      :model ""
      :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]))
 
-
 (rf/reg-event-fx
  ::opine-initialize
- (fn [[{:keys [db]} _]]
+ (fn [{:keys [db]} _]
    {:fx
-    [
-     [:dispatch [:flaglib2.stepper/set-summary :excerpt]]
+    [[:dispatch [:flaglib2.stepper/set-summary :excerpt]]
      [:dispatch [:flaglib2.stepper/set-summary :reference]]
      [:dispatch [:flaglib2.stepper/set-summary :flag]]]}))
 
@@ -318,11 +330,13 @@
     :label [flag-page]
     :buttons ""}
    {:id :excerpt
-    :page [excerpt-page]}
+    :page [excerpt-page]
+    :label [excerpt-summary]}
    {:id :reference}
    {:id :opine
     :label [opine]
     :page [opine]
+    :once [::opine-initialize]
     }
    
             ])

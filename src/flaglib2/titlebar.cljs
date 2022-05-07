@@ -10,7 +10,6 @@
 
 
 
-
 (defn flag-icon [type]
-  (let [flag (get type flags/flags)]
+  (let [flag (get flags/flags type)]
     (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")))
