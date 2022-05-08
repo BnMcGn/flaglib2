@@ -284,10 +284,11 @@
         :immediate-model-update? true])]))
 
 (defn excerpt-summary []
-  (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])]
-    (if (or (not excerpt) (zero? (count excerpt)))
-      "(no excerpt)"
-      excerpt)))
+  (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])
+        text (if (or (not excerpt) (zero? (count excerpt)))
+               "[no excerpt]"
+               excerpt)]
+   [step/summary-button :excerpt text]))
 
 (rf/reg-event-db
  ::set-comment
