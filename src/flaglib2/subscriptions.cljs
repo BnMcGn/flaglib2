@@ -94,7 +94,7 @@
     (:flaglib2.fabricate/supplied-text db)
     (let [target (:flaglib2.fabricate/selection db)]
       (when target
-        (get-in db [:text-store target]))))))
+        (get-in db [:text-store target :text]))))))
 
 (rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
 (rf/reg-sub
@@ -113,3 +113,4 @@
    (or excerpt [(get params :excerpt "") (get params :offset nil)])))
 (rf/reg-sub :flaglib.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)
 
+(rf/reg-sub :flaglib2.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)

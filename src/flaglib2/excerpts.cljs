@@ -1,6 +1,6 @@
 (ns flaglib2.excerpts
   (:require
-   [clojure.string :as str]
+   [clojure.string :as string]
    [flaglib2.misc :as misc]))
 
 
@@ -15,9 +15,10 @@
                        (range (count group) 0 -1))]
           itm)))
 
+
 (defn create-textdata [text]
   ;;FIXME: trim not customized. Might not match other ws definitions
-  (let [text (str/trim text)
+  (let [text (string/trim text)
         tlen (count text)]
     (letfn
         [(white [i stor]
@@ -81,13 +82,13 @@
             (recur (rest i) offset)))))))
 
 (defn previous-break [text index]
-  (str/last-index-of text \newline index))
+  (string/last-index-of text \newline index))
 
 (defn next-break [text index]
-  (str/index-of text \newline index))
+  (string/index-of text \newline index))
 
 (defn excerpt-context [text position1 position2]
-  (let [text (str/trim text)
+  (let [text (string/trim text)
         tlength (count text)
         estart position1
         eend (+ position2 estart)
@@ -152,8 +153,8 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 
 (defn split-search-on-double-space [srch]
   ;;FIXME: is trim right thing to do?
-  (let [srch (str/trim srch)
-        res (str/index-of srch "  ")]
+  (let [srch (string/trim srch)
+        res (string/index-of srch "  ")]
     (if res
       [(subs srch 0 res) (subs srch (+ res 2))]
       [srch])))
