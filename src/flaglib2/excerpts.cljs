@@ -15,7 +15,6 @@
                        (range (count group) 0 -1))]
           itm)))
 
-
 (defn create-textdata [text]
   ;;FIXME: trim not customized. Might not match other ws definitions
   (let [text (string/trim text)

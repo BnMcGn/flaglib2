@@ -14,6 +14,7 @@
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.typeahead :as ta]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
@@ -237,51 +238,79 @@
 (rf/reg-event-db
  ::set-excerpt-start
  (fn [db [_ start]]
-   (assoc db ::excerpt-start start)))
+   (if (or (nil? start) (map? start))
+     (assoc db ::excerpt-start start)
+     db)))
 
 (rf/reg-event-db
  ::set-excerpt
  (fn [db [_ [excerpt offset]]]
    (assoc db ::excerpt [excerpt offset])))
 
+(rf/reg-event-db
+ ::set-excerpt-search
+ (fn [db [_ search]]
+   (assoc db ::excerpt-search search)))
+
 (defn render-start-suggestion [tdat start]
   (let [text (excerpts/clean-string-for-excerpt
-              (subs (:text tdat) (:start-index start) (:end-index start)))]
-    [:span (str (:start-index start) ":" text)]))
+              (subs (:text tdat) (:start-index start) (inc (:end-index start))))
+        context (excerpts/clean-string-for-excerpt
+                 (subs (:text tdat) (inc (:end-index start))
+                       (min (+ 10 (:end-index start)) (dec (:text-length tdat)))))]
+    [:span (str (:start-index start) ": ") [:strong text] context]))
 
 (defn render-end-suggestion [tdat start end]
   (let [text (excerpts/clean-string-for-excerpt
-              (subs (:text tdat) (:start-index start) (:end-index end)))]
+              (subs (:text tdat) (:start-index start) (inc (:end-index end))))]
     [:span (str (count text) " chars:" text)]))
+
+(def excerpt-search (atom ""))
+
+(defn data-source-fn! [tdat start srch]
+  (reset! excerpt-search srch)
+  (if start
+    (if (excerpts/excerpt-start-valid? tdat srch start)
+      (get (excerpts/excerpt-possibilities tdat srch start) 1)
+      (rf/dispatch [::set-excerpt-start nil]))
+    (let [[starts ends] (excerpts/excerpt-possibilities tdat srch)]
+      (if (= 1 (count starts))
+        (rf/dispatch [::set-excerpt-start (nth starts 0)])
+        starts))))
 
 (defn excerpt-page []
   (let [[excerpt offset] @(rf/subscribe [::excerpt-or-default])
         start @(rf/subscribe [::excerpt-start])
         text @(rf/subscribe [::active-text])
-        tdat (excerpts/create-textdata text)]
+        model (or @excerpt-search excerpt)
+        tdat (excerpts/create-textdata text)
+        ds-fn (partial data-source-fn! tdat start)]
     [:div
      (if start
-       [rc/typeahead
-        :model excerpt
-        :data-source (fn [srch]
-                       (if (excerpts/excerpt-start-valid? tdat srch start)
-                         (get (excerpts/excerpt-possibilities tdat srch start) 1)
-                         (rf/dispatch [::set-excerpt-start nil])))
+       [ta/typeahead
+        :model model
+        :data-source ds-fn
         :on-change (fn [itm]
                      (rf/dispatch [::set-excerpt (excerpts/start-end->excerpt-offset tdat start itm)]))
+        :suggestion-to-string (fn [_] @excerpt-search)
         :rigid? false
+        :change-on-blur? true
+        :debounce-delay 200
         :render-suggestion (fn [itm]
                              (render-end-suggestion tdat start itm))
-        :immediate-model-update? true]
-       [rc/typeahead
-        :data-source (fn [srch]
-                       (get (excerpts/excerpt-possibilities tdat srch) 0))
+        :immediate-model-update? false]
+       [ta/typeahead
+        :model model
+        :data-source ds-fn
         :on-change (fn [itm]
                      (rf/dispatch [::set-excerpt-start itm]))
+        :suggestion-to-string (fn [_] @excerpt-search)
         :rigid? false
+        :change-on-blur? true
+        :debounce-delay 200
         :render-suggestion (fn [itm]
                              (render-start-suggestion tdat itm))
-        :immediate-model-update? true])]))
+        :immediate-model-update? false])]))
 
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])

@@ -111,6 +111,6 @@
  :<- [:server-parameters]
  (fn [[excerpt params] _]
    (or excerpt [(get params :excerpt "") (get params :offset nil)])))
-(rf/reg-sub :flaglib.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)
 
 (rf/reg-sub :flaglib2.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)
+(rf/reg-sub :flaglib2.fabricate/excerpt-search :-> :flaglib2.fabricate/excerpt-search)

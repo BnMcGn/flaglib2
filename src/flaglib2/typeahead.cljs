@@ -139,7 +139,8 @@
   [state]
   (cond-> state
     :always clear-suggestions
-    :always (assoc :waiting? false :input-text "" :displaying-suggestion? false)
+    ;;Don't reset input-text to "". Need it to stay even when we find a start.
+    :always (assoc :waiting? false :input-text (:model state) :displaying-suggestion? false)
     (event-updates-model? state :input-text-changed) (update-model nil)))
 
 (defn- got-suggestions
