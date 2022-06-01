@@ -275,7 +275,8 @@
       (rf/dispatch [::set-excerpt-start nil]))
     (let [[starts ends] (excerpts/excerpt-possibilities tdat srch)]
       (if (= 1 (count starts))
-        (rf/dispatch [::set-excerpt-start (nth starts 0)])
+        (do (rf/dispatch [::set-excerpt-start (nth starts 0)])
+            ends)
         starts))))
 
 (defn excerpt-page []
