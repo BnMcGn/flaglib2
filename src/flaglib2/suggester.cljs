@@ -1,23 +1,23 @@
-(ns flaglib2.typeahead
-  (:require-macros
-    [re-com.core            :refer [handler-fn at reflect-current-component]]
-    [cljs.core.async.macros :refer [alt! go-loop]])
+(ns flaglib2.suggester
   (:require
-    [cljs.core.async   :refer [chan timeout <! put!]]
-    [re-com.config     :refer [include-args-desc?]]
-    [re-com.debug      :refer [->attr]]
-    [re-com.throbber   :refer [throbber]]
-    [re-com.input-text :refer [input-text]]
-    [re-com.util       :refer [deref-or-value px]]
-    [re-com.popover    :refer [popover-tooltip]] ;; need?
     [re-com.box        :refer [h-box v-box box gap line flex-child-style align-style]] ;; need?
-    [re-com.validate   :refer [input-status-type? input-status-types-list regex? string-or-hiccup? css-style? html-attr? parts? number-or-string?
-                               string-or-atom? throbber-size? throbber-sizes-list]]
-
+    
     [flaglib2.misc :as misc]
     [re-frame.core :as rf]
     [reagent.core      :as    reagent]
     [goog.events.KeyCodes]))
+
+(defn- activate-suggestion-next
+  [{:as state :keys [suggestions suggestion-active-index]}]
+  (cond-> state
+    (seq suggestions)
+    (activate-suggestion-by-index (-> suggestion-active-index (or -1) inc (wrap (count suggestions))))))
+
+(defn- activate-suggestion-prev
+  [{:as state :keys [suggestions suggestion-active-index]}]
+  (cond-> state
+    (seq suggestions)
+    (activate-suggestion-by-index (-> suggestion-active-index (or 0) dec (wrap (count suggestions))))))
 
 
 (defn suggester-keydown-handler! [location event]
@@ -44,6 +44,11 @@
  (fn [db [_ location]]
    (update-in db location activate-suggestion-prev)))
 
+(rf/reg-event-db
+ ::activate-suggestion-by-index
+ (fn [db [_ location index]]
+   (update-in db location #(assoc %1 :suggestion-active-index index))))
+
 (rf/reg-fx
  ::call-on-select
  (fn [[func selection]]
@@ -57,6 +62,15 @@
      {::call-on-select [(:on-select state)
                         (or selection (get (:suggestions state) (:suggestion-active-index state)))]})))
 
+(rf/reg-event-fx
+ ::select
+ (fn [{:keys [db]} [_ location & index]]
+   (if index
+     {:dispatch [::on-select location index]}
+     (let [index (get (get-in db location) :suggestion-active-index)]
+       {:db (update-in db location #(assoc %1 :suggestion-active-index index))
+        :fx  [[:dispatch [::on-select location index]]]}))))
+
 (rf/reg-event-db
  ::initialize-suggester
  (fn [db [_ location state]]
@@ -66,62 +80,48 @@
        db
        (assoc-in db location state)))))
 
+(rf/reg-event-db
+ ::delete-suggester
+ (fn [db [_ location]]
+   (update-in db (butlast location) dissoc (last location))))
+
+(rf/reg-sub
+ ::suggester
+ (fn [db [_ location]]
+   (get-in db location)))
+
+(defn suggester-component
+  [location init & props]
+  (let [render-suggestion (:render-suggestion init)
+        {:as state
+         :keys [suggestions suggestion-active-index input]}
+        @(rf/subscribe [::suggester location])]
+    [box
+     :style {:position "relative"}
+     :child
+     [v-box
+      ;;We omit the waiting? code
+      :children
+      [(for [[i s] (map vector (range) suggestions)
+             :let [selected? (= suggestion-active-index i)]]
+         ^{:key i}
+         [box
+          :child (if render-suggestion
+                   (render-suggestion s)
+                   s)
+          :class (str "rc-typeahead-suggestion" (when selected? " active"))
+          :attr {:on-mouse-over #(rf/dispatch [::activate-suggestion-by-index location i])
+                 :on-mouse-down #(do (.preventDefault %)
+                                     (rf/dispatch [::select location i]))}])]]]))
+
 (defn suggester
-  [{:as state :keys [location]}]
+  [& {:as state :keys [location]}]
   (reagent/with-let
-    [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])
-     _ (rf/dispatch-sync [::initialize-suggester loc state])]
-    ))
-(defn suggester
-  "Utility component for adding drop down suggestions to an entry."
-  [& {:keys [location] :as args}]
-  (let [
-        {:as state :keys [c-search c-input]} (make-typeahead-state args)
-        state-atom (reagent/atom state)
-        input-text-model (reagent/cursor state-atom [:input-text])]
-    (search-data-source-loop! state-atom c-search)
-    (fn typeahead-render
-      [& {:as   args
-          :keys [data-source _on-change _change-on-blur? _immediate-model-update? model _debounce-delay render-suggestion _suggestion-to-string _rigid?
-    ]}]
-      (let [{:as state :keys [suggestions suggestion-active-index input]} @(rf/subscribe location)
+    [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])]
+    (rf/dispatch-sync [::initialize-suggester loc state])
+    (partial suggester-component loc state)
+    reagent/finally
+    (when-not location
+      (rf/dispatch [::delete-suggester loc]))))
 
 
-
-
-
-            {:as state :keys [suggestions waiting? suggestion-active-index external-model]} @state-atom
-            width                 (or width "250px")]
-        [v-box
-         :src      src
-         :class    "rc-typeahead"
-         :width    width
-         :children
-         [
-          (if (or (not-empty suggestions) waiting?)
-            [box
-             :src   (at)
-             :style {:position "relative"}
-             :child [v-box
-                     :src      (at)
-                     :children [(when waiting?
-                                  [box
-                                   :src   (at)
-                                   :align :center
-                                   :child [throbber
-                                           :src   (at)
-                                           :size  :small
-                                           :class (str "rc-typeahead-throbber " (get-in parts [:throbber :class]))]])
-                                          (for [[i s] (map vector (range) suggestions)
-                                                :let [selected? (= suggestion-active-index i)]]
-                                            ^{:key i}
-                                            [box
-                                             :src   (at)
-                                             :child (if render-suggestion
-                                                      (render-suggestion s)
-                                                      s)
-                                             :class (str "rc-typeahead-suggestion"
-                                                         (when selected? " active")
-                                                         (get-in parts [:suggestion :class]))
-                                             :attr {:on-mouse-over #(swap! state-atom activate-suggestion-by-index i)
-                                                    :on-mouse-down #(do (.preventDefault %) (swap! state-atom choose-suggestion-by-index i))}])]]])]]))))
