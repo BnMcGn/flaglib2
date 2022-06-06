@@ -7,6 +7,14 @@
     [reagent.core      :as    reagent]
     [goog.events.KeyCodes]))
 
+(defn- activate-suggestion-by-index
+  "Make the suggestion at `index` the active suggestion"
+  [{:as state :keys [suggestions]} index]
+  (let [suggestion (nth suggestions index)]
+    (assoc state :suggestion-active-index index)))
+
+(defn- wrap [index count] (mod (+ count index) count))
+
 (defn- activate-suggestion-next
   [{:as state :keys [suggestions suggestion-active-index]}]
   (cond-> state
@@ -120,7 +128,7 @@
     [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])]
     (rf/dispatch-sync [::initialize-suggester loc state])
     (partial suggester-component loc state)
-    reagent/finally
+    :finally ;;reagent/finally  ??
     (when-not location
       (rf/dispatch [::delete-suggester loc]))))
 

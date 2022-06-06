@@ -252,18 +252,6 @@
  (fn [db [_ search]]
    (assoc db ::excerpt-search search)))
 
-(defn render-start-suggestion [tdat start]
-  (let [text (excerpts/clean-string-for-excerpt
-              (subs (:text tdat) (:start-index start) (inc (:end-index start))))
-        context (excerpts/clean-string-for-excerpt
-                 (subs (:text tdat) (inc (:end-index start))
-                       (min (+ 10 (:end-index start)) (dec (:text-length tdat)))))]
-    [:span (str (:start-index start) ": ") [:strong text] context]))
-
-(defn render-end-suggestion [tdat start end]
-  (let [text (excerpts/clean-string-for-excerpt
-              (subs (:text tdat) (:start-index start) (inc (:end-index end))))]
-    [:span (str (count text) " chars:" text)]))
 
 (def excerpt-search (atom ""))
 
