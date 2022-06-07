@@ -14,6 +14,7 @@
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.excerpt-search :as xsearch]
    [flaglib2.typeahead :as ta]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
@@ -247,59 +248,15 @@
  (fn [db [_ [excerpt offset]]]
    (assoc db ::excerpt [excerpt offset])))
 
-(rf/reg-event-db
- ::set-excerpt-search
- (fn [db [_ search]]
-   (assoc db ::excerpt-search search)))
-
-
-(def excerpt-search (atom ""))
-
-(defn data-source-fn! [tdat start srch]
-  (reset! excerpt-search srch)
-  (if start
-    (if (excerpts/excerpt-start-valid? tdat srch start)
-      (get (excerpts/excerpt-possibilities tdat srch start) 1)
-      (rf/dispatch [::set-excerpt-start nil]))
-    (let [[starts ends] (excerpts/excerpt-possibilities tdat srch)]
-      (if (= 1 (count starts))
-        (do (rf/dispatch [::set-excerpt-start (nth starts 0)])
-            ends)
-        starts))))
-
 (defn excerpt-page []
   (let [[excerpt offset] @(rf/subscribe [::excerpt-or-default])
-        start @(rf/subscribe [::excerpt-start])
-        text @(rf/subscribe [::active-text])
-        model (or @excerpt-search excerpt)
-        tdat (excerpts/create-textdata text)
-        ds-fn (partial data-source-fn! tdat start)]
+        text @(rf/subscribe [::active-text])]
     [:div
-     (if start
-       [ta/typeahead
-        :model model
-        :data-source ds-fn
-        :on-change (fn [itm]
-                     (rf/dispatch [::set-excerpt (excerpts/start-end->excerpt-offset tdat start itm)]))
-        :suggestion-to-string (fn [_] @excerpt-search)
-        :rigid? false
-        :change-on-blur? true
-        :debounce-delay 200
-        :render-suggestion (fn [itm]
-                             (render-end-suggestion tdat start itm))
-        :immediate-model-update? false]
-       [ta/typeahead
-        :model model
-        :data-source ds-fn
-        :on-change (fn [itm]
-                     (rf/dispatch [::set-excerpt-start itm]))
-        :suggestion-to-string (fn [_] @excerpt-search)
-        :rigid? false
-        :change-on-blur? true
-        :debounce-delay 200
-        :render-suggestion (fn [itm]
-                             (render-start-suggestion tdat itm))
-        :immediate-model-update? false])]))
+     [xsearch/excerpt-search
+      :text text
+      :excerpt excerpt
+      :offset offset
+      :on-change #(rf/dispatch [::set-excerpt %1])]]))
 
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])

@@ -44,12 +44,11 @@
     [:span (str (count text) " chars:" text)]))
 
 ;;FIXME: need to handle existing excerpt/offset
-(defn excerpt-search [{:keys [text excerpt on-change]}]
+(defn excerpt-search [{:keys [text excerpt on-change width]}]
   (let [model @(rf/subscribe [::raw-excerpt-search])
         start @(rf/subscribe [::excerpt-start])
         suggestions @(rf/subscribe [::suggestions])
-        tdat (excerpts/create-textdata text)
-        ]
+        tdat (excerpts/create-textdata text)]
     [rc/v-box
      :class "rc-typeahead"
      :width width
@@ -59,15 +58,16 @@
        :on-change (fn [itm] (rf/dispatch [::do-search itm tdat]))
        :attr {:on-key-down (partial suggester/suggester-keydown-handler! ::excerpt-suggester)
               :on-focus #()
-              :on-blur ???}]
+              ;;FIXME:
+                                        ;:on-blur ???
+              }]
       [suggester/suggester
        :location ::excerpt-suggester
        :suggestions suggestions
-       :on-select (when start (on-change (excerpts/start-end->excerpt-offset tdat start itm)))
+       :on-select #(when start (on-change (excerpts/start-end->excerpt-offset tdat start %1)))
        :render-suggestion #(if start
                              (render-end-suggestion tdat start %1)
-                             (render-start-suggestion tdat %1))
-       ]]]))
+                             (render-start-suggestion tdat %1))]]]))
 
 
 
