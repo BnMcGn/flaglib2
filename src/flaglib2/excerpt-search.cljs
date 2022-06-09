@@ -2,6 +2,7 @@
   (:require
    [re-com.core :as rc]
    [re-frame.core :as rf]
+   [reagent.core :as reagent]
    
    [flaglib2.misc :as misc]
    [flaglib2.suggester :as suggester]
@@ -47,7 +48,7 @@
 
 ;;FIXME: need to handle existing excerpt/offset
 (defn excerpt-search [& {:as init}]
-  (let [model (atom nil)]
+  (let [model (reagent/atom nil)]
     (fn [& {:keys [text excerpt on-change width]}]
          (let [start @(rf/subscribe [::excerpt-start])
                suggestions @(rf/subscribe [::suggestions])
@@ -57,11 +58,13 @@
             :width width
             :children
             [[rc/input-text
-              ;;FIXME: that's broken:
-              :model @model
+              :model model
+              ;:on-change (fn [itm] (println itm)
+              ;             (println @model)
+              ;             (reset! model itm))
               :on-change (fn [itm]
-                           (rf/dispatch [::do-search itm tdat])
-                           (reset! model itm))
+                           (reset! model itm)
+                           (rf/dispatch [::do-search itm tdat]))
               :change-on-blur? false
               :attr {:on-key-down (partial suggester/suggester-keydown-handler! [::excerpt-suggester])
                      :on-focus #()
