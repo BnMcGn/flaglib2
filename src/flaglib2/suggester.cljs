@@ -27,6 +27,10 @@
     (seq suggestions)
     (activate-suggestion-by-index (-> suggestion-active-index (or 0) dec (wrap (count suggestions))))))
 
+(rf/reg-sub
+ ::suggester
+ (fn [db [_ location]]
+   (get-in db location)))
 
 (defn suggester-keydown-handler! [location event]
   (condp = (.-which event)
@@ -35,8 +39,8 @@
     goog.events.KeyCodes.ENTER (rf/dispatch [::choose-suggestion-active location])
     goog.events.KeyCodes.ESC (rf/dispatch [::activate-suggestion-prev location])
     goog.events.KeyCodes.TAB
-    (let [suggestions @(rf/subscribe [::suggestions location])]
-      (if (not-empty suggestions)
+    (let [suggester @(rf/subscribe [::suggester location])]
+      (if (not-empty (:suggestions suggester))
         (do (.preventDefault event)
             (rf/dispatch [::activate-suggestion-next location]))
         (rf/dispatch [::hide-suggester location])))
@@ -93,13 +97,9 @@
  (fn [db [_ location]]
    (update-in db (butlast location) dissoc (last location))))
 
-(rf/reg-sub
- ::suggester
- (fn [db [_ location]]
-   (get-in db location)))
 
 (defn suggester-component
-  [location init & props]
+  [location init]
   (let [render-suggestion (:render-suggestion init)
         {:as state
          :keys [suggestions suggestion-active-index input]}
@@ -113,21 +113,22 @@
       [(for [[i s] (map vector (range) suggestions)
              :let [selected? (= suggestion-active-index i)]]
          ^{:key i}
-         [box
-          :child (if render-suggestion
-                   (render-suggestion s)
-                   s)
-          :class (str "rc-typeahead-suggestion" (when selected? " active"))
-          :attr {:on-mouse-over #(rf/dispatch [::activate-suggestion-by-index location i])
-                 :on-mouse-down #(do (.preventDefault %)
-                                     (rf/dispatch [::select location i]))}])]]]))
+         (do
+           [box
+           :child (if render-suggestion
+                    (render-suggestion s)
+                    s)
+           :class (str "rc-typeahead-suggestion" (when selected? " active"))
+           :attr {:on-mouse-over #(rf/dispatch [::activate-suggestion-by-index location i])
+                  :on-mouse-down #(do (.preventDefault %)
+                                      (rf/dispatch [::select location i]))}]))]]]))
 
 (defn suggester
   [& {:as state :keys [location]}]
   (reagent/with-let
     [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])]
     (rf/dispatch-sync [::initialize-suggester loc state])
-    (partial suggester-component loc state)
+    (suggester-component loc state)
     :finally ;;reagent/finally  ??
     (when-not location
       (rf/dispatch [::delete-suggester loc]))))

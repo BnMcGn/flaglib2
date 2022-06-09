@@ -28,7 +28,9 @@
              (if (= 1 (count starts))
                [(nth starts 0) ends]
                [nil starts])))]
-     (assoc db ::raw-excerpt-search search ::excerpt-start start ::suggestions suggests))))
+     (assoc-in
+      (assoc db ::raw-excerpt-search search ::excerpt-start start)
+      [::excerpt-suggester :suggestions] suggests))))
 
 (defn render-start-suggestion [tdat start]
   (let [text (excerpts/clean-string-for-excerpt
@@ -44,30 +46,35 @@
     [:span (str (count text) " chars:" text)]))
 
 ;;FIXME: need to handle existing excerpt/offset
-(defn excerpt-search [& {:as stuff :keys [text excerpt on-change width]}]
-  (let [model @(rf/subscribe [::raw-excerpt-search])
-        start @(rf/subscribe [::excerpt-start])
-        suggestions @(rf/subscribe [::suggestions])
-        tdat (excerpts/create-textdata text)]
-    [rc/v-box
-     :class "rc-typeahead"
-     :width width
-     :children
-     [[rc/input-text
-       :model (if (zero? (count model)) excerpt model)
-       :on-change (fn [itm] (rf/dispatch [::do-search itm tdat]))
-       :attr {:on-key-down (partial suggester/suggester-keydown-handler! [::excerpt-suggester])
-              :on-focus #()
-              ;;FIXME:
-              ;;:on-blur ???
-              }]
-      [suggester/suggester
-       :location [::excerpt-suggester]
-       :suggestions suggestions
-       :on-select #(when start (on-change (excerpts/start-end->excerpt-offset tdat start %1)))
-       :render-suggestion #(if start
-                             (render-end-suggestion tdat start %1)
-                             (render-start-suggestion tdat %1))]]]))
+(defn excerpt-search [& {:as init}]
+  (let [model (atom nil)]
+    (fn [& {:keys [text excerpt on-change width]}]
+         (let [start @(rf/subscribe [::excerpt-start])
+               suggestions @(rf/subscribe [::suggestions])
+               tdat (excerpts/create-textdata text)]
+           [rc/v-box
+            :class "rc-typeahead"
+            :width width
+            :children
+            [[rc/input-text
+              ;;FIXME: that's broken:
+              :model @model
+              :on-change (fn [itm]
+                           (rf/dispatch [::do-search itm tdat])
+                           (reset! model itm))
+              :change-on-blur? false
+              :attr {:on-key-down (partial suggester/suggester-keydown-handler! [::excerpt-suggester])
+                     :on-focus #()
+                     ;;FIXME:
+                     ;;:on-blur ???
+                     }]
+             [suggester/suggester
+              :location [::excerpt-suggester]
+              :suggestions suggestions
+              :on-select #(when start (on-change (excerpts/start-end->excerpt-offset tdat start %1)))
+              :render-suggestion #(if start
+                                    (render-end-suggestion tdat start %1)
+                                    (render-start-suggestion tdat %1))]]]))))
 
 
 
