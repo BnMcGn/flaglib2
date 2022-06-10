@@ -100,9 +100,8 @@
 
 (defn suggester-component
   [location init]
-  (let [render-suggestion (:render-suggestion init)
-        {:as state
-         :keys [suggestions suggestion-active-index input]}
+  (let [{:as state
+         :keys [suggestions suggestion-active-index input render-suggestion]}
         @(rf/subscribe [::suggester location])]
     [box
      :style {:position "relative"}
@@ -113,23 +112,30 @@
       [(for [[i s] (map vector (range) suggestions)
              :let [selected? (= suggestion-active-index i)]]
          ^{:key i}
-         (do
-           [box
-           :child (if render-suggestion
-                    (render-suggestion s)
-                    s)
-           :class (str "rc-typeahead-suggestion" (when selected? " active"))
-           :attr {:on-mouse-over #(rf/dispatch [::activate-suggestion-by-index location i])
-                  :on-mouse-down #(do (.preventDefault %)
-                                      (rf/dispatch [::select location i]))}]))]]]))
+         [box
+          :child (if render-suggestion
+                   (render-suggestion s)
+                   s)
+          :class (str "rc-typeahead-suggestion" (when selected? " active"))
+          :attr {:on-mouse-over #(rf/dispatch [::activate-suggestion-by-index location i])
+                 :on-mouse-down #(do (.preventDefault %)
+                                     (rf/dispatch [::select location i]))}])]]]))
 
 (defn suggester
+  [& {:as state :keys [location]}]
+  (let [loc location]
+    (rf/dispatch-sync [::initialize-suggester loc state])
+    (fn [state]
+      (suggester-component loc state))))
+
+;;FIXME: is with-let broken?
+(defn suggesterx
   [& {:as state :keys [location]}]
   (reagent/with-let
     [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])]
     (rf/dispatch-sync [::initialize-suggester loc state])
     (suggester-component loc state)
-    :finally ;;reagent/finally  ??
+    'reagent/finally
     (when-not location
       (rf/dispatch [::delete-suggester loc]))))
 

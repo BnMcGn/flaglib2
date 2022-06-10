@@ -8,9 +8,10 @@
    [flaglib2.suggester :as suggester]
    [flaglib2.excerpts :as excerpts]))
 
-(rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
+;;FIXME: remove unused
+;;(rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
-(rf/reg-sub ::suggestions :-> ::suggestions)
+;;(rf/reg-sub ::suggestions :-> ::suggestions)
 
 (rf/reg-event-db
  ::do-search
@@ -51,7 +52,6 @@
   (let [model (reagent/atom nil)]
     (fn [& {:keys [text excerpt on-change width]}]
          (let [start @(rf/subscribe [::excerpt-start])
-               suggestions @(rf/subscribe [::suggestions])
                tdat (excerpts/create-textdata text)]
            [rc/v-box
             :class "rc-typeahead"
@@ -59,9 +59,6 @@
             :children
             [[rc/input-text
               :model model
-              ;:on-change (fn [itm] (println itm)
-              ;             (println @model)
-              ;             (reset! model itm))
               :on-change (fn [itm]
                            (reset! model itm)
                            (rf/dispatch [::do-search itm tdat]))
@@ -73,7 +70,6 @@
                      }]
              [suggester/suggester
               :location [::excerpt-suggester]
-              :suggestions suggestions
               :on-select #(when start (on-change (excerpts/start-end->excerpt-offset tdat start %1)))
               :render-suggestion #(if start
                                     (render-end-suggestion tdat start %1)
