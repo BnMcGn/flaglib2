@@ -69,14 +69,15 @@
 
 (rf/reg-event-fx
  ::on-select
- (fn [{:keys [db]} [_ location & selection]]
+ (fn [{:keys [db]} [_ location selection]]
    (let [state (get-in db location)]
-     {::call-on-select [(:on-select state)
-                        (or selection (get (:suggestions state) (:suggestion-active-index state)))]})))
+     {:fx [[::call-on-select
+            [(:on-select state)
+             (nth (:suggestions state) (or selection (:suggestion-active-index state)))]]]})))
 
 (rf/reg-event-fx
  ::select
- (fn [{:keys [db]} [_ location & index]]
+ (fn [{:keys [db]} [_ location index]]
    (if index
      {:dispatch [::on-select location index]}
      (let [index (get (get-in db location) :suggestion-active-index)]

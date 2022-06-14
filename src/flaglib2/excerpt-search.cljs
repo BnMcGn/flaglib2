@@ -14,6 +14,11 @@
 ;;(rf/reg-sub ::suggestions :-> ::suggestions)
 
 (rf/reg-event-db
+ ::excerpt-start-selected
+ (fn [db [_ start]]
+   (assoc db ::excerpt-start start)))
+
+(rf/reg-event-db
  ::do-search
  (fn [db [_ search tdat]]
    (let [start (::excerpt-start db)
@@ -70,11 +75,11 @@
                      }]
              [suggester/suggester
               :location [::excerpt-suggester]
-              :on-select #(when start (on-change (excerpts/start-end->excerpt-offset tdat start %1)))
+              :on-select #(if start
+                            (on-change (excerpts/start-end->excerpt-offset tdat start %1))
+                            (rf/dispatch [::excerpt-start-selected %1]))
               :render-suggestion #(if start
                                     (render-end-suggestion tdat start %1)
                                     (render-start-suggestion tdat %1))]]]))))
-
-
 
 
