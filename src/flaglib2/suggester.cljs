@@ -94,6 +94,14 @@
        (assoc-in db location state)))))
 
 (rf/reg-event-db
+ ::reset
+ (fn [db [_ location]]
+   (update-in db location
+              assoc
+              :suggestions nil
+              :suggestion-active-index 0)))
+
+(rf/reg-event-db
  ::delete-suggester
  (fn [db [_ location]]
    (update-in db (butlast location) dissoc (last location))))
