@@ -164,6 +164,18 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
     (when (pos? rindex)
       (subs search rindex))))
 
+(defn ensure-correct-start [tdat search start]
+  (let [[seg1 seg2] (split-search-on-double-space search)
+        stindex (:start-index start)]
+    (if seg2
+      (if (excerpt-here? tdat seg1 stindex)
+        (if (= (length-of-match start) (count seg1))
+          start
+          {:start-index stindex :remaining 0 :end-index (+ stindex (count seg1))})
+        (throw (js/Error. "Bad match start. Shouldn't happen!")))
+      ;;We could check the old search for correctness, but this is simpler
+      (some-excerpt-here? tdat search (:start-index start)))))
+
 (defn excerpt-possibilities
   ([tdat search]
    (let [[seg1 seg2] (split-search-on-double-space search)
@@ -181,11 +193,13 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
   ;;Handle end search
   ([tdat search found-start]
    (let [[seg1 seg2] (split-search-on-double-space search)
+         start (ensure-correct-start tdat search found-start)
          seg2 (or seg2
-                  (remaining-portion-of-search search found-start))]
+                  (remaining-portion-of-search search start))]
      (if seg2
-       [(list found-start) (find-possible-excerpt-ends tdat (:end-index found-start) seg2)]
+       [(list start) (find-possible-excerpt-ends tdat (:end-index start) seg2)]
        ['() '()]))))
+
 
 (defn excerpt-start-valid? [tdat search start]
   (let [i (:start-index start)

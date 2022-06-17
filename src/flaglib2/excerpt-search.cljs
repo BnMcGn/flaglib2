@@ -37,7 +37,7 @@
                [(nth starts 0) ends]
                [nil starts])))]
      (assoc-in
-      (assoc db ::raw-excerpt-search search ::excerpt-start start)
+      (assoc db ::raw-excerpt-search search ::excerpt-start xstart)
       [::excerpt-suggester :suggestions] suggests))))
 
 (defn render-start-suggestion [tdat start]
