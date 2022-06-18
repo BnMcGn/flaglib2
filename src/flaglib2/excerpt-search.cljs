@@ -53,35 +53,47 @@
               (subs (:text tdat) (:start-index start) (inc (:end-index end))))]
     [:span (str (count text) " chars:" text)]))
 
+(defn render-suggestion [tdat item]
+  (let [start @(rf/subscribe [::excerpt-start])]
+    (if start
+      (render-end-suggestion tdat start item)
+      (render-start-suggestion tdat item))))
+
+(rf/reg-event-fx
+ ::set-excerpt-start-or-end
+ (fn [{:keys [db]} [_ & {:keys [tdat item event]}]]
+   (if-let [start? (::excerpt-start db)]
+     {:fx [[:dispatch [event (excerpts/start-end->excerpt-offset tdat start? item)]]]}
+     {:fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
+
 ;;FIXME: need to handle existing excerpt/offset
 (defn excerpt-search [& {:as init}]
   (let [model (reagent/atom nil)]
-    (fn [& {:keys [text excerpt on-change width]}]
-         (let [start @(rf/subscribe [::excerpt-start])
-               tdat (excerpts/create-textdata text)
-               location [::excerpt-suggester]]
-           [rc/v-box
-            :class "rc-typeahead"
-            :width width
-            :children
-            [[rc/input-text
-              :model model
-              :on-change (fn [itm]
-                           (reset! model itm)
-                           (rf/dispatch [::do-search itm tdat]))
-              :change-on-blur? false
-              :attr {:on-key-down (partial suggester/suggester-keydown-handler! location)
-                     :on-focus #()
-                     ;;FIXME:
-                     ;;:on-blur ???
-                     }]
-             [suggester/suggester
-              :location location
-              :on-select #(if start
-                            (on-change (excerpts/start-end->excerpt-offset tdat start %1))
-                            (rf/dispatch [::excerpt-start-selected location %1]))
-              :render-suggestion #(if start
-                                    (render-end-suggestion tdat start %1)
-                                    (render-start-suggestion tdat %1))]]]))))
+    (fn [& {:keys [text excerpt on-change-event width]}]
+      (let [start @(rf/subscribe [::excerpt-start])
+            tdat (excerpts/create-textdata text)
+            location [::excerpt-suggester]]
+        [rc/v-box
+         :class "rc-typeahead"
+         :width width
+         :children
+         [[rc/input-text
+           :model model
+           :on-change (fn [itm]
+                        (reset! model itm)
+                        (rf/dispatch [::do-search itm tdat]))
+           :change-on-blur? false
+           :attr {:on-key-down (partial suggester/suggester-keydown-handler! location)
+                  :on-focus #()
+                  ;;FIXME:
+                  ;;:on-blur ???
+                  }]
+          [suggester/suggester
+           :location location
+           :on-select #(rf/dispatch [::set-excerpt-start-or-end
+                                     :tdat tdat
+                                     :item %1
+                                     :event on-change-event])
+           :render-suggestion #(render-suggestion tdat %1)]]]))))
 
 

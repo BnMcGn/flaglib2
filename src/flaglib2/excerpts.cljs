@@ -209,7 +209,8 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 
 (defn start-end->excerpt-offset [tdat start end]
   (let [excerpt (subs (:text tdat) (:start-index start) (:end-index end))]
-    (clean-string-for-excerpt excerpt)))
+    [(clean-string-for-excerpt excerpt)
+     (calculate-offset tdat excerpt (:start-index start))]))
 
 (defn excerpt-offset->start [tdat excerpt offset]
   (let [res (find-excerpt-position tdat excerpt :offset offset)]
