@@ -130,12 +130,12 @@
 (defn find-possible-excerpt-starts [tdat excerpt]
   (let [excerpt (create-textdata excerpt)
         ;;Don't consider starts shorter than this, but return complete matches
-        minimum (min 5 (:text-length excerpt))]
+        minimum (min 3 (:text-length excerpt))]
     (for [i (range (:text-length tdat))
           :let [match (some-excerpt-here? tdat excerpt i)]
           :when (and match
                      (or (zero? (:remaining match))
-                         (> (- (:text-length excerpt) (:remaining match)) minimum)))]
+                         (>= (- (:text-length excerpt) (:remaining match)) minimum)))]
       (assoc match :start-index i))))
 
 (defn find-possible-excerpt-ends [tdat end-of-start remainder]
@@ -174,7 +174,9 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
           {:start-index stindex :remaining 0 :end-index (+ stindex (count seg1))})
         (throw (js/Error. "Bad match start. Shouldn't happen!")))
       ;;We could check the old search for correctness, but this is simpler
-      (assoc (some-excerpt-here? tdat search stindex) :start-index stindex))))
+      (if-let [res (some-excerpt-here? tdat search stindex)]
+        (assoc res :start-index stindex)
+        (throw (js/Error. "Bad match start. Shouldn't happen!"))))))
 
 (defn excerpt-possibilities
   ([tdat search]
