@@ -174,7 +174,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
           {:start-index stindex :remaining 0 :end-index (+ stindex (count seg1))})
         (throw (js/Error. "Bad match start. Shouldn't happen!")))
       ;;We could check the old search for correctness, but this is simpler
-      (some-excerpt-here? tdat search (:start-index start)))))
+      (assoc (some-excerpt-here? tdat search stindex) :start-index stindex))))
 
 (defn excerpt-possibilities
   ([tdat search]
@@ -188,7 +188,9 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
          (if (= (count seg1) (length-of-match (nth res 0)))
            (excerpt-possibilities tdat search (nth res 0))
            ['() '()])
-         (excerpt-possibilities tdat search (nth res 0)))
+         (if (= (count search) (length-of-match (nth res 0)))
+           [res res] ;;FIXME: is this correct?
+           (excerpt-possibilities tdat search (nth res 0))))
        :else [res '()])))
   ;;Handle end search
   ([tdat search found-start]
