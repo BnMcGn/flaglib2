@@ -23,13 +23,10 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 (deftest complete-excerpt
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light of men")
         res (get starts 0)]
-    (is (and
-         (= 1 (count starts))
-         (= 0 (:remaining res))
-         (= 241 (:start-index res))
-         (= 252 (:end-index res))
-         ;;FIXME: make sure we have right text
-         ))))
+    (is (= 1 (count starts)))
+    (is (= 0 (:remaining res)))
+    (is (= 241 (:start-index res)))
+    (is (= 252 (:end-index res)))))
 
 (deftest gapped-search
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light the")
@@ -61,10 +58,3 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 
 
 
-
-
-;;(deftest multiply-test
-;;  (is (= (* 1 2) (multiply 1 2))))
-
-;;(deftest multiply-test-2
-;;  (is (= (* 75 10) (multiply 10 75))))
