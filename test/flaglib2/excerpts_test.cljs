@@ -56,5 +56,30 @@ And the light shineth in darkness; and the darkness comprehended it not.")
                  (excerpts/excerpt-possibilities tdat1 "light the" start)))))
 
 
+(deftest double-search
+  (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light  the")
+        res (nth starts 0)]
+    (is (= 2 (count starts)))
+    (is (every? (partial = 0) (map :remaining starts)))
+    (is (= 241 (:start-index res)))
+    (is (= 245 (:end-index res)))))
 
+(deftest double-search-with-start
+  (let [start {:remaining 0 :start-index 241 :end-index 245}
+        [starts ends] (excerpts/excerpt-possibilities tdat1 "light  the" start)]
+    (is (= 1 (count starts)))
+    (is (= 2 (count ends)))
+    (is (every? (partial = 0) (map :remaining ends)))))
+
+(deftest double-search-with-short-start
+  (let [start {:remaining 4 :start-index 241 :end-index 243}
+        [starts ends] (excerpts/excerpt-possibilities tdat1 "light  the" start)]
+    (is (= 1 (count starts)))
+    (is (= 2 (count ends)))
+    (is (every? (partial = 0) (map :remaining ends)))))
+
+(deftest double-with-bad-start
+  (let [start {:remaining 4 :start-index 240 :end-index 243}]
+    (is (thrown? js/Error
+                 (excerpts/excerpt-possibilities tdat1 "light  the" start)))))
 
