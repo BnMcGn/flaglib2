@@ -22,7 +22,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 
 (deftest complete-excerpt
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light of men")
-        res (get starts 0)]
+        res (nth starts 0)]
     (is (= 1 (count starts)))
     (is (= 0 (:remaining res)))
     (is (= 241 (:start-index res)))
@@ -30,7 +30,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 
 (deftest gapped-search
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light the")
-        res (get starts 0)]
+        res (nth starts 0)]
     (is (= 2 (count starts)))
     (is (every? (partial = 4) (map :remaining starts)))
     (is (= 241 (:start-index res)))
