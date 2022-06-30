@@ -127,6 +127,25 @@
 ;;  - If user selects, or we are down to one, move on to selecting end.
 ;;  - Minimum starting size, perhaps 5 characters. Must be contiguous. What about short excerpts?
 
+(defn find-possible-excerpt-ends [tdat end-of-start remainder]
+  "Find possible endings for an excerpt when start is already known.
+Decide before calling where the start has ended. Will return some-excerpt-here? style matches"
+  (let [excerpt (create-textdata remainder)]
+    (for [i (range end-of-start (:text-length tdat))
+          :let [match (some-excerpt-here? tdat excerpt i)]
+          :when (and match (= (:remaining match) 0))]
+      (assoc match :start-index i))))
+
+(defn has-viable-excerpt-end? [tdat end-of-start remainder]
+  (when remainder
+    (not-empty (find-possible-excerpt-ends tdat end-of-start remainder))))
+
+(defn remaining-portion-of-search [search res]
+  (let [slen (count search)
+        rindex (- slen (:remaining res))]
+    (when (pos? rindex)
+      (subs search rindex))))
+
 (defn find-possible-excerpt-starts [tdat excerpt]
   (let [excerpt (create-textdata excerpt)
         ;;Don't consider starts shorter than this, but return complete matches
@@ -135,16 +154,10 @@
           :let [match (some-excerpt-here? tdat excerpt i)]
           :when (and match
                      (or (zero? (:remaining match))
-                         (>= (- (:text-length excerpt) (:remaining match)) minimum)))]
-      (assoc match :start-index i))))
-
-(defn find-possible-excerpt-ends [tdat end-of-start remainder]
-  "Find possible endings for an excerpt when start is already known.
-Decide before calling where the start has ended. Will return some-excerpt-here? style matches"
-  (let [excerpt (create-textdata remainder)]
-    (for [i (range end-of-start (:text-length tdat))
-          :let [match (some-excerpt-here? tdat excerpt i)]
-          :when (and match (= (:remaining match) 0))]
+                         (and (>= (- (:text-length excerpt) (:remaining match)) minimum)
+                              (has-viable-excerpt-end?
+                               tdat (:end-index match)
+                               (remaining-portion-of-search (:text excerpt) match)))))]
       (assoc match :start-index i))))
 
 (defn length-of-match [match]
@@ -157,12 +170,6 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
     (if res
       [(subs srch 0 res) (subs srch (+ res 2))]
       [srch])))
-
-(defn remaining-portion-of-search [search res]
-  (let [slen (count search)
-        rindex (- slen (:remaining res))]
-    (when (pos? rindex)
-      (subs search rindex))))
 
 (defn ensure-correct-start [tdat search start]
   (let [[seg1 seg2] (split-search-on-double-space search)
@@ -203,7 +210,6 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
      (if seg2
        [(list start) (find-possible-excerpt-ends tdat (:end-index start) seg2)]
        ['() '()]))))
-
 
 (defn excerpt-start-valid? [tdat search start]
   (let [i (:start-index start)
