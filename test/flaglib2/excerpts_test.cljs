@@ -83,3 +83,15 @@ And the light shineth in darkness; and the darkness comprehended it not.")
     (is (thrown? js/Error
                  (excerpts/excerpt-possibilities tdat1 "light  the" start)))))
 
+
+(deftest single-match
+  (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "prehenot")]
+    (is (= 1 (count starts)))
+    (is (= 1 (count ends)))))
+
+(deftest no-match
+  (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "man")]
+    (is (= 0 (count starts)))
+    (is (= 0 (count ends)))))
+
+
