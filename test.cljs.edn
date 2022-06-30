@@ -1,10 +1,16 @@
 ^{
   ;; use an alternative landing page for the tests so that we don't
   ;; launch the application
-  :open-url "http://[[server-hostname]]:[[server-port]]/test.html"
-  
+  ;; :open-url "http://[[server-hostname]]:[[server-port]]/test.html"
+
+  :client-port 9501
+
+  :ring-server-options {:port 9501}
+
   ;; uncomment to launch tests in a headless environment
   ;; you will have to figure out the path to chrome on your system
   ;; :launch-js ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "--headless" "--disable-gpu" "--repl" :open-url]
   }
-{:main flaglib2.test-runner}
+{:main flaglib2.test-runner
+ :asset-path "/cljs-out/test"
+ }
