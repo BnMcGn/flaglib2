@@ -2,6 +2,7 @@
   (:require
    [cljs-time.format]
    [re-frame.registrar]
+   [re-frame.core :as rf]
    [clojure.string :as str]))
 
 (defn encode-uri-component2 [uri]
@@ -66,3 +67,18 @@
         [k urls] (or l {})
         url (or urls [])]
     url))
+
+;;Designed to handle callbacks passed in to a re-frame component.
+;; Callback can be either a function or a re-frame event.
+(defn call []
+  (rf/->interceptor
+   :id :call
+   :after
+   (fn [context]
+     (if-let [call-info (:call context)]
+       (let [callable (first call-info)]
+         (if (function? callable)
+           (apply callable (rest call-info))
+           (rf/dispatch call-info)))
+       context))))
+
