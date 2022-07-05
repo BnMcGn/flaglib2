@@ -256,7 +256,7 @@
       :text text
       :excerpt excerpt
       :offset offset
-      :on-change-event ::set-excerpt]]))
+      :on-change ::set-excerpt]]))
 
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])

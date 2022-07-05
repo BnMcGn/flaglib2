@@ -77,7 +77,7 @@
    (fn [context]
      (if-let [call-info (:call context)]
        (let [callable (first call-info)]
-         (if (function? callable)
+         (if (ifn? callable)
            (apply callable (rest call-info))
            (rf/dispatch call-info)))
        context))))

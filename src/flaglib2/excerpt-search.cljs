@@ -61,15 +61,17 @@
 
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
- (fn [{:keys [db]} [_ & {:keys [tdat item event]}]]
+ [misc/call]
+ (fn [{:keys [db]} [_ & {:keys [tdat item endpoint]}]]
    (if-let [start? (::excerpt-start db)]
-     {:fx [[:dispatch [event (excerpts/start-end->excerpt-offset tdat start? item)]]]}
+     {:call [call (excerpts/start-end->excerpt-offset tdat start? item)]}
      {:fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
 
 ;;FIXME: need to handle existing excerpt/offset
 (defn excerpt-search [& {:as init}]
+  "on-change can be an event or a function"
   (let [model (reagent/atom nil)]
-    (fn [& {:keys [text excerpt on-change-event width]}]
+    (fn [& {:keys [text excerpt on-change width]}]
       (let [start @(rf/subscribe [::excerpt-start])
             tdat (excerpts/create-textdata text)
             location [::excerpt-suggester]]
@@ -93,7 +95,7 @@
            :on-select #(rf/dispatch [::set-excerpt-start-or-end
                                      :tdat tdat
                                      :item %1
-                                     :event on-change-event])
+                                     :endpoint on-change])
            :render-suggestion #(render-suggestion tdat %1)]]]))))
 
 
