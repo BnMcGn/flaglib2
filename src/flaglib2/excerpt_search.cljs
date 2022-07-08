@@ -61,10 +61,10 @@
 
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
- [misc/call]
+ [misc/call-something]
  (fn [{:keys [db]} [_ & {:keys [tdat item endpoint]}]]
    (if-let [start? (::excerpt-start db)]
-     {:call [call (excerpts/start-end->excerpt-offset tdat start? item)]}
+     {:call-something [endpoint (excerpts/start-end->excerpt-offset tdat start? item)]}
      {:fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
 
 ;;FIXME: need to handle existing excerpt/offset
@@ -90,12 +90,12 @@
                   ;;FIXME:
                   ;;:on-blur ???
                   }]
-          [suggester/suggester
+          (suggester/suggester
            :location location
            :on-select #(rf/dispatch [::set-excerpt-start-or-end
                                      :tdat tdat
                                      :item %1
                                      :endpoint on-change])
-           :render-suggestion #(render-suggestion tdat %1)]]]))))
+           :render-suggestion #(render-suggestion tdat %1))]]))))
 
 

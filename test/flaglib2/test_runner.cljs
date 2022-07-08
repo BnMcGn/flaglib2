@@ -4,6 +4,8 @@
    ;; require all the namespaces that you want to test
    [flaglib2.core-test]
    [flaglib2.excerpts-test]
+   [flaglib2.excerpt-search-test]
+
    [figwheel.main.testing :refer [run-tests-async]]))
 
 (defn -main [& args]

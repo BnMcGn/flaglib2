@@ -70,15 +70,16 @@
 
 ;;Designed to handle callbacks passed in to a re-frame component.
 ;; Callback can be either a function or a re-frame event.
-(defn call []
+(def call-something
   (rf/->interceptor
-   :id :call
+   :id :call-something
    :after
    (fn [context]
-     (if-let [call-info (:call context)]
+     (if-let [call-info (get-in context [:effects :call-something])]
        (let [callable (first call-info)]
-         (if (ifn? callable)
-           (apply callable (rest call-info))
-           (rf/dispatch call-info)))
+         (do (if (ifn? callable)
+               (apply callable (rest call-info))
+               (rf/dispatch call-info))
+             context))
        context))))
 
