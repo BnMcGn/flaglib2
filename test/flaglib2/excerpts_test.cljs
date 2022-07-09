@@ -32,7 +32,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "light the")
         res (nth starts 0)]
     (is (= 2 (count starts)))
-    (is (every? (partial = 4) (map :remaining starts)))
+    (is (every? (partial = 3) (map :remaining starts)))
     (is (= 241 (:start-index res)))
     (is (= 246 (:end-index res)))))
 
@@ -46,6 +46,13 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 (deftest gapped-search-with-short-start
   (let [start {:remaining 4 :start-index 241 :end-index 243}
         [starts ends] (excerpts/excerpt-possibilities tdat1 "light the" start)]
+    (is (= 1 (count starts)))
+    (is (= 2 (count ends)))
+    (is (every? (partial = 0) (map :remaining ends)))))
+
+(deftest unspaced-gapped-search-with-short-start
+  (let [start {:remaining 4 :start-index 241 :end-index 243}
+        [starts ends] (excerpts/excerpt-possibilities tdat1 "lightthe" start)]
     (is (= 1 (count starts)))
     (is (= 2 (count ends)))
     (is (every? (partial = 0) (map :remaining ends)))))

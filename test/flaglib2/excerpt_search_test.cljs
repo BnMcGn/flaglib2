@@ -21,14 +21,25 @@
        :text text
        :on-change (fn [res] (reset! result res)))
       :text text)
-     (println @re-frame.db/app-db)
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
-     (println (rf/subscribe [:flaglib2.suggester/suggester location]))
-     (rf/dispatch [:flaglib2.suggester/select location 0])
-     (println (rf/subscribe [:flaglib2.excerpt-search/excerpt-start]))
+     (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
+           suggests (:suggestions state)]
+       (is (= 2 (count suggests)))
+       (println suggests)
+       (when (= 2 (count suggests))
+         (rf/dispatch [:flaglib2.suggester/select location 0])))
+     (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
+       (is (= 0 (:remaining start)))
+       (is (= 7 (:start-index start)))
+       (is (= 12 (:end-index start))))
 
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see ityou can" tdat])
-     (rf/dispatch [:flaglib2.suggester/select location 0])
+     (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
+           suggests (:suggestions state)]
+       (is (= 2 (count suggests)))
+       (println suggests)
+       (when (= 2 (count suggests))
+         (rf/dispatch [:flaglib2.suggester/select location 0])))
      (println @result)
      (is (not @result))
      )))

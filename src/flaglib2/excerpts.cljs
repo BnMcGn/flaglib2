@@ -57,7 +57,7 @@
               (if (or (zero? ewhite) (zero? twhite))
                 (if (zero? eind)
                   false
-                  {:remaining (+ 1 (- elen eind)) :end-index (- tind 1)})
+                  {:remaining (- elen eind) :end-index (- tind 1)})
                 (recur (+ tind twhite) (+ eind ewhite))))))))))
 
 (defn excerpt-here? [tdat excerpt index]
