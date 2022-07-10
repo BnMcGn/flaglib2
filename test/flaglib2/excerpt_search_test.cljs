@@ -12,20 +12,20 @@
 
 (deftest basic-excerpt-search
   (rf-test/run-test-sync
-   (println "in basic-excerpt-search test")
    (let [result (atom nil)
          tdat (excerpt/create-textdata text)
          ;;FIXME: uses internal knowledge. Probably shouldn't.
+         
          location [:flaglib2.excerpt-search/excerpt-suggester]]
      ((es/excerpt-search
-       :text text
-       :on-change (fn [res] (reset! result res)))
-      :text text)
+       :text text)
+      :text text
+      :on-change (fn [res] (reset! result res)))
+
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
            suggests (:suggestions state)]
        (is (= 2 (count suggests)))
-       (println suggests)
        (when (= 2 (count suggests))
          (rf/dispatch [:flaglib2.suggester/select location 0])))
      (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
@@ -37,9 +37,11 @@
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
            suggests (:suggestions state)]
        (is (= 2 (count suggests)))
-       (println suggests)
        (when (= 2 (count suggests))
          (rf/dispatch [:flaglib2.suggester/select location 0])))
-     (println @result)
-     (is (not @result))
+
+     (let [[excerpt offset] @result]
+       (is (string? excerpt))
+       (is (= 0 offset))
+       (is (= 220 (count excerpt))))
      )))

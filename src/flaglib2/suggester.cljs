@@ -61,12 +61,6 @@
  (fn [db [_ location index]]
    (update-in db location #(assoc %1 :suggestion-active-index index))))
 
-(rf/reg-fx
- ::call-on-select
- (fn [[func selection]]
-   (when func
-     (func selection))))
-
 (rf/reg-event-fx
  ::on-select
  [misc/call-something]
