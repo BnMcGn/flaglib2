@@ -8,7 +8,8 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.773"]
-                 [reagent "0.10.0" ]
+                 [cljsjs/react "17.0.2-0"]
+                 [reagent "1.1.1"]
                  [re-frame "1.3.0-rc3"]
                  [day8.re-frame/http-fx "0.2.4"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
