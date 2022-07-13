@@ -90,12 +90,12 @@
                   ;;FIXME:
                   ;;:on-blur ???
                   }]
-          (suggester/suggester
+          [suggester/suggester
            :location location
            :on-select #(rf/dispatch [::set-excerpt-start-or-end
                                      :tdat tdat
                                      :item %1
                                      :endpoint on-change])
-           :render-suggestion #(render-suggestion tdat %1))]]))))
+           :render-suggestion #(render-suggestion tdat %1)]]]))))
 
 

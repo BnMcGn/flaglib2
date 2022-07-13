@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.773"]
                  [cljsjs/react "17.0.2-0"]
+                 [cljsjs/react-dom "17.0.2-0"]
                  [reagent "1.1.1"]
                  [re-frame "1.3.0-rc3"]
                  [day8.re-frame/http-fx "0.2.4"]
@@ -37,7 +38,7 @@
   ;;Utterly ignorant so far
   :tailwind {:tailwind-dir "src/css/tailwind"
             :output-dir   "src/css"
-            :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value 
+            :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value
             :styles [{:src "main.css"
                       :dst "main.css"}]})
 

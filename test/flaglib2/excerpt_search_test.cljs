@@ -4,6 +4,8 @@
      [day8.re-frame.test :as rf-test]
      [flaglib2.excerpt-search :as es]
      [flaglib2.excerpts :as excerpt]
+
+     [reagent.dom :as rdom]
      [re-frame.core :as rf]
      ))
 
@@ -14,10 +16,15 @@
   (rf-test/run-test-sync
    (let [result (atom nil)
          tdat (excerpt/create-textdata text)
+         el (js/document.createElement "div")
          ;;FIXME: uses internal knowledge. Probably shouldn't.
-         
          location [:flaglib2.excerpt-search/excerpt-suggester]]
-     ((es/excerpt-search
+     (rdom/render
+      [es/excerpt-search
+       :text text
+       :on-change (fn [res] (reset! result res))]
+      el)
+     #_((es/excerpt-search
        :text text)
       :text text
       :on-change (fn [res] (reset! result res)))

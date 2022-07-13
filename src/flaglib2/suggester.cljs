@@ -133,7 +133,7 @@
   (let [loc location]
     (rf/dispatch-sync [::initialize-suggester loc state])
     (fn [state]
-      (suggester-component loc state))))
+      [suggester-component loc state])))
 
 ;;FIXME: is with-let broken?
 (defn suggesterx
