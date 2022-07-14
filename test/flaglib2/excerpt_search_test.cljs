@@ -70,13 +70,11 @@
 
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
      (suggest/suggester-keydown-handler! location (fake-key-event keycodes.DOWN))
+     (suggest/suggester-keydown-handler! location (fake-key-event keycodes.DOWN))
      (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
 
      (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
-       (println "in keyboard select start")
-       (println start)
-       ;(is (= 0 (:remaining start)))
-       ;(is (= 7 (:start-index start)))
-       ;(is (= 12 (:end-index start)))
-       (is true)))))
+       (is (= 0 (:remaining start)))
+       (is (= 229 (:start-index start)))
+       (is (= 234 (:end-index start)))))))
 

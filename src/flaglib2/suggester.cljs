@@ -62,6 +62,11 @@
    (update-in db location #(assoc %1 :suggestion-active-index index))))
 
 (rf/reg-event-fx
+ ::choose-suggestion-active
+ (fn [{:keys [db]} [_ location]]
+   {:fx [[:dispatch [::select location (get (get-in db location) :suggestion-active-index)]]]}))
+
+(rf/reg-event-fx
  ::on-select
  [misc/call-something]
  (fn [{:keys [db]} [_ location selection]]
