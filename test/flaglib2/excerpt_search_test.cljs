@@ -4,6 +4,8 @@
      [day8.re-frame.test :as rf-test]
      [flaglib2.excerpt-search :as es]
      [flaglib2.excerpts :as excerpt]
+     [flaglib2.suggester :as suggest]
+     [goog.events.KeyCodes]
 
      [reagent.dom :as rdom]
      [re-frame.core :as rf]
@@ -24,10 +26,6 @@
        :text text
        :on-change (fn [res] (reset! result res))]
       el)
-     #_((es/excerpt-search
-       :text text)
-      :text text
-      :on-change (fn [res] (reset! result res)))
 
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
@@ -52,3 +50,33 @@
        (is (= 0 offset))
        (is (= 220 (count excerpt))))
      )))
+
+(defn fake-key-event [keycode]
+  (let [res js/Object.]
+    (set! (.-which res) keycode)
+    res))
+
+(def keycodes goog.events.KeyCodes)
+
+(deftest keyboard-select-start
+  (rf-test/run-test-sync
+   (let [tdat (excerpt/create-textdata text)
+         el (js/document.createElement "div")
+         location [:flaglib2.excerpt-search/excerpt-suggester]]
+     (rdom/render
+      [es/excerpt-search
+       :text text]
+      el)
+
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
+     (suggest/suggester-keydown-handler! location (fake-key-event keycodes.DOWN))
+     (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
+
+     (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
+       (println "in keyboard select start")
+       (println start)
+       ;(is (= 0 (:remaining start)))
+       ;(is (= 7 (:start-index start)))
+       ;(is (= 12 (:end-index start)))
+       (is true)))))
+
