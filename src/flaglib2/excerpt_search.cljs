@@ -67,13 +67,19 @@
      {:call-something [endpoint (excerpts/start-end->excerpt-offset tdat start? item)]}
      {:fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
 
+(rf/reg-event-db
+ ::init-excerpt-offset
+ (fn [db [_ tdat excerpt offset]]
+   (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))))
+
 ;;FIXME: need to handle existing excerpt/offset
-(defn excerpt-search [& {:as init}]
+(defn excerpt-search [& {:as init :keys [excerpt offset]}]
   "on-change can be an event or a function"
-  (let [model (reagent/atom nil)]
-    (fn [& {:keys [text excerpt on-change width]}]
+  (let [model (reagent/atom (when (not-empty excerpt) excerpt))
+        tdat (excerpts/create-textdata text)]
+    (rf/dispatch-sync [::init-excerpt-offset tdat excerpt offset])
+    (fn [& {:keys [text on-change width]}]
       (let [start @(rf/subscribe [::excerpt-start])
-            tdat (excerpts/create-textdata text)
             location [::excerpt-suggester]]
         [rc/v-box
          :class "rc-typeahead"
