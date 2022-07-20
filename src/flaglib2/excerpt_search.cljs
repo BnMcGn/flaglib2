@@ -73,7 +73,7 @@
    (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))))
 
 ;;FIXME: need to handle existing excerpt/offset
-(defn excerpt-search [& {:as init :keys [excerpt offset]}]
+(defn excerpt-search [& {:as init :keys [excerpt offset text]}]
   "on-change can be an event or a function"
   (let [model (reagent/atom (when (not-empty excerpt) excerpt))
         tdat (excerpts/create-textdata text)]

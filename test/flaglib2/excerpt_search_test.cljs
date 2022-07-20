@@ -78,3 +78,19 @@
        (is (= 229 (:start-index start)))
        (is (= 234 (:end-index start)))))))
 
+(deftest set-excerpt-offset
+  (rf-test/run-test-sync
+   (let [tdat (excerpt/create-textdata text)
+         el (js/document.createElement "div")
+         location [:flaglib2.excerpt-search/excerpt-suggester]]
+     (rdom/render
+      [es/excerpt-search
+       :text text
+       :excerpt "see it"
+       :offset 1]
+      el)
+
+     (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
+       (is (= 0 (:remaining start)))
+       (is (= 229 (:start-index start)))
+       (is (= 234 (:end-index start)))))))
