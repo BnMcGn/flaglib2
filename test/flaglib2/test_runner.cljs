@@ -6,7 +6,8 @@
    [flaglib2.excerpts-test]
    [flaglib2.excerpt-search-test]
 
-   [figwheel.main.testing :refer [run-tests-async]]))
+   [figwheel.main.testing :refer [run-tests-async]]
+   [cljs-test-display.core]))
 
 (defn -main [& args]
-  (run-tests-async 5000))
+  (run-tests-async 5000 (cljs-test-display.core/init!)))
