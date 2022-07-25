@@ -70,7 +70,9 @@
 (rf/reg-event-db
  ::init-excerpt-offset
  (fn [db [_ tdat excerpt offset]]
-   (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))))
+   (if (not-empty excerpt)
+     (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))
+     db)))
 
 ;;FIXME: need to handle existing excerpt/offset
 (defn excerpt-search [& {:as init :keys [excerpt offset text]}]

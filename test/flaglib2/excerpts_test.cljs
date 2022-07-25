@@ -14,7 +14,14 @@ In him was life; and the life was the light of men.
 And the light shineth in darkness; and the darkness comprehended it not.")
 (def tdat1 (excerpts/create-textdata text1))
 
+(deftest find-excerpt-position
+  (let [[start plus] (excerpts/find-excerpt-position tdat1 "the beginning" :offset 1)]
+    (is (= 12 plus))
+    (is (= 96 start))))
 
+(deftest find-excerpt-position-bad-offset
+  (let [result (excerpts/find-excerpt-position tdat1 "the beginning" :offset 2)]
+    (is (not result))))
 
 (deftest short-search
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "the")]

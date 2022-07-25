@@ -73,7 +73,7 @@
     (loop [i (range (count (:text tdat)))
            offset offset]
       (let [loc (excerpt-here? tdat exdat (first i))]
-        (when i
+        (when (not-empty i)
           (if (integer? loc)
             (if (< 0 offset)
               (recur (rest i) (- offset 1))
@@ -225,6 +225,6 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 (defn excerpt-offset->start [tdat excerpt offset]
   (let [res (find-excerpt-position tdat excerpt :offset offset)]
     (when res
-      {:start-index (res 0) :end-index (res 1) :remaining 0})))
+      {:start-index (res 0) :end-index (+ (res 0) (res 1)) :remaining 0})))
 
 
