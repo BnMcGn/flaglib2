@@ -29,23 +29,31 @@
 
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
-           suggests (:suggestions state)]
+           suggests (:suggestions state)
+           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
+       (is (= :unstarted status))
        (is (= 2 (count suggests)))
        (when (= 2 (count suggests))
          (rf/dispatch [:flaglib2.suggester/select location 0])))
-     (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])]
+     (let [start @(rf/subscribe [:flaglib2.excerpt-search/excerpt-start])
+           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
+       (is (= :complete status))
        (is (= 0 (:remaining start)))
        (is (= 7 (:start-index start)))
        (is (= 12 (:end-index start))))
 
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see ityou can" tdat])
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
-           suggests (:suggestions state)]
+           suggests (:suggestions state)
+           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
+       (is (= :started status))
        (is (= 2 (count suggests)))
        (when (= 2 (count suggests))
          (rf/dispatch [:flaglib2.suggester/select location 0])))
 
-     (let [[excerpt offset] @result]
+     (let [[excerpt offset] @result
+           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
+       (is (= :complete status))
        (is (string? excerpt))
        (is (= 0 offset))
        (is (= 220 (count excerpt))))
