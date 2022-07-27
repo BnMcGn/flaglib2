@@ -307,7 +307,8 @@
     :buttons ""}
    {:id :excerpt
     :page [excerpt-page]
-    :label [excerpt-summary]}
+    :label [excerpt-summary]
+    :buttons [xsearch/excerpt-search-buttons]}
    {:id :reference}
    {:id :opine
     :label [opine]

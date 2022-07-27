@@ -8,10 +8,10 @@
    [flaglib2.suggester :as suggester]
    [flaglib2.excerpts :as excerpts]))
 
-;;FIXME: remove unused
-;;(rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
+(rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
-;;(rf/reg-sub ::suggestions :-> ::suggestions)
+(rf/reg-sub ::suggestions :-> ::suggestions)
+(rf/reg-sub ::debouncing :-> ::debouncing)
 
 (rf/reg-event-fx
  ::excerpt-start-selected
@@ -39,6 +39,52 @@
      (assoc-in
       (assoc db ::raw-excerpt-search search ::excerpt-start xstart)
       [::excerpt-suggester :suggestions] suggests))))
+
+(rf/reg-event-fx
+ ::debounced-do-search
+ (fn [{:keys [db]} [_ search tdat]]
+   (if (::debouncing db)
+     {:db (assoc db ::current-search [search tdat])}
+     {:db (assoc db ::current-search [search tdat] ::debouncing true)
+      :fx [ [:dispatch-later {:ms 500 :dispatch [::complete-do-search]}]]})))
+
+(rf/reg-event-fx
+ ::complete-do-search
+ (fn [{:keys [db]} _]
+   (let [curr (::current-search db)]
+     {:db (assoc db ::debouncing false)
+      :fx [ [:dispatch (into [] (flatten [::do-search curr]))]]})))
+
+(rf/reg-sub
+ ::excerpt-search-status
+ :<- [::raw-excerpt-search]
+ :<- [::excerpt-start]
+ :<- [::suggestions]
+ :<- [::debouncing]
+ (fn [[raw-search start suggestions debouncing] _]
+   (if (empty raw-search)
+     :empty
+     (if start
+       (cond
+         (empty? suggestions)
+         (if (= 0 (:remaining start))
+           :complete
+           :failed)
+         (= 1 (count suggestions))
+         :complete
+         :else
+         :started)
+       (cond
+         (empty? suggestions)
+         (if debouncing
+           :unstarted
+           :failed)
+         (= 1 (count suggestions))
+         (if (= 0 (:remaining (nth suggestions 0)))
+           :complete
+           :unstarted)
+         :else
+         :unstarted)))))
 
 (defn render-start-suggestion [tdat start]
   (let [text (excerpts/clean-string-for-excerpt
@@ -74,6 +120,8 @@
      (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))
      db)))
 
+
+
 ;;FIXME: need to handle existing excerpt/offset
 (defn excerpt-search [& {:as init :keys [excerpt offset text]}]
   "on-change can be an event or a function"
@@ -91,7 +139,7 @@
            :model model
            :on-change (fn [itm]
                         (reset! model itm)
-                        (rf/dispatch [::do-search itm tdat]))
+                        (rf/dispatch [::debounced-do-search itm tdat]))
            :change-on-blur? false
            :attr {:on-key-down (partial suggester/suggester-keydown-handler! location)
                   :on-focus #()
@@ -106,4 +154,18 @@
                                      :endpoint on-change])
            :render-suggestion #(render-suggestion tdat %1)]]]))))
 
+;;FIXME: Next few items might do better in a higher level file. Refers to stepper
+(rf/reg-event-fx
+ ::accept-entry
+ (fn [{:keys [db]} _]
+   {:fx [ [:dispatch [:flaglib2.stepper/set-summary :excerpt]]]}))
 
+(defn excerpt-search-buttons []
+  (let [status @(rf/subscribe [::excerpt-search-status])]
+    (case status
+      :empty
+      [[rc/button :label "Accept" :disabled? true]]
+      :complete
+      [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
+      (:started :unstarted :failed)
+      [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry])]])))

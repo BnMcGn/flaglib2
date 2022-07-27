@@ -19,7 +19,7 @@
 ;; :label - summary depiction of step when completed. Can be a string or hiccup.
 ;; :every - an event to fire whenever the step is activated
 ;; :once - an event that gets run on first load of the step
-;; :next, :previous - optional id of where the Next/Previous buttons should jump when 
+;; :next, :previous - optional id of where the Next/Previous buttons should jump when activated.
 (defn find-active-step [steps]
   (first
    (for [[k settings] steps
