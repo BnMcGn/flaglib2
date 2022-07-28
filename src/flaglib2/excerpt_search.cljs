@@ -10,7 +10,7 @@
 
 (rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
-(rf/reg-sub ::suggestions :-> ::suggestions)
+(rf/reg-sub ::suggestions :-> (fn [db] (get-in db [::excerpt-suggester :suggestions])))
 (rf/reg-sub ::debouncing :-> ::debouncing)
 
 (rf/reg-event-fx
@@ -73,6 +73,9 @@
          (= 1 (count suggestions))
          :complete
          :else
+         ;;FIXME: Excerpt-search module does not track selection of end, only calling the
+         ;; externally supplied callback. So might be :complete instead of :started but
+         ;; we can't tell from here. May need to rework if this turns out to be a problem.
          :started)
        (cond
          (empty? suggestions)
