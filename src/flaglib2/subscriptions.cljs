@@ -49,7 +49,9 @@
 (rf/reg-sub
  :warstats-store
  (fn [db [_ key]]
-   (get-in db [:warstats-store key])))
+   (if key
+     (get-in db [:warstats-store key])
+     (:warstats-store db))))
 
 (rf/reg-sub
  :text-store

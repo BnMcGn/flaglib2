@@ -98,6 +98,12 @@
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
 
+(defn rebreak [text]
+  (butlast
+   (reduce
+    into
+    (map (fn [tx] [tx [:br]]) (string/split-lines text)))))
+
 (defn clean-string-for-excerpt [the-string]
   (loop [res nil
          last-was-white false

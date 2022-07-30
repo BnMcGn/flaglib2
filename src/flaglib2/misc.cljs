@@ -54,7 +54,13 @@
   (do (println itm)
       itm))
 
+(defn relative-to-range [start end num]
+  "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
+  (/ (- num start) (- end start)))
 
+(defn as-in-range [start end num]
+  "Complement of relative-to-range function. Treats num as if it were a fraction of the range specified by start and end. Returns the absolute number that results."
+  (+ start (* num (- end start))))
 
 (defn reformat-urls-lists [lists]
   (for [l lists
