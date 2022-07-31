@@ -140,15 +140,3 @@
     (fn [state]
       [suggester-component loc state])))
 
-;;FIXME: is with-let broken?
-(defn suggesterx
-  [& {:as state :keys [location]}]
-  (reagent/with-let
-    [loc (or location [::suggesters (keyword *ns* (gensym "suggester"))])]
-    (rf/dispatch-sync [::initialize-suggester loc state])
-    (suggester-component loc state)
-    'reagent/finally
-    (when-not location
-      (rf/dispatch [::delete-suggester loc]))))
-
-
