@@ -237,13 +237,6 @@
      [:span (:description (get flag flags/flags))]]))
 
 (rf/reg-event-db
- ::set-excerpt-start
- (fn [db [_ start]]
-   (if (or (nil? start) (map? start))
-     (assoc db ::excerpt-start start)
-     db)))
-
-(rf/reg-event-db
  ::set-excerpt
  (fn [db [_ [excerpt offset]]]
    (assoc db ::excerpt [excerpt offset])))

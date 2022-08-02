@@ -56,10 +56,17 @@
  (fn [db [_ location]]
    (update-in db location activate-suggestion-prev)))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::activate-suggestion-by-index
- (fn [db [_ location index]]
-   (update-in db location #(assoc %1 :suggestion-active-index index))))
+ [misc/call-something]
+ (fn [{:keys [db]} [_ location selection]]
+   (let [newdb (update-in db location #(assoc %1 :suggestion-active-index selection))
+         state (get-in db location)
+         endpoint (:on-activate state)]
+     (if endpoint
+       {:call-something [endpoint (:suggestions state) selection]
+        :db newdb}
+       {:db newdb}))))
 
 (rf/reg-event-fx
  ::choose-suggestion-active

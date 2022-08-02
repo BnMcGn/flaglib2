@@ -102,8 +102,9 @@
               (subs (:text tdat) (:start-index start) (inc (:end-index end))))]
     [:span (str (count text) " chars:" text)]))
 
-(defn render-suggestion [tdat item]
-  (let [start @(rf/subscribe [::excerpt-start])]
+(defn render-suggestion [item]
+  (let [start @(rf/subscribe [::excerpt-start])
+        tdat @(rf/subscribe [::tdat])]
     (if start
       (render-end-suggestion tdat start item)
       (render-start-suggestion tdat item))))
@@ -111,21 +112,23 @@
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
  [misc/call-something]
- (fn [{:keys [db]} [_ & {:keys [tdat item endpoint]}]]
+ (fn [{:keys [db]} [_ & {:keys [item endpoint]}]]
    (if-let [start? (::excerpt-start db)]
-     {:call-something [endpoint (excerpts/start-end->excerpt-offset tdat start? item)]}
-     {:fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
+     {:db (assoc db ::excerpt-end item)
+      :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]}
+     {:db (assoc db ::excerpt-end nil)
+      :fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
 
 (rf/reg-event-db
  ::init-excerpt-offset
  (fn [db [_ tdat excerpt offset]]
-   (if (not-empty excerpt)
-     (assoc db ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))
-     db)))
+   (let [newdb (assoc db ::tdat tdat)]
+     (if (not-empty excerpt)
+       (assoc newdb ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))
+       newdb))))
 
 
-
-;;FIXME: need to handle existing excerpt/offset
+;;FIXME: Don't have a way to input offset in case of unmatched excerpt
 (defn excerpt-search [& {:as init :keys [excerpt offset text]}]
   "on-change can be an event or a function"
   (let [model (reagent/atom (when (not-empty excerpt) excerpt))
@@ -152,10 +155,9 @@
           [suggester/suggester
            :location location
            :on-select #(rf/dispatch [::set-excerpt-start-or-end
-                                     :tdat tdat
                                      :item %1
                                      :endpoint on-change])
-           :render-suggestion #(render-suggestion tdat %1)]]]))))
+           :render-suggestion #(render-suggestion %1)]]]))))
 
 ;;FIXME: Next few items might do better in a higher level file. Refers to stepper
 (rf/reg-event-fx
@@ -172,3 +174,19 @@
       [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
       (:started :unstarted :failed)
       [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry])]])))
+
+(rf/reg-sub
+ ::active-excerpt
+ :<- [::excerpt-start]
+ :<- [::excerpt-end]
+ :<- [::tdat]
+ (fn [[start end tdat] _]
+   (if start
+     (excerpts/start-end->excerpt-offset tdat start end)
+     [nil nil])))
+
+(defn excerpt-search-context []
+  (let [status @(rf/subscribe [::excerpt-search-status])
+        text @(rf/subscribe [:flaglib2.fabricate/active-text])
+        [excerpt offset] @(rf/subscribe [::active-excerpt])]
+    ))
