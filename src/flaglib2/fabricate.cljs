@@ -249,7 +249,8 @@
       :text text
       :excerpt excerpt
       :offset offset
-      :on-change ::set-excerpt]]))
+      :on-change ::set-excerpt]
+     [xsearch/excerpt-search-context]]))
 
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])

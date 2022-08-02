@@ -98,6 +98,10 @@
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
 
+(defn excerpt-context2 [tdat excerpt offset]
+  (let [[p1 p2] (find-excerpt-position tdat excerpt :offset offset)]
+    (excerpt-context (:text tdat) p1 p2)))
+
 (defn rebreak [text]
   (butlast
    (reduce

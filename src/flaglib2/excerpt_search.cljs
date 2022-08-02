@@ -6,7 +6,8 @@
    
    [flaglib2.misc :as misc]
    [flaglib2.suggester :as suggester]
-   [flaglib2.excerpts :as excerpts]))
+   [flaglib2.excerpts :as excerpts]
+   [flaglib2.displayables :as disps]))
 
 (rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
@@ -187,6 +188,16 @@
 
 (defn excerpt-search-context []
   (let [status @(rf/subscribe [::excerpt-search-status])
-        text @(rf/subscribe [:flaglib2.fabricate/active-text])
+        tdat @(rf/subscribe [::tdat])
         [excerpt offset] @(rf/subscribe [::active-excerpt])]
-    ))
+    (case status
+      :empty
+      ""
+      :failed
+      [disps/thread-excerpt-display :excerpt excerpt]
+      (:started :unstarted :complete)
+      (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
+        [disps/thread-excerpt-display
+         :excerpt excerpt
+         :leading-context leading
+         :trailing-context trailing]))))
