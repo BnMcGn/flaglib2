@@ -53,12 +53,15 @@
          (rf/dispatch [:flaglib2.suggester/select location 0])))
 
      (let [[excerpt offset] @result
-           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
+           status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])
+           [ex2 off2] @(rf/subscribe [:flaglib2.excerpt-search/active-excerpt])]
        (is (= :started status)) ;;Should be :complete. see note at ::excerpt-search-status
        (is (string? excerpt))
        (is (= 0 offset))
-       (is (= 221 (count excerpt))))
-     )))
+       (is (= 221 (count excerpt)))
+       (is (= 0 off2))
+       (is (= "s" (first ex2)))
+       (is (= "n" (last ex2)))))))
 
 (defn fake-key-event [keycode]
   (let [res js/Object.]
