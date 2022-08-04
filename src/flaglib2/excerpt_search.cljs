@@ -11,8 +11,10 @@
 
 (rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
+(rf/reg-sub ::excerpt-end :-> ::excerpt-end)
 (rf/reg-sub ::suggestions :-> (fn [db] (get-in db [::excerpt-suggester :suggestions])))
 (rf/reg-sub ::debouncing :-> ::debouncing)
+(rf/reg-sub ::tdat :-> ::tdat)
 
 (rf/reg-event-fx
  ::excerpt-start-selected
@@ -189,15 +191,16 @@
 (defn excerpt-search-context []
   (let [status @(rf/subscribe [::excerpt-search-status])
         tdat @(rf/subscribe [::tdat])
-        [excerpt offset] @(rf/subscribe [::active-excerpt])]
-    (case status
-      :empty
-      ""
-      :failed
-      [disps/thread-excerpt-display :excerpt excerpt]
-      (:started :unstarted :complete)
-      (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
-        [disps/thread-excerpt-display
-         :excerpt excerpt
-         :leading-context leading
-         :trailing-context trailing]))))
+        [excerpt offset] (or @(rf/subscribe [::active-excerpt]) [nil nil])]
+    (when excerpt
+      (case status
+       :empty
+       ""
+       :failed
+       [disps/thread-excerpt-display :excerpt excerpt]
+       (:started :unstarted :complete)
+       (let [{:keys [leading trailing]} (misc/say (excerpts/excerpt-context2 tdat excerpt offset))]
+         [disps/thread-excerpt-display
+          :excerpt excerpt
+          :leading-context leading
+          :trailing-context trailing])))))

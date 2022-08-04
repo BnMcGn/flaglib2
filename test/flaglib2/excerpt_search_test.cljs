@@ -57,7 +57,7 @@
        (is (= :started status)) ;;Should be :complete. see note at ::excerpt-search-status
        (is (string? excerpt))
        (is (= 0 offset))
-       (is (= 220 (count excerpt))))
+       (is (= 221 (count excerpt))))
      )))
 
 (defn fake-key-event [keycode]

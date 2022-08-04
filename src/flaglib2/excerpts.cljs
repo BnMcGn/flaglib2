@@ -100,7 +100,7 @@
 
 (defn excerpt-context2 [tdat excerpt offset]
   (let [[p1 p2] (find-excerpt-position tdat excerpt :offset offset)]
-    (excerpt-context (:text tdat) p1 p2)))
+    (excerpt-context (:text tdat) p1 (inc p2))))
 
 (defn rebreak [text]
   (butlast
@@ -229,7 +229,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 
 (defn start-end->excerpt-offset [tdat start end]
   (let [end-index (if end (:end-index end) (:end-index start))
-        excerpt (subs (:text tdat) (:start-index start) end-index)]
+        excerpt (subs (:text tdat) (:start-index start) (inc end-index))]
     [(clean-string-for-excerpt excerpt)
      (calculate-offset tdat excerpt (:start-index start))]))
 

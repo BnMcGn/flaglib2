@@ -13,13 +13,13 @@
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
   (if (or leading-context trailing-context)
     [:div
-     :class "thread-excerpt"
+     {:class "thread-excerpt"}
      [:span (excerpts/rebreak leading-context)]
-     [:span :class excerpt-class (excerpts/rebreak excerpt)]
+     [:span {:class excerpt-class} (excerpts/rebreak excerpt)]
      [:span (excerpts/rebreak trailing-context)]]
     [:div
-     :class "thread-excerpt thread-excerpt-unfound"
-     [:span :class excerpt-class (excerpts/rebreak excerpt)]]))
+     {:class "thread-excerpt thread-excerpt-unfound"}
+     [:span {:class excerpt-class} (excerpts/rebreak excerpt)]]))
 
 (defn thread-excerpt
   [& {:keys [opinion opinionid text]}]

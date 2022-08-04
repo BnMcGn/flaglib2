@@ -110,6 +110,8 @@
 (defn target-decision []
   (let [selection @(rf/subscribe [::selection])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
+    (println "in target-decision")
+    (println factors)
     (if factors
       (case (:status factors)
         :reviewed ""
@@ -302,7 +304,8 @@
    {:id :excerpt
     :page [excerpt-page]
     :label [excerpt-summary]
-    :buttons [xsearch/excerpt-search-buttons]}
+    ;;:buttons [xsearch/excerpt-search-buttons]
+    }
    {:id :reference}
    {:id :opine
     :label [opine]
