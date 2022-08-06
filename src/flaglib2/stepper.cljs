@@ -44,7 +44,7 @@
    :child
    [:div
     (:page step)
-    [rc/h-box :children [(:buttons step)]]]])
+    (:buttons step)]])
 
 (defn next-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
@@ -68,15 +68,17 @@
                [next-button next])
         previous (when previous
                    [previous-button previous])]
-    (reduce into
-            [[]
-             (when previous
-               [previous [rc/gap :size "3em"]])
-             buttons
-             (when next
-               (if buttons
-                 [[rc/gap :size "3em"] next]
-                 [next]))])))
+    [rc/h-box
+     :children
+     (reduce into
+             [[]
+              (when previous
+                [previous [rc/gap :size "3em"]])
+              buttons
+              (when next
+                (if buttons
+                  [[rc/gap :size "3em"] next]
+                  [next]))])]))
 
 (defn summary-button [id label]
   [rc/button :label label

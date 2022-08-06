@@ -170,13 +170,15 @@
 
 (defn excerpt-search-buttons []
   (let [status @(rf/subscribe [::excerpt-search-status])]
-    (case status
-      :empty
-      [[rc/button :label "Accept" :disabled? true]]
-      :complete
-      [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
-      (:started :unstarted :failed)
-      [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry])]])))
+    (rc/h-box
+     :children
+     (case (or status :empty)
+       :empty
+       [[rc/button :label "Accept" :disabled? true]]
+       :complete
+       [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
+       (:started :unstarted :failed)
+       [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry])]]))))
 
 (rf/reg-sub
  ::active-excerpt

@@ -110,8 +110,6 @@
 (defn target-decision []
   (let [selection @(rf/subscribe [::selection])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
-    (println "in target-decision")
-    (println factors)
     (if factors
       (case (:status factors)
         :reviewed ""
@@ -174,8 +172,7 @@
    (assoc db ::review-text text)))
 
 (defn review-text []
-  (let [
-        text @(rf/subscribe [::review-text])]
+  (let [text @(rf/subscribe [::review-text])]
     [:div
      [:h3 "Review article text for tidyness"]
      [:ul
@@ -300,11 +297,12 @@
    {:id :flag
     :page [flag-page]
     :label [flag-page]
-    :buttons ""}
+    ;:buttons ""
+    }
    {:id :excerpt
     :page [excerpt-page]
     :label [excerpt-summary]
-    ;;:buttons [xsearch/excerpt-search-buttons]
+    :buttons [xsearch/excerpt-search-buttons]
     }
    {:id :reference}
    {:id :opine
@@ -317,7 +315,6 @@
 
 
 ;;Needs to be at bottom of file:
-
 
 (defn make-opinion []
   (let [search @(rf/subscribe [::search])
