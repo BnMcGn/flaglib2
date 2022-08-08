@@ -165,8 +165,17 @@
 ;;FIXME: Next few items might do better in a higher level file. Refers to stepper
 (rf/reg-event-fx
  ::accept-entry
- (fn [{:keys [db]} _]
-   {:fx [ [:dispatch [:flaglib2.stepper/set-summary :excerpt]]]}))
+ (fn [{:keys [db]} _ status]
+   {:db (assoc db :flaglib2.fabricate/excerpt
+               (cond
+                 (= status :failed)
+                 [(::raw-excerpt-search db) nil]
+                 (::excerpt-start db)
+                 (excerpts/start-end->excerpt-offset
+                  (::tdat db) (::excerpt-start db) (::excerpt-end db))
+                 :else
+                 [nil nil]))
+    :fx [ [:dispatch [:flaglib2.stepper/set-summary :excerpt]]]}))
 
 (defn excerpt-search-buttons []
   (let [status @(rf/subscribe [::excerpt-search-status])]
@@ -178,7 +187,7 @@
        :complete
        [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
        (:started :unstarted :failed)
-       [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry])]]))))
+       [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry status])]]))))
 
 (rf/reg-sub
  ::active-excerpt
@@ -201,7 +210,7 @@
        :failed
        [disps/thread-excerpt-display :excerpt excerpt]
        (:started :unstarted :complete)
-       (let [{:keys [leading trailing]} (misc/say (excerpts/excerpt-context2 tdat excerpt offset))]
+       (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
          [disps/thread-excerpt-display
           :excerpt excerpt
           :leading-context leading
