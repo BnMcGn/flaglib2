@@ -5,6 +5,7 @@
    [flaglib2.core-test]
    [flaglib2.excerpts-test]
    [flaglib2.excerpt-search-test]
+   [flaglib2.misc-test]
 
    [figwheel.main.testing :refer [run-tests-async]]
    [cljs-test-display.core]))

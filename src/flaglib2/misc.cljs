@@ -74,6 +74,13 @@
         url (or urls [])]
     url))
 
+(defn context-dispatch-surgery [context dispatch]
+  (update-in
+   context
+   [:effects :fx]
+   (fn [x]
+     (conj (or x []) [:dispatch-n dispatch]))))
+
 ;;Designed to handle callbacks passed in to a re-frame component.
 ;; Callback can be either a function or a re-frame event.
 (def call-something
@@ -85,7 +92,16 @@
        (let [callable (first call-info)]
          (do (if (ifn? callable)
                (apply callable (rest call-info))
-               (rf/dispatch call-info))
-             context))
+               ;(context-dispatch-surgery context call-info)
+               (rf/dispatch call-info)
+               )
+             (update-in context [:effects] dissoc :call-something)))
        context))))
 
+(rf/reg-fx
+ :call-something
+ (fn [call-info]
+   (let [callable (first call-info)]
+     (if (fn? callable)
+       (apply callable (rest call-info))
+       (rf/dispatch call-info)))))
