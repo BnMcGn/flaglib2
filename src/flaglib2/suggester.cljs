@@ -58,7 +58,6 @@
 
 (rf/reg-event-fx
  ::activate-suggestion-by-index
- [misc/call-something]
  (fn [{:keys [db]} [_ location selection]]
    (let [newdb (update-in db location #(assoc %1 :suggestion-active-index selection))
          state (get-in db location)
@@ -75,7 +74,6 @@
 
 (rf/reg-event-fx
  ::on-select
- [misc/call-something]
  (fn [{:keys [db]} [_ location selection]]
    (let [state (get-in db location)
          endpoint (:on-select state)]
@@ -146,4 +144,3 @@
     (rf/dispatch-sync [::initialize-suggester loc state])
     (fn [state]
       [suggester-component loc state])))
-

@@ -114,7 +114,6 @@
 
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
- [misc/call-something]
  (fn [{:keys [db]} [_ & {:keys [item endpoint]}]]
    (if-let [start? (::excerpt-start db)]
      {:db (assoc db ::excerpt-end item)
