@@ -65,7 +65,7 @@
  :<- [::suggestions]
  :<- [::debouncing]
  (fn [[raw-search start suggestions debouncing] _]
-   (if (empty raw-search)
+   (if (empty? raw-search)
      :empty
      (if start
        (cond
