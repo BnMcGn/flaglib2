@@ -114,10 +114,11 @@
 
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
- (fn [{:keys [db]} [_ & {:keys [item endpoint]}]]
+ (fn [{:keys [db]} [_ & {:keys [item endpoint location]}]]
    (if-let [start? (::excerpt-start db)]
      {:db (assoc db ::excerpt-end item)
-      :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]}
+      :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]
+      :fx [[:dispatch [:flaglib2.suggester/reset location]]]}
      {:db (assoc db ::excerpt-end nil)
       :fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
 
@@ -158,6 +159,7 @@
            :location location
            :on-select #(rf/dispatch [::set-excerpt-start-or-end
                                      :item %1
+                                     :location location
                                      :endpoint on-change])
            :render-suggestion #(render-suggestion %1)]]]))))
 
