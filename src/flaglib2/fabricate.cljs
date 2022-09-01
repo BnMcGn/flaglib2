@@ -203,7 +203,7 @@
 
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])
-        text (if (or (not excerpt) (zero? (count excerpt)))
+        text (if (empty? excerpt)
                "[no excerpt]"
                excerpt)]
     [step/summary-button :excerpt text]))
@@ -216,10 +216,9 @@
    :placeholder "Reference URL or search terms"])
 
 (defn specify-reference-summary []
-  (let [selection @(rf/subscribe [:selected-url [::specify-reference]])]
-    [step/summary-button :reference (str "Reference: " selection)]))
-
-
+  (let [selection @(rf/subscribe [:selected-url [::specify-reference]])
+        text (if (empty? selection) "[no reference]" (str "Reference: " selection))]
+    [step/summary-button :reference text]))
 
 
 (rf/reg-event-db
