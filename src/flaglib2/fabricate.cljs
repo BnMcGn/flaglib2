@@ -39,7 +39,7 @@
    :placeholder "Target URL or search terms"])
 
 (defn specify-target-summary []
-  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])]
+  (let [selection @(rf/subscribe [:selected-url [::specify-target]])]
     [step/summary-button :specify-target (str "Target: " selection)]))
 
 
@@ -57,7 +57,7 @@
 
 
 (defn target-decision []
-  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])
+  (let [selection @(rf/subscribe [:selected-url [::specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -90,7 +90,7 @@
 
 
 (defn target-decision-buttons []
-  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])
+  (let [selection @(rf/subscribe [:selected-url [::specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -113,7 +113,8 @@
 (rf/reg-event-db
  ::reset-review-text
  (fn [db _]
-   (assoc db ::review-text (get-in db [:text-store (::selection db) :text]))))
+   (let [target (ug/selected-url-from-db [::specify-target] db)]
+     (assoc db ::review-text (get-in db [:text-store target :text])))))
 
 (rf/reg-event-db
  ::set-review-text
@@ -209,10 +210,14 @@
 
 
 
+(defn specify-reference []
+  [ug/url-search [::specify-reference]
+   ;;FIXME: omit target URL
+   :placeholder "Reference URL or search terms"])
 
 (defn specify-reference-summary []
-  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])]
-    [step/summary-button :specify-target (str "Reference: " selection)]))
+  (let [selection @(rf/subscribe [:selected-url [::specify-reference]])]
+    [step/summary-button :reference (str "Reference: " selection)]))
 
 
 
@@ -264,15 +269,13 @@
     :buttons [xsearch/excerpt-search-buttons]
     }
    {:id :reference
-    ;;:page [specify-reference]
+    :page [specify-reference]
     :label [specify-reference-summary]}
    {:id :opine
     :label [opine]
     :page [opine]
     :once [::opine-initialize]
-    }
-   
-            ])
+    }])
 
 
 ;;Needs to be at bottom of file:
