@@ -21,6 +21,7 @@
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]
+   ;;FIXME: deprecated:
    ::enter-search [::get-stuff-for-selection]})
 
 (rf/reg-event-fx
@@ -256,7 +257,17 @@
         text (if (or (not excerpt) (zero? (count excerpt)))
                "[no excerpt]"
                excerpt)]
-   [step/summary-button :excerpt text]))
+    [step/summary-button :excerpt text]))
+
+
+
+
+(defn specify-reference-summary []
+  (let [selection @(rf/subscribe [::selection])]
+    [step/summary-button :specify-target (str "Reference: " selection)]))
+
+
+
 
 (rf/reg-event-db
  ::set-comment
@@ -304,7 +315,9 @@
     :label [excerpt-summary]
     :buttons [xsearch/excerpt-search-buttons]
     }
-   {:id :reference}
+   {:id :reference
+    :page [specify-reference]
+    :label [specify-reference-summary]}
    {:id :opine
     :label [opine]
     :page [opine]
