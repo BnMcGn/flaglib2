@@ -45,7 +45,7 @@
      (into {}
            [[:db ndb]
             (when disp
-              [:dispatch [disp]])
+              [:dispatch disp])
             (when (and selection onsel)
               [:call-something [onsel selection]])]))))
 
@@ -53,7 +53,7 @@
 (defn suggest-button [location itm]
   [rc/button
    :label itm
-   :on-click (fn [] (rf/dispatch [::select-url location itm]))])
+   :on-click (fn [] (rf/dispatch [::enter-search location itm]))])
 
 (defn display-urls-in-categories [location]
   (let [labels {:rooturls "Previous Targets"
@@ -87,7 +87,7 @@
     (rf/dispatch-sync [::initialize-url-search loc onsel]))
   (fn [location & {:keys [placeholder]}]
     (let [search @(rf/subscribe [::search location])
-          search-res @(rf/subscribe [::search-results location])]
+          search-res @(rf/subscribe [:url-search-results location])]
       [:div
        [rc/input-text
         :placeholder placeholder

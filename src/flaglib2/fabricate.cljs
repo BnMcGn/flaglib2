@@ -16,6 +16,7 @@
    [flaglib2.excerpts :as excerpts]
    [flaglib2.excerpt-search :as xsearch]
    [flaglib2.typeahead :as ta]
+   [flaglib2.urlgrab :as ug]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
@@ -32,67 +33,14 @@
                (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
                :no-text true]}))
 
-(rf/reg-event-db
- ::enter-search
- [fetchers/hook-inserter]
- (fn [db [_ search]]
-   (let [ndb (assoc db ::search search)]
-     (if (misc/url? search)
-       (assoc ndb ::selection search)
-       ndb))))
-
-;;FIXME: will load all of url data. No way to check if we already have it.
-(rf/reg-event-fx
- ::get-stuff-for-selection
- (fn [{:keys [db]} _]
-   {:dispatch [:load-rooturls [(::selection db)]]}))
-
-
-
-(defn suggest-button [itm]
-  [rc/button
-   :label itm
-   :on-click (fn [] (rf/dispatch [::enter-search itm]))])
-
-(defn display-urls-in-categories []
-  (let [labels {:rooturls "Previous Targets"
-                :references "Previous References"
-                :replies "References from replies to your posts"}
-        aurls @(rf/subscribe [:flaglib2.fetchers/author-urls])]
-    [rc/v-box
-     :children
-     (reduce into
-             (for [[cat items] aurls
-                   :when (seq items)]
-               (into [[rc/box :child (or (get labels cat) "")]]
-                     (for [itm items]
-                       [suggest-button itm]))))]))
-
-(defn display-searched-urls []
-  (let [aurls @(rf/subscribe [:url-search-results])]
-    [rc/v-box
-     :children
-     (for [itm aurls]
-       [suggest-button (:url itm)])]))
-
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
-
 (defn specify-target []
-  (let [search @(rf/subscribe [::search])
-        search-res @(rf/subscribe [:url-search-results])]
-    [:div
-     [rc/input-text
-      :placeholder "Target URL or search terms"
-      :model search
-      :on-change (fn [ev] ev (rf/dispatch [::enter-search ev]))]
-     (if search-res
-       [display-searched-urls]
-       [display-urls-in-categories])]))
+  [ug/url-search [::specify-target]
+   :placeholder "Target URL or search terms"])
 
 (defn specify-target-summary []
-  (let [selection @(rf/subscribe [::selection])]
+  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])]
     [step/summary-button :specify-target (str "Target: " selection)]))
-
 
 
 ;;Decisioner: what to do if we don't have text
@@ -109,7 +57,7 @@
 
 
 (defn target-decision []
-  (let [selection @(rf/subscribe [::selection])
+  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -142,7 +90,7 @@
 
 
 (defn target-decision-buttons []
-  (let [selection @(rf/subscribe [::selection])
+  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -263,7 +211,7 @@
 
 
 (defn specify-reference-summary []
-  (let [selection @(rf/subscribe [::selection])]
+  (let [selection @(rf/subscribe [:flaglib2.urlgrab/selection [::specify-target]])]
     [step/summary-button :specify-target (str "Reference: " selection)]))
 
 
@@ -316,7 +264,7 @@
     :buttons [xsearch/excerpt-search-buttons]
     }
    {:id :reference
-    :page [specify-reference]
+    ;;:page [specify-reference]
     :label [specify-reference-summary]}
    {:id :opine
     :label [opine]
@@ -330,8 +278,8 @@
 ;;Needs to be at bottom of file:
 
 (defn make-opinion []
-  (let [search @(rf/subscribe [::search])
-        search-res @(rf/subscribe [:url-search-results])]
+  (let [search @(rf/subscribe [:flaglib2.urlgrab/search [::specify-target]])
+        search-res @(rf/subscribe [:url-search-results [::specify-target]])]
     [step/wf-stepper]))
 
 (rf/reg-event-fx
