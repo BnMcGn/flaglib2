@@ -55,7 +55,7 @@
      (let [[excerpt offset] @result
            status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])
            [ex2 off2] @(rf/subscribe [:flaglib2.excerpt-search/active-excerpt])]
-       (is (= :started status)) ;;Should be :complete. see note at ::excerpt-search-status
+       (is (= :complete status)) 
        (is (string? excerpt))
        (is (= 0 offset))
        (is (= 221 (count excerpt)))
