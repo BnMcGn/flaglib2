@@ -17,13 +17,12 @@
    [flaglib2.excerpt-search :as xsearch]
    [flaglib2.typeahead :as ta]
    [flaglib2.urlgrab :as ug]
+   [flaglib2.posters :as posters]
    [cljsjs.fuse :as fuse]
    [re-com.core :as rc]))
 
 (def fabricate-hooks
-  {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]
-   ;;FIXME: deprecated:
-   ::enter-search [::get-stuff-for-selection]})
+  {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
 
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
@@ -145,6 +144,8 @@
  (fn [db [_ text]]
    ;;FIXME: Perhaps some processing on text?
    (assoc db ::supplied-text text)))
+
+(rf/reg-sub ::supplied-text :-> ::supplied-text)
 
 (defn supply-text []
   [:div
@@ -273,9 +274,26 @@
    {:id :opine
     :label [opine]
     :page [opine]
+    :buttons [posters/opine-buttons]
     :once [::opine-initialize]
     }])
 
+(rf/reg-sub
+ :current-opinion
+ :<- [::flag-or-default]
+ :<- [::excerpt-or-default]
+ :<- [:selected-url [::specify-target]]
+ :<- [:selected-url [::specify-reference]]
+ :<- [::comment]
+ :<- [::supplied-text]
+ (fn [[flag [excerpt offset] target reference comment supplied-text] _]
+   {:opinion {:target target
+              :flag flag
+              :excerpt excerpt
+              :excerpt-offset offset
+              :reference reference
+              :comment comment}
+    :alternate supplied-text}))
 
 ;;Needs to be at bottom of file:
 
