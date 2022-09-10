@@ -13,10 +13,12 @@
 ;;Low level
 (rf/reg-event-fx
  :post-opinion-to-server
- (fn [_ [opinion callback & {:keys [failure]}]]
+ (fn [_ [_ opinion callback & {:keys [failure]}]]
    {:http-xhrio {:method :post
                  :uri "/opinion-post/"
                  :timeout 6000
+                 :params opinion
+                 :format (ajax/url-request-format)
                  :response-format (ajax/json-response-format)
                  :on-success [::posted-opinion-to-server callback]
                  :on-failure [::opinion-post-failed failure]}}))
@@ -24,13 +26,13 @@
 (rf/reg-event-fx
  ::posted-opinion-to-server
  (fn [_ [_ callback response]]
-   {:call-something [callback (walk/keywordize-keys response)]}))
+   {:call-something (conj callback (walk/keywordize-keys response))}))
 
 (rf/reg-event-fx
  ::opinion-post-failed
  (fn [_ [_ callback response]]
    (if callback
-     {:call-something [callback response]}
+     {:call-something (conj callback response)}
      {})))
 
 
@@ -56,6 +58,31 @@
 
 ;;Post tool for fabricate form
 
+(defn opinion-post-status [db]
+  (let [response (::opinion-response db)
+        failure (::opinion-failure db)]
+    (cond
+      failure :failed
+      response
+      (cond
+        (:errors response) :failed
+        (:success response) :posted
+        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
+      :else :unposted)))
+
+(defn alternate-post-status [db]
+  (let [response (::alternate-response db)
+        failure (::alternate-failure db)]
+    (cond
+      failure :failed
+      response
+      (cond
+        (:errors response) :failed
+        (:success response) :posted
+        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
+      :else :unposted)))
+
+
 ;;FIXME: should check for previous failed before posting both opin and alt.
 (rf/reg-event-fx
  :post-opinion
@@ -63,11 +90,12 @@
    (let [{:keys [opinion alternate]} @(rf/subscribe [:current-opinion])
          altop (when (and (string? alternate) (not-empty alternate))
                  (ttify-opinion {:comment alternate} "text" false))]
-     {:fx [(when (and (not (= :posted alternate-post-status db)) altop)
+     {:fx [(when (and (not (= :posted (alternate-post-status db))) altop)
              [:dispatch [:post-opinion-to-server
                          altop [::alternate-response] :failure [::alternate-failure]]])
            (when (not (= :posted (opinion-post-status db)))
-             [:dispatch [:post-opinion-to-server [::opinion-response] :failure [::opinion-failure]]])]})))
+             [:dispatch [:post-opinion-to-server opinion [::opinion-response]
+                         :failure [::opinion-failure]]])]})))
 
 (rf/reg-event-db
  ::opinion-response
@@ -96,18 +124,6 @@
 (rf/reg-sub ::alternate-failure :-> ::alternate-failure)
 (rf/reg-sub ::alternate-response :-> ::alternate-response)
 
-(defn opinion-post-status [db]
-  (let [response (::opinion-response db)
-        failure (::opinion-failure db)]
-    (cond
-      failure :failed
-      response
-      (cond
-        (:errors response) :failed
-        (:success response) :posted
-        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
-      :else :unposted)))
-
 ;;FIXME: may need resets for statuses. Shouldn't be too hard.
 (rf/reg-sub
  :opinion-post-status
@@ -115,17 +131,7 @@
  :<- [::opinion-failure]
  (fn [response failure] (opinion-post-status {::opinion-response response ::opinion-failure failure})))
 
-(defn alternate-post-status [db]
-  (let [response (::alternate-response db)
-        failure (::alternate-failure db)]
-    (cond
-      failure :failed
-      response
-      (cond
-        (:errors response) :failed
-        (:success response) :posted
-        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
-      :else :unposted)))
+
 
 (rf/reg-sub
  :alternate-post-status
@@ -157,5 +163,5 @@
     (rc/h-box
      :children
      (if (some #(= :failed %) [ostatus astatus])
-       [[rc/button :label "Retry" #(rf/dispatch [:post-opinion])]]
-       [[rc/button :label "Post" #(rf/dispatch [:post-opinion])]]))))
+       [[rc/button :label "Retry" :on-click #(rf/dispatch [:post-opinion])]]
+       [[rc/button :label "Post" :on-click #(rf/dispatch [:post-opinion])]]))))
