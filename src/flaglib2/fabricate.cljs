@@ -121,6 +121,7 @@
  (fn [db [_ text]]
    (assoc db ::review-text text)))
 
+;;FIXME: Should also review title?
 (defn review-text []
   (let [text @(rf/subscribe [::review-text])]
     [:div
@@ -136,6 +137,7 @@
       :rows 15
       :on-change (fn [text] (rf/dispatch [::set-review-text text]))]]))
 
+;;FIXME: How do we handle unchanged?
 (defn review-text-buttons []
   (step/stepper-buttons
    :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-review-text])]]))
@@ -230,10 +232,17 @@
 (rf/reg-sub ::comment :-> ::comment)
 
 (defn opine []
-  (let [comment @(rf/subscribe [::comment])]
-    [rc/input-textarea
-     :model ""
-     :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]))
+  (let [comment @(rf/subscribe [::comment])
+        messages @(rf/subscribe [:opinion-post-messages])]
+    [:div
+     [rc/input-textarea
+      :model ""
+      :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]
+     [rc/v-box
+      :children
+      (into []
+            (for [m messages]
+              [:div m]))]]))
 
 (rf/reg-event-fx
  ::opine-initialize

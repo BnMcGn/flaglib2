@@ -162,8 +162,9 @@
  (fn [[response failure] _]
    (alternate-post-status {::alternate-response response ::alternate-failure failure})))
 
+;;FIXME: add indicator of message type.
 (rf/reg-sub
- :opinion-post-error-messages
+ :opinion-post-messages
  :<- [::opinion-response]
  :<- [::opinion-failure]
  :<- [::alternate-response]
@@ -173,12 +174,16 @@
          (flatten
           [(if afail
              [(str "Reviewed text failed to post: " (:status-text afail))]
-             (when-let [errors (:errors aresp)]
-               (map (fn [[k v]] (str k ": " v)) errors)))
+             (if-let [errors (:errors aresp)]
+               (map (fn [[k v]] (str k ": " v)) errors)
+               (when (:success aresp)
+                 ["Reviewed text posted"])))
            (if ofail
              [(str "Opinion failed to post: " (:status-text ofail))]
-             (when-let [errors (:errors oresp)]
-               (map (fn [[k v]] (str k ": " v)) errors)))]))))
+             (if-let [errors (:errors oresp)]
+               (map (fn [[k v]] (str k ": " v)) errors)
+               (when (:success oresp)
+                 ["Opinion posted"])))]))))
 
 (defn opine-buttons []
   (let [ostatus @(rf/subscribe [:opinion-post-status])
