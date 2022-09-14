@@ -32,6 +32,7 @@
                (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
                :no-text true]}))
 
+;;FIXME: Chokes if user fails to select a target
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
   [ug/url-search [::specify-target]

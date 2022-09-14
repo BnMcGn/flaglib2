@@ -9,6 +9,7 @@
    [flaglib2.fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.fabricate :as fab]
+   [flaglib2.posters :as posters]
    [cljs.reader]))
 
 (println "This text is printed from src/flaglib2/core.cljs. Go ahead and edit it and see reloading in action.")
@@ -16,11 +17,13 @@
 (rf/reg-event-db
  :initialize
  (fn [_ _]
-   {:warstats-store {}
-    :opinion-store {}
-    :text-store {}
-    :title-store {}
-    }))
+   (conj
+    {:warstats-store {}
+     :opinion-store {}
+     :text-store {}
+     :title-store {}
+     }
+    (posters/init))))
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []

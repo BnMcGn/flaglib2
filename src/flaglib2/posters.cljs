@@ -7,17 +7,40 @@
    [clojure.string :as string]
    [clojure.walk :as walk]
 
+   [flaglib2.flags :as flags]
    [flaglib2.misc :as misc]))
 
 
+(defn init []
+  {::opinion-response nil
+   ::opinion-failure nil
+   ::alternate-response nil
+   ::alternate-failure nil})
+
+
 ;;Low level
+
+(defn flag->server-style [opinion]
+  (let [flag ((:flag opinion) flags/flags)]
+    (if flag
+      (assoc opinion :flag (str (:category flag) ": " (:label flag)))
+      opinion)))
+
+(defn remove-nulls [thing]
+  (into {}
+        (for [[k v] thing
+              :when v]
+          [k v])))
+
 (rf/reg-event-fx
  :post-opinion-to-server
  (fn [_ [_ opinion callback & {:keys [failure]}]]
    {:http-xhrio {:method :post
                  :uri "/opinion-post/"
                  :timeout 6000
-                 :params opinion
+                 :params (-> opinion
+                             flag->server-style
+                             remove-nulls)
                  :format (ajax/url-request-format)
                  :response-format (ajax/json-response-format)
                  :on-success [::posted-opinion-to-server callback]
@@ -67,7 +90,7 @@
       (cond
         (:errors response) :failed
         (:success response) :posted
-        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
+        :else (throw (js/Error. "Invalid status from server"))) ;;Shouldn't happen
       :else :unposted)))
 
 (defn alternate-post-status [db]
@@ -79,7 +102,7 @@
       (cond
         (:errors response) :failed
         (:success response) :posted
-        :else (js/Error. "Invalid status from server")) ;;Shouldn't happen
+        :else (throw (js/Error. "Invalid status from server"))) ;;Shouldn't happen
       :else :unposted)))
 
 
@@ -129,15 +152,15 @@
  :opinion-post-status
  :<- [::opinion-response]
  :<- [::opinion-failure]
- (fn [response failure] (opinion-post-status {::opinion-response response ::opinion-failure failure})))
-
-
+ (fn [[response failure] _]
+   (opinion-post-status {::opinion-response response ::opinion-failure failure})))
 
 (rf/reg-sub
  :alternate-post-status
  :<- [::alternate-response]
  :<- [::alternate-failure]
- (fn [response failure] (alternate-post-status {::alternate-response response ::alternate-failure failure})))
+ (fn [[response failure] _]
+   (alternate-post-status {::alternate-response response ::alternate-failure failure})))
 
 (rf/reg-sub
  :opinion-post-error-messages
@@ -145,7 +168,7 @@
  :<- [::opinion-failure]
  :<- [::alternate-response]
  :<- [::alternate-failure]
- (fn [oresp ofail aresp afail]
+ (fn [[oresp ofail aresp afail] _]
    (into []
          (flatten
           [(if afail
