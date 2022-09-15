@@ -36,10 +36,9 @@
                    ;; need to add the compiled assets to the :clean-targets
                    :clean-targets ^{:protect false} ["target"]}}
 
-  ;;Utterly ignorant so far
-  :tailwind {:tailwind-dir "src/css/tailwind"
-            :output-dir   "src/css"
+  :tailwind {:tailwind-dir "."
+            :output-dir   "resources/public/css"
             :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value
-            :styles [{:src "main.css"
+            :styles [{:src "style.src.css"
                       :dst "main.css"}]})
 
