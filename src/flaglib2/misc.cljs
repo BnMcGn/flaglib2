@@ -1,6 +1,7 @@
 (ns flaglib2.misc
   (:require
    [cljs-time.format]
+   [reagent.dom.server :refer [render-to-string]]
    [re-frame.registrar]
    [re-frame.core :as rf]
    [clojure.string :as str]))
@@ -54,6 +55,17 @@
   (do (println itm)
       itm))
 
+(defn say-when [cond itm]
+  (do (when cond (println itm))
+      itm))
+
+(defn say-hiccup [itm]
+  (println "SOURCE:")
+  (println itm)
+  (println "HTML:")
+  (println (render-to-string itm))
+  itm)
+
 (defn relative-to-range [start end num]
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
   (/ (- num start) (- end start)))
@@ -81,3 +93,8 @@
      (if (fn? callable)
        (apply callable (rest call-info))
        (rf/dispatch call-info)))))
+
+
+
+
+

@@ -64,7 +64,7 @@
          responses (and warstat (not (zero? (:replies-total warstat))))]
      {:status (cond (and responses have-text) :reviewed
                     have-text :available
-                    ;;FIXME: Not sure that :wait is correct here. Perhaps add an approppriate message
+                    ;;FIXME: Not sure that :wait is correct here. Perhaps add an appropriate message
                     ;; for the NIL circumstance
                     :else (or (walk/keywordize-keys (:status status)) :wait))
       :message (and status (:message status))})))
@@ -76,8 +76,10 @@
    (or
     (:flaglib2.fabricate/supplied-text db)
     (let [target (:flaglib2.fabricate/selection db)]
-      (when target
-        (get-in db [:text-store target :text]))))))
+      (if target
+        (get-in db [:text-store target :text])
+        ;;FIXME: Should lack of text be an error? If so, what to do with it?
+        "")))))
 
 (rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
 (rf/reg-sub
