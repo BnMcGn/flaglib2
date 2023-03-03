@@ -30,7 +30,7 @@
                  :on-success
                  [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))
                   rooturl]
-                 ;; :on-failure []
+                 :on-failure [::failure rooturl resource-type]
                  }}))
 
 (rf/reg-event-fx
@@ -44,7 +44,7 @@
                  :on-success
                  [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))
                   iid]
-                 ;; :on-failure []
+                 :on-failure [::failure iid resource-type]
                  }}))
 
 (defn proc-warstat [data]
@@ -97,6 +97,12 @@
  ::received-references
  (fn [db [_ key result]]
    (assoc-in db [:references key] (cljs.reader/read-string result))))
+
+(rf/reg-event-db
+ ::failure
+ (fn [db [_ iid type spec]]
+   (println "IPFS fetch failure: " iid " Type:" type (:last-error spec))
+   db))
 
 (rf/reg-event-fx
  ::start-debounce
