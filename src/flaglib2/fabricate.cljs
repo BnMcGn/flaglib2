@@ -19,7 +19,7 @@
    [flaglib2.urlgrab :as ug]
    [flaglib2.posters :as posters]
    [cljsjs.fuse :as fuse]
-   [re-com.core :as rc]))
+   [re-com-tailwind.core :as rc]))
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})

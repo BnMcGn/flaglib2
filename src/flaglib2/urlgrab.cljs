@@ -2,7 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [re-com.core :as rc]
+   [re-com-tailwind.core :as rc]
 
    [cljsjs.fuse :as fuse]
 

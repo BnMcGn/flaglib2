@@ -1,6 +1,6 @@
 (ns flaglib2.suggester
   (:require
-    [re-com.box        :refer [h-box v-box box gap line flex-child-style align-style]] ;; need?
+    [re-com-tailwind.core        :refer [h-box v-box box gap line flex-child-style align-style]] ;; need?
     
     [flaglib2.misc :as misc]
     [re-frame.core :as rf]

@@ -5,7 +5,7 @@
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
    [flaglib2.excerpts :as excerpts]
-   [re-com.core :as rc]))
+   [re-com-tailwind.core :as rc]))
 
 
 

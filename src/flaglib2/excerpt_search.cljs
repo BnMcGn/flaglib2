@@ -1,6 +1,6 @@
 (ns flaglib2.excerpt-search
   (:require
-   [re-com.core :as rc]
+   [re-com-tailwind.core :as rc]
    [re-frame.core :as rf]
    [reagent.core :as reagent]
    

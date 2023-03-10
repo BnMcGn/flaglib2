@@ -3,7 +3,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [flaglib2.misc :as misc]
-   [re-com.core :as rc]))
+   [re-com-tailwind.core :as rc]))
 
 ;;;
 

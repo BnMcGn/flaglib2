@@ -2,7 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [day8.re-frame.http-fx]
-   [re-com.core :as rc]
+   [re-com-tailwind.core :as rc]
    [ajax.core :as ajax]
    [clojure.string :as string]
    [clojure.walk :as walk]

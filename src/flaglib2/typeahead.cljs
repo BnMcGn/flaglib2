@@ -5,16 +5,35 @@
     [cljs.core.async.macros :refer [alt! go-loop]])
   (:require
     [cljs.core.async   :refer [chan timeout <! put!]]
-    [re-com.config     :refer [include-args-desc?]]
-    [re-com.debug      :refer [->attr]]
-    [re-com.throbber   :refer [throbber]]
-    [re-com.input-text :refer [input-text]]
-    [re-com.util       :refer [deref-or-value px]]
-    [re-com.popover    :refer [popover-tooltip]] ;; need?
-    [re-com.box        :refer [h-box v-box box gap line flex-child-style align-style]] ;; need?
-    [re-com.validate   :refer [input-status-type? input-status-types-list regex? string-or-hiccup? css-style? html-attr? parts? number-or-string?
-                               string-or-atom? throbber-size? throbber-sizes-list]]
-
+    [re-com-tailwind.core
+     :refer
+     [include-args-desc?
+      ->attr
+      throbber
+      input-text
+      deref-or-value
+      px
+      add-map-to-hiccup-call
+      merge-css
+      popover-tooltip
+      h-box
+      v-box
+      box
+      gap
+      line
+      flex-child-style
+      align-style
+      input-status-type?
+      input-status-types-list
+      regex?
+      string-or-hiccup?
+      css-style?
+      html-attr?
+      parts?
+      number-or-string?
+      string-or-atom?
+      throbber-size?
+      throbber-sizes-list]]
     [flaglib2.misc :as misc]
     [reagent.core      :as    reagent]
     [goog.events.KeyCodes]))
