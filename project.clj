@@ -16,7 +16,6 @@
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [cljsjs/fuse "6.0.0-0"]
                  [rgm/tailwind-hiccup "0.2.0"]
-                 [re-com "2.13.2"]
                  [re-com-tailwind "2.13.2"]]
 
   :plugins [[lein-tailwind "0.1.2"]]
