@@ -53,6 +53,22 @@
  (fn [db [_ key]]
    (get-in db [:text-status key])))
 
+(defn target-decision-core [[warstat text status] _]
+  (let [have-text (and text (:text text))
+        responses (and warstat (not (zero? (:replies-total warstat))))]
+    {:status (cond (and responses have-text) :reviewed
+                   have-text :available
+                   ;;FIXME: Not sure that :wait is correct here. Perhaps add an appropriate message
+                   ;; for the NIL circumstance
+                   :else (or (walk/keywordize-keys (:status status)) :wait))
+     :message (and status (:message status))}))
+
+(defn target-decision [db target]
+  (target-decision-core
+   [(get-in db [:warstats-store target])
+    (get-in db [:text-store target])
+    (get-in db [:text-status target])]
+   nil))
 
 (rf/reg-sub
  :target-decision
@@ -60,15 +76,7 @@
    [(rf/subscribe [:warstats-store target])
     (rf/subscribe [:text-store target])
     (rf/subscribe [:text-status target])])
- (fn [[warstat text status] _]
-   (let [have-text (and text (:text text))
-         responses (and warstat (not (zero? (:replies-total warstat))))]
-     {:status (cond (and responses have-text) :reviewed
-                    have-text :available
-                    ;;FIXME: Not sure that :wait is correct here. Perhaps add an appropriate message
-                    ;; for the NIL circumstance
-                    :else (or (walk/keywordize-keys (:status status)) :wait))
-      :message (and status (:message status))})))
+ target-decision-core)
 
 (rf/reg-sub
  :flaglib2.fabricate/active-text

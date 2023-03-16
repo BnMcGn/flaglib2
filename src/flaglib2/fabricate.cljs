@@ -10,6 +10,7 @@
    [flaglib2.fetchers :as fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
+   [flaglib2.subscriptions :as subs]
    [flaglib2.stepper :as step]
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
@@ -255,7 +256,14 @@
 (def steps
   [{:id :specify-target
     :label [specify-target-summary]
-    :page [specify-target]}
+    :page [specify-target]
+    :next (fn [db]
+            (if (= :reviewed (:status
+                              (subs/target-decision
+                               db
+                               (ug/selected-url-from-db [::specify-target] db))))
+              :opine
+              :target-decision))}
    {:id :target-decision
     :page [target-decision]
     :buttons [target-decision-buttons]
