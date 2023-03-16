@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [flaglib2.misc :as misc]
+   [flaglib2.urlgrab :as urlgrab]
 
    [clojure.walk :as walk]))
 
@@ -75,7 +76,7 @@
  (fn [db _]
    (or
     (:flaglib2.fabricate/supplied-text db)
-    (let [target (:flaglib2.fabricate/selection db)]
+    (let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
       (if target
         (get-in db [:text-store target :text])
         ;;FIXME: Should lack of text be an error? If so, what to do with it?
