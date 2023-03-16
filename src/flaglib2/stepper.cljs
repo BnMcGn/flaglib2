@@ -122,16 +122,21 @@
       :fx [ (when (:every step) [:dispatch (:every step)])
             (when once [:dispatch once])]})))
 
+(defn get-next-step-in-order [db]
+  (let [stepid (find-active-step (::steps db))
+        steplist (::steplist db)
+        stepind (misc/first-index stepid steplist)]
+    (and stepind
+         (< stepind (count steplist))
+         (nth steplist (+ 1 stepind)))))
+
 (rf/reg-event-fx
  ::next
  (fn [{:keys [db]} _]
    (let [stepid (find-active-step (::steps db))
-         next (or (get-in db [::steps stepid :next])
-                  (let [steplist (::steplist db)
-                        stepind (misc/first-index stepid steplist)]
-                    (and stepind
-                         (< stepind (count steplist))
-                         (nth steplist (+ 1 stepind)))))]
+         next (get-in db [::steps stepid :next])
+         next (if (fn? next) (next db) next)
+         next (or next (get-next-step-in-order db))]
      (when next
        {:dispatch [::goto next]}))))
 
