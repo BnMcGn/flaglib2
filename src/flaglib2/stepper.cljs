@@ -3,7 +3,8 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [flaglib2.misc :as misc]
-   [re-com-tailwind.core :as rc]))
+   [re-com-tailwind.core :as rc]
+   [re-com-tailwind.functions :refer [tw-btn-primary]]))
 
 ;;;
 
@@ -49,6 +50,7 @@
 (defn next-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
     [rc/button
+     :class (tw-btn-primary)
      :label (if (string? label) label "Next")
      :on-click #(rf/dispatch [::next])
      :disabled? (if (< (:index indpos) (:count indpos)) false true)]))
