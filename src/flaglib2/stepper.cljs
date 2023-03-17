@@ -53,6 +53,11 @@
      :on-click #(rf/dispatch [::next])
      :disabled? (if (< (:index indpos) (:count indpos)) false true)]))
 
+(defn next-button-disabled []
+  [rc/button
+   :label "Next"
+   :disabled? true])
+
 (defn previous-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
     [rc/button

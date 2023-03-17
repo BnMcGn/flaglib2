@@ -33,7 +33,6 @@
                (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
                :no-text true]}))
 
-;;FIXME: Chokes if user fails to select a target
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
   [ug/url-search [::specify-target]
@@ -43,6 +42,13 @@
   (let [selection @(rf/subscribe [:selected-url [::specify-target]])]
     [step/summary-button :specify-target (str "Target: " selection)]))
 
+
+(defn specify-target-buttons []
+  (let [url @(rf/subscribe [:selected-url [::specify-target]])]
+    [rc/h-box
+     :children
+     [[step/previous-button nil] [rc/gap :size "3em"]
+      (if (empty? url) [step/next-button-disabled] [step/next-button nil])]]))
 
 ;;Decisioner: what to do if we don't have text
 
@@ -257,6 +263,7 @@
   [{:id :specify-target
     :label [specify-target-summary]
     :page [specify-target]
+    :buttons [specify-target-buttons]
     :next (fn [db]
             (if (= :reviewed (:status
                               (subs/target-decision
