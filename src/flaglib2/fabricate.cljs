@@ -215,7 +215,7 @@
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [::excerpt-or-default])
         text (if (empty? excerpt)
-               "[no excerpt]"
+               "Choose an Excerpt"
                excerpt)]
     [step/summary-button :excerpt text]))
 
@@ -228,7 +228,7 @@
 
 (defn specify-reference-summary []
   (let [selection @(rf/subscribe [:selected-url [::specify-reference]])
-        text (if (empty? selection) "[no reference]" (str "Reference: " selection))]
+        text (if (empty? selection) "Set a Reference" (str "Reference: " selection))]
     [step/summary-button :reference text]))
 
 
