@@ -286,18 +286,22 @@
    {:id :flag
     :page [flag-page]
     :label [flag-page]
+    :grouped true
     ;:buttons ""
     }
    {:id :excerpt
     :page [excerpt-page]
     :label [excerpt-summary]
+    :grouped true
     :buttons [xsearch/excerpt-search-buttons]
     }
    {:id :reference
     :page [specify-reference]
+    :grouped true
     :label [specify-reference-summary]}
    {:id :opine
     :label [opine]
+    :grouped true
     :page [opine]
     :buttons [posters/opine-buttons]
     :once [::opine-initialize]

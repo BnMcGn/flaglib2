@@ -1,5 +1,6 @@
 (ns flaglib2.stepper
   (:require
+   [clojure.string :as string]
    [re-frame.core :as rf]
    [reagent.core :as r]
    [flaglib2.misc :as misc]
@@ -40,8 +41,17 @@
          index (misc/first-index active steplist)]
      {:count count :active active :index index})))
 
+(defn step-style [active? grouped?]
+  (let [base "border-solid border-8 rounded-lg m-2 p-2"
+        color (if grouped?
+                (if active? "border-stripes" "border-blue-200")
+                (if active? "border-blue-200" "border-slate-200"))
+        margin (when grouped? "ml-4")]
+    (string/join " " [base color margin])))
+
 (defn step-base [step]
   [rc/box
+   :class (step-style true (:grouped step))
    :child
    [:div
     (:page step)
@@ -94,9 +104,12 @@
 (defn step-display [step]
   (cond
     (= :summary (:status step))
-    (if (string? (:label step))
-      [summary-button (:id step) (:label step)]
-      (:label step))
+    [rc/box
+     :class (step-style false (:grouped step))
+     :child
+     (if (string? (:label step))
+       [summary-button (:id step) (:label step)]
+       (:label step))]
     (= :active (:status step))
     [step-base (assoc step :buttons (or (:buttons step) (stepper-buttons)))]))
 
