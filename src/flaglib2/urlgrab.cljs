@@ -6,6 +6,7 @@
 
    [cljsjs.fuse :as fuse]
 
+   [flaglib2.deco :as deco]
    [flaglib2.misc :as misc]))
 
 
@@ -68,7 +69,9 @@
      (reduce into
              (for [[cat items] aurls
                    :when (seq items)]
-               (into [[rc/box :child (or (get labels cat) "")]]
+               (into [[rc/box
+                       :child
+                       (or (deco/casual-note-heading (get labels cat)) "")]]
                      (for [itm items]
                        [suggest-button location itm]))))]))
 
