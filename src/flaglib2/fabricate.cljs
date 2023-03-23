@@ -45,8 +45,7 @@
 
 (defn specify-target-buttons []
   (let [url @(rf/subscribe [:selected-url [::specify-target]])]
-    [rc/h-box
-     :children
+    [step/button-box
      [[step/previous-button nil] [rc/gap :size "3em"]
       (if (empty? url) [step/next-button-disabled] [step/next-button nil])]]))
 

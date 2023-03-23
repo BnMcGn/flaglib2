@@ -77,7 +77,10 @@
      :on-click #(rf/dispatch [::previous])
      :disabled? (if (< (:index indpos) 1) true false)]))
 
-
+(defn button-box [contents]
+  [rc/h-box
+   :class "mt-2 bg-gray-200"
+   :children contents])
 
 (defn stepper-buttons [& {:keys [next previous buttons]
                           :or {previous true next true}}]
@@ -85,8 +88,7 @@
                [next-button next])
         previous (when previous
                    [previous-button previous])]
-    [rc/h-box
-     :children
+    [button-box
      (reduce into
              [[]
               (when previous
