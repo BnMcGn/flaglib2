@@ -95,6 +95,10 @@
        (rf/dispatch call-info)))))
 
 
+(defn element-ancestors [element]
+  (when element
+    (lazy-seq (cons element (element-ancestors (.-parentElement element))))))
 
-
-
+(defn dump-rect [el]
+  (let [rec (.getBoundingClientRect el)]
+    {:left (.-left rec) :right (.-right rec) :top (.-top rec) :bottom (.-bottom rec)}))
