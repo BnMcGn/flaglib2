@@ -8,6 +8,22 @@
    [re-com-tailwind.core :as rc]))
 
 
+(defn target-title [])
+(defn target-title-short [])
+(defn popup-side [])
+
+(defn hilited-segment [])
+(defn plain-segment [])
+(defn parent-segment [])
+(defn hilited-text [])
+(defn hilited-text-core [])
+
+
+(defn sub-opinion-list [])
+(defn opinion-info [])
+(defn excerptless-opinions [])
+(defn opinion-summary [])
+
 
 (defn thread-excerpt-display
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
@@ -34,3 +50,10 @@
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) opid)]))
+
+
+(defn reference [])
+(defn reference-default-display [])
+(defn reference-excerpt-display [])
+(defn question [])
+(defn thread-opinion [])
