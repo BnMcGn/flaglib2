@@ -1,7 +1,9 @@
 (ns flaglib2.mood
   (:require
    [cljs-time.core :as tm]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+
+   [flaglib2.misc :as misc]))
 
 
 
@@ -63,3 +65,15 @@
                     :when ws]
                 [id ws]))]
     (str (flavor-from-warstats wcoll) "-" (freshness-from-warstats wcoll))))
+
+
+
+
+(defn magnitude [item & {:keys [keyfunc] :or {:keyfunc identity}}]
+  (let [val (keyfunc item)]
+    (cond
+      (< 200 val) 4
+      (< 50 val) 3
+      (< 10 val) 2
+      (< 3 val) 1
+      :else 0)))
