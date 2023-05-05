@@ -44,18 +44,16 @@
         (reduce #(update %1 %2 inc) (cons {} (map warstat-direction warstats-coll)))
         top (max controv positive negative)]
     (cond
-      (> 0.5 top) "neutral"
-      (significant controv top) "contested"
+      (> 0.5 top) :neutral
+      (significant controv top) :contested
       (= top positive)
       (if (significant negative positive)
-        "contested"
-        "positive")
+        :contested
+        :positive)
       (= top negative)
       (if (significant positive negative)
-        "contested"
-        "negative"))))
-
-
+        :contested
+        :negative))))
 
 (defn flavor+freshness [warstats & ids]
   (let [wcoll
@@ -64,7 +62,7 @@
                     ws (get warstats id)
                     :when ws]
                 [id ws]))]
-    (str (flavor-from-warstats wcoll) "-" (freshness-from-warstats wcoll))))
+    (str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))))
 
 
 
