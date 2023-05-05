@@ -64,8 +64,31 @@
                 [id ws]))]
     (str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))))
 
-
-
+(defn flavor-from-own-warstats [warstats]
+  (let [effect (:effect warstats)
+        controv (:controv warstats)
+        ;;FIXME: pos is unused. Should it be used?
+        pos (+ (:x-right warstats) (:x-up warstats))
+        neg (+ (:x-wrong warstats) (:x-down warstats))
+        ;; flags may eventually be put in own object, but for now...
+        flags warstats
+        ;;FIXME: Need clearer indicators and more nuance for handling these. Not too bad because
+        ;; it just contributes to flavor. Will need visibility system to do this right.
+        badflags [:spam :inflammatory :language-warning :disturbing :logical-fallacy :out-of-bounds
+                  :redundant :out-of-date :retraction :incorrect-flag :flag-abuse :offtopic :arcane]
+        goodflags [:interesting :funny]
+        badness (reduce + (map #(get flags % 0) badflags))
+        goodness (reduce + (map #(get flags % 0) goodflags))
+        diff (misc/relative-to-range 0 effect controv)]
+    (if (< 0 (+ effect goodness))
+      (if (> diff 0.7)
+        :contested
+        (if (and (> 10 effect) (< 0 badness))
+          :contested
+          :positive))
+      (if (< 0 neg)
+        :negative
+        :neutral))))
 
 (defn magnitude [item & {:keys [keyfunc] :or {:keyfunc identity}}]
   (let [val (keyfunc item)]
