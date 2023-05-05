@@ -4,11 +4,38 @@
    [reagent.core :as r]
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
+   [flaglib2.deco :as deco]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
 
+;;FIXME: are url/rootid redundant? has been tested with opinionid? Might be an early misnomer...
+;; root-title?
+(defn target-title [& {:keys [url rootid opinionid title display-depth intro-text hide-warstats
+                              warstats hide-reply hide-count reply-excerpt reply-offset
+                              hide-external-link warflagger-link children]
+                       :or {:intro-text "Target Page: "}}]
+  (let [id (or rootid opinionid)
+        warstats (or warstats @(rf/subscribe [:warstats-store id]))
+        opinion (when opinionid @(rf/subscribe [:opinion-store opinionid]))
+        class [(nth deco/display-depths (or display-depth
+                                            (when opinion (count (:tree-address opinion)))))
+               ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
+               ((mood/flavor-from-own-warstats) deco/flavor-background)]
+        [:div
+         {:class class}
+         intro-text
+         [tb/headline :title title :url warflagger-link]
+         (when (and rootid (not hide-external-link))
+           [tb/display-external-link :url url])
+         (when-not hide-warstats
+           [tb/display-warstats :warstats warstats])
+         children
+         (when-not hide-reply
+           [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+         (when-not hide-count
+           [tb/reply-count :warstats warstats])]]))
 
-(defn target-title [])
 (defn target-title-short [])
 (defn popup-side [])
 

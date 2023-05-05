@@ -40,7 +40,7 @@
                    deco/positive-magnitude
                    deco/negative-magnitude)]
         [:span
-         :class (str "bg-[" (nth mags mag) "]" opacity)
+         :class (str (nth mags mag) opacity)
          [:img :src (str "/static/img/" (get axis indicator-names) ".svg")
           :title (get axis warstat-text)]]))
     '(:x-up :x-down :x-right :x-wrong))])
