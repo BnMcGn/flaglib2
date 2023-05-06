@@ -9,17 +9,11 @@
    [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
 
-;;FIXME: are url/rootid redundant? has been tested with opinionid? Might be an early misnomer...
-;; root-title?
-(defn target-title [& {:keys [url rootid opinionid title display-depth intro-text hide-warstats
+(defn root-title [& {:keys [url title display-depth intro-text hide-warstats
                               warstats hide-reply hide-count reply-excerpt reply-offset
-                              hide-external-link warflagger-link children]
-                       :or {:intro-text "Target Page: "}}]
-  (let [id (or rootid opinionid)
-        warstats (or warstats @(rf/subscribe [:warstats-store id]))
-        opinion (when opinionid @(rf/subscribe [:opinion-store opinionid]))
-        class [(nth deco/display-depths (or display-depth
-                                            (when opinion (count (:tree-address opinion)))))
+                              hide-external-link warflagger-link children]}]
+  (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
+        class [(nth deco/display-depths display-depth )
                ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
                ((mood/flavor-from-own-warstats) deco/flavor-background)]
         [:div
