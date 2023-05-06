@@ -84,8 +84,8 @@
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
         tinfo (when id @(rf/subscribe [:title-store id]))
-        title (or title (:title tinfo))]
-    [:span :class "mx-4" title]))
+        title (or title (:title tinfo) " ")]
+    [:span {:class "mx-4"} title]))
 
 (defn comment-summary [])
 

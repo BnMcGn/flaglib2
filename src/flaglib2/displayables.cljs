@@ -19,7 +19,7 @@
     [:div
      {:class class}
      intro-text
-     [tb/headline :title title :url warflagger-link]
+     [tb/headline :title title :rootid url]
      (when (and url (not hide-external-link))
        [tb/display-external-link :url url])
      (when-not hide-warstats
