@@ -31,19 +31,21 @@
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats]}]
   [:span
-   (map
-    (fn [axis]
-      (let [stat (get axis warstats)
-            mag (if (integer? stat) (mood/magnitude stat) 0)
-            opacity (when (or (not stat) (zero? stat)) " opacity-25")
-            mags (if (#{:x-up :x-right} axis)
-                   deco/positive-magnitude
-                   deco/negative-magnitude)]
-        [:span
-         :class (str (nth mags mag) opacity)
-         [:img :src (str "/static/img/" (get axis indicator-names) ".svg")
-          :title (get axis warstat-text)]]))
-    '(:x-up :x-down :x-right :x-wrong))])
+   (into
+    []
+    (map
+     (fn [axis]
+       (let [stat (get axis warstats)
+             mag (if (integer? stat) (mood/magnitude stat) 0)
+             opacity (when (or (not stat) (zero? stat)) " opacity-25")
+             mags (if (#{:x-up :x-right} axis)
+                    deco/positive-magnitude
+                    deco/negative-magnitude)]
+         [:span
+          :class (str (nth mags mag) opacity)
+          [:img :src (str "/static/img/" (get axis indicator-names) ".svg")
+           :title (get axis warstat-text)]]))
+     '(:x-up :x-down :x-right :x-wrong)))])
 
 (defn display-date-nicely [])
 (defn date-stamp [])
@@ -74,8 +76,8 @@
 
 (defn display-external-link [& {:keys [url]}]
   [:a :href url
-   [:img :src "/static/img/white-external-link.svg"
-    :alt "Original article" :title "Original article"]])
+   [:img {:src "/static/img/white-external-link.svg"
+          :alt "Original article" :title "Original article"}]])
 
 (defn headline [& {:keys [title external-link domain rootid opinionid]}]
   (when (and rootid opinionid)

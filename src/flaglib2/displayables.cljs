@@ -10,25 +10,25 @@
    [re-com-tailwind.core :as rc]))
 
 (defn root-title [& {:keys [url title display-depth intro-text hide-warstats
-                              warstats hide-reply hide-count reply-excerpt reply-offset
-                              hide-external-link warflagger-link children]}]
+                            warstats hide-reply hide-count reply-excerpt reply-offset
+                            hide-external-link warflagger-link children]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
-        class [(nth deco/display-depths display-depth )
+        class [(nth deco/display-depths display-depth)
                ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
-               ((mood/flavor-from-own-warstats) deco/flavor-background)]
-        [:div
-         {:class class}
-         intro-text
-         [tb/headline :title title :url warflagger-link]
-         (when (and rootid (not hide-external-link))
-           [tb/display-external-link :url url])
-         (when-not hide-warstats
-           [tb/display-warstats :warstats warstats])
-         children
-         (when-not hide-reply
-           [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
-         (when-not hide-count
-           [tb/reply-count :warstats warstats])]]))
+               ((mood/flavor-from-own-warstats warstats) deco/flavor-background)]]
+    [:div
+     {:class class}
+     intro-text
+     [tb/headline :title title :url warflagger-link]
+     (when (and url (not hide-external-link))
+       [tb/display-external-link :url url])
+     (when-not hide-warstats
+       [tb/display-warstats :warstats warstats])
+     children
+     (when-not hide-reply
+       [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+     (when-not hide-count
+       [tb/reply-count :warstats warstats])]))
 
 (defn target-title-short [])
 (defn popup-side [])
