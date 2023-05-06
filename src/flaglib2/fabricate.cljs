@@ -3,10 +3,7 @@
    [goog.dom :as gdom]
    [re-frame.core :as rf]
    [reagent.core :as r]
-;   [day8.re-frame.http-fx]
-;   [ajax.core :as ajax]
-;   [clojure.string :as string]
-;   [clojure.walk :as walk]
+
    [flaglib2.fetchers :as fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
@@ -19,6 +16,7 @@
    [flaglib2.typeahead :as ta]
    [flaglib2.urlgrab :as ug]
    [flaglib2.posters :as posters]
+
    [cljsjs.fuse :as fuse]
    [re-com-tailwind.core :as rc]))
 

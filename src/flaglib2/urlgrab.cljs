@@ -7,7 +7,8 @@
    [cljsjs.fuse :as fuse]
 
    [flaglib2.deco :as deco]
-   [flaglib2.misc :as misc]))
+   [flaglib2.misc :as misc]
+   [flaglib2.displayables :as disp]))
 
 
 (rf/reg-sub
@@ -56,7 +57,7 @@
 
 (defn suggest-button [location itm]
   [rc/button
-   :label itm
+   :label [disp/root-title :url itm :hide-reply true :hide-external-link true :display-depth 0]
    :on-click (fn [] (rf/dispatch [::enter-search location itm]))])
 
 (defn display-urls-in-categories [location]
