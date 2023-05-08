@@ -90,7 +90,7 @@
         :negative
         :neutral))))
 
-(defn magnitude [item & {:keys [keyfunc] :or {:keyfunc identity}}]
+(defn magnitude [item & {:keys [keyfunc] :or {keyfunc identity}}]
   (let [val (keyfunc item)]
     (cond
       (< 200 val) 4

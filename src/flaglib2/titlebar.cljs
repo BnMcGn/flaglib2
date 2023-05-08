@@ -34,7 +34,7 @@
    (into []
          (map
           (fn [axis]
-            (let [stat (get axis warstats)
+            (let [stat (get warstats axis)
                   mag (if (integer? stat) (mood/magnitude stat) 0)
                   opacity (when (or (not stat) (zero? stat)) " opacity-25")
                   mags (if (#{:x-up :x-right} axis)
