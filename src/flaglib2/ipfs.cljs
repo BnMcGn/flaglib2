@@ -158,5 +158,12 @@
                 [:dispatch [:text-status url :on-available ev]]
                 [:dispatch ev]))))}))
 
+;; Title Utilities
 
+(defn has-title? [tinfo]
+  (when-let [title (:title tinfo)]
+    (when-not (empty? title) title)))
+
+(defn alternate-title? [tinfo]
+  (and (has-title? tinfo) (= :initial (:title-source tinfo))))
 

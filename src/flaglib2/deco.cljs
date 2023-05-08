@@ -32,3 +32,5 @@
                         :positive "bg-[#80ff80]"
                         :negative "bg-[#ff8080]"
                         :neutral "bg-[#bce0e2]"})
+
+(def patch "border-dashed border-slate-300")

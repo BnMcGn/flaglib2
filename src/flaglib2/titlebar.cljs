@@ -5,6 +5,7 @@
 ;   [clojure.string :as string]
 ;   [clojure.walk :as walk]
    [flaglib2.misc :as misc]
+   [flaglib2.ipfs :as ipfs]
    [flaglib2.flags :as flags]
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
@@ -30,7 +31,9 @@
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats]}]
-  [rc/h-box :children
+  [rc/h-box
+   :class "ml-4"
+   :children
    (into []
          (map
           (fn [axis]
@@ -70,7 +73,7 @@
 (defn reply-count [& {:keys [warstats]}]
   (let [immediate (:replies-immediate warstats)
         total (:replies-total warstats)]
-    [:span {:class "text-base"
+    [:span {:class "text-base ml-4"
             :title (str immediate " direct responses, " total " in conversation")}
      (str " (" immediate "/" total ")")]))
 
@@ -84,8 +87,14 @@
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
         tinfo (when id @(rf/subscribe [:title-store id]))
+        [titl available] (if-let [t (or title (ipfs/has-title? tinfo))]
+                           [t true]
+                           [external-link false])
+        class ["mx-4"
+               (when-not available "italic font-thin")
+               (when (ipfs/alternate-title? deco/patch))]
         title (or title (:title tinfo) " ")]
-    [:span {:class "mx-4"} title]))
+    [:span {:class class} title]))
 
 (defn comment-summary [])
 
