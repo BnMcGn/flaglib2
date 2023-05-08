@@ -13,22 +13,25 @@
                             warstats hide-reply hide-count reply-excerpt reply-offset
                             hide-external-link warflagger-link children]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
-        class [(nth deco/display-depths display-depth)
-               ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
-               ((mood/flavor-from-own-warstats warstats) deco/flavor-background)]]
-    [:div
-     {:class class}
-     intro-text
-     [tb/headline :title title :rootid url]
-     (when (and url (not hide-external-link))
-       [tb/display-external-link :url url])
-     (when-not hide-warstats
-       [tb/display-warstats :warstats warstats])
-     children
-     (when-not hide-reply
-       [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
-     (when-not hide-count
-       [tb/reply-count :warstats warstats])]))
+        class (str (nth deco/display-depths display-depth)
+                   " "
+                   ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
+                   ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
+    [rc/h-box
+     :class class
+     :align :center
+     :children
+     [intro-text
+      [tb/headline :title title :rootid url]
+      (when (and url (not hide-external-link))
+        [tb/display-external-link :url url])
+      (when-not hide-warstats
+        [tb/display-warstats :warstats warstats])
+      children
+      (when-not hide-reply
+        [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+      (when-not hide-count
+        [tb/reply-count :warstats warstats])]]))
 
 (defn target-title-short [])
 (defn popup-side [])

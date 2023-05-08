@@ -30,22 +30,22 @@
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats]}]
-  (into
-   [:span]
-   (map
-    (fn [axis]
-      (let [stat (get axis warstats)
-            mag (if (integer? stat) (mood/magnitude stat) 0)
-            opacity (when (or (not stat) (zero? stat)) " opacity-25")
-            mags (if (#{:x-up :x-right} axis)
-                   deco/positive-magnitude
-                   deco/negative-magnitude)]
-        [:span
-         {:class (str (nth mags mag) opacity)}
-         [:img {:src (str "/static/img/" (get indicator-names axis) ".svg")
-                :style {:width "22px" :height "22px"}
-                :title (get warstat-text axis)}]]))
-    '(:x-up :x-down :x-right :x-wrong))))
+  [rc/h-box :children
+   (into []
+         (map
+          (fn [axis]
+            (let [stat (get axis warstats)
+                  mag (if (integer? stat) (mood/magnitude stat) 0)
+                  opacity (when (or (not stat) (zero? stat)) " opacity-25")
+                  mags (if (#{:x-up :x-right} axis)
+                         deco/positive-magnitude
+                         deco/negative-magnitude)]
+              [:span
+               {:class (str (nth mags mag) opacity)}
+               [:img {:src (str "/static/img/" (get indicator-names axis) ".svg")
+                      :style {:width "12px" :height "12px"}
+                      :title (get warstat-text axis)}]]))
+          '(:x-up :x-down :x-right :x-wrong)))])
 
 (defn display-date-nicely [])
 (defn date-stamp [])
