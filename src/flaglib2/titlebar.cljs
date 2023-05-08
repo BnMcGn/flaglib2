@@ -30,22 +30,22 @@
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats]}]
-  [:span
-   (into
-    []
-    (map
-     (fn [axis]
-       (let [stat (get axis warstats)
-             mag (if (integer? stat) (mood/magnitude stat) 0)
-             opacity (when (or (not stat) (zero? stat)) " opacity-25")
-             mags (if (#{:x-up :x-right} axis)
-                    deco/positive-magnitude
-                    deco/negative-magnitude)]
-         [:span
-          :class (str (nth mags mag) opacity)
-          [:img :src (str "/static/img/" (get axis indicator-names) ".svg")
-           :title (get axis warstat-text)]]))
-     '(:x-up :x-down :x-right :x-wrong)))])
+  (into
+   [:span]
+   (map
+    (fn [axis]
+      (let [stat (get axis warstats)
+            mag (if (integer? stat) (mood/magnitude stat) 0)
+            opacity (when (or (not stat) (zero? stat)) " opacity-25")
+            mags (if (#{:x-up :x-right} axis)
+                   deco/positive-magnitude
+                   deco/negative-magnitude)]
+        [:span
+         {:class (str (nth mags mag) opacity)}
+         [:img {:src (str "/static/img/" (get indicator-names axis) ".svg")
+                :style {:width "22px" :height "22px"}
+                :title (get warstat-text axis)}]]))
+    '(:x-up :x-down :x-right :x-wrong))))
 
 (defn display-date-nicely [])
 (defn date-stamp [])
@@ -70,8 +70,8 @@
 (defn reply-count [& {:keys [warstats]}]
   (let [immediate (:replies-immediate warstats)
         total (:replies-total warstats)]
-    [:span :class "text-base"
-     :title (str immediate " direct responses, " total " in conversation")
+    [:span {:class "text-base"
+            :title (str immediate " direct responses, " total " in conversation")}
      (str " (" immediate "/" total ")")]))
 
 (defn display-external-link [& {:keys [url]}]
