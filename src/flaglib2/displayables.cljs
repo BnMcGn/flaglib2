@@ -22,7 +22,7 @@
      :align :center
      :children
      [intro-text
-      [tb/headline :title title :rootid url]
+      [tb/headline :title title :rootid url :url url]
       (when (and url (not hide-external-link))
         [tb/display-external-link :url url])
       (when-not hide-warstats
