@@ -165,5 +165,5 @@
     (when-not (empty? title) title)))
 
 (defn alternate-title? [tinfo]
-  (and (has-title? tinfo) (= :initial (:title-source tinfo))))
+  (and (has-title? tinfo) (not (= :initial (:title-source tinfo)))))
 

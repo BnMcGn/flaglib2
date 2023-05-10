@@ -92,7 +92,7 @@
                            [url false])
         class ["mx-3"
                (when-not available "italic font-thin")
-               (when (ipfs/alternate-title? deco/patch))]
+               (when (ipfs/alternate-title? tinfo) deco/patch)]
         title (or title (:title tinfo) " ")]
     [:span {:class class} titl]))
 
