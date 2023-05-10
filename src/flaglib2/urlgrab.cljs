@@ -69,12 +69,11 @@
      :children
      (reduce into
              (for [[cat items] aurls
-                   :when (seq items)]
-               (into [[rc/box
-                       :child
-                       (or (deco/casual-note-heading (get labels cat)) "")]]
-                     (for [itm items]
-                       [suggest-button location itm]))))]))
+                   :when (not (empty? items))]
+               [(or [deco/casual-note-heading (get labels cat)] "")
+                (into [:ul {:class "ml-2 list-inside list-disc"}]
+                      (for [itm items]
+                        [:li [suggest-button location itm]]))]))]))
 
 (defn display-searched-urls [location]
   (let [aurls @(rf/subscribe [:url-search-results location])]
