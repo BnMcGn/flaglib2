@@ -37,4 +37,5 @@
 
 
 ;;(def button-headline-widths "sm:w-40 md:w-44 lg:w-48 xl:w-52 2xl:w-[79em]")
+;;FIXME: Should be full width. Find out how to do this...
 (def button-headline-widths "2xl:w-[79em]")
