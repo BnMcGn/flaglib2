@@ -57,6 +57,7 @@
 
 (defn suggest-button [location itm]
   [rc/button
+   :class deco/button-headline-widths
    :label [disp/root-title :url itm :hide-reply true :hide-external-link true :display-depth 0]
    :on-click (fn [] (rf/dispatch [::enter-search location itm]))])
 
