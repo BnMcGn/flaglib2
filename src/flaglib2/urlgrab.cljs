@@ -19,7 +19,7 @@
      (when (and (not-empty search) aurls)
        (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls))
                             (clj->js {:include-score true :keys (list :url)}))]
-         (. fus (search search)))))))
+         (js->clj (. fus (search search)) :keywordize-keys true))))))
 
 (rf/reg-sub
  ::search
@@ -79,10 +79,12 @@
 
 (defn display-searched-urls [location]
   (let [aurls @(rf/subscribe [:url-search-results location])]
-    [rc/v-box
-     :children
-     (for [itm aurls]
-       [suggest-button location (:url itm)])]))
+    (when (not-empty aurls)
+      (into [:ul {:class "ml-2 list-inside"
+                 :style {:list-style-image "url(\"/static/img/target-simple.svg\")"}}]
+           (for [itm aurls
+                 :let [itm (:item itm)]]
+             [:li [suggest-button location (:url itm)]])))))
 
 (rf/reg-event-db
  ::initialize-url-search
