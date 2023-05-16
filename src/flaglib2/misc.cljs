@@ -66,6 +66,13 @@
   (println (render-to-string itm))
   itm)
 
+(defn dump [itm]
+  (do (set! (. js/window -dumped) itm)
+      itm))
+
+(defn dive []
+  (. js/window -dumped))
+
 (defn relative-to-range [start end num]
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
   (/ (- num start) (- end start)))
@@ -75,8 +82,7 @@
   (+ start (* num (- end start))))
 
 (defn reformat-urls-lists [lists]
-  (for [l lists
-        [k urls] l
+  (for [[k urls] (seq lists)
         url (or urls [])]
     {:url url :category k}))
 

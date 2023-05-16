@@ -4,7 +4,7 @@
    [reagent.core :as r]
    [re-com-tailwind.core :as rc]
 
-   [cljsjs.fuse :as fuse]
+   [cljsjs.fuse]
 
    [flaglib2.deco :as deco]
    [flaglib2.misc :as misc]
@@ -15,11 +15,11 @@
  :url-search-results
  (fn [db [_ location]]
    (let [search (::search (get-in db location))
-         aurls (:fetchers/author-urls db)]
-     (when (and search aurls)
-       (let [fus (fuse/fuse (misc/reformat-urls-lists aurls)
+         aurls (:flaglib2.fetchers/author-urls db)]
+     (when (and (not-empty search) aurls)
+       (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls))
                             (clj->js {:include-score true :keys (list :url)}))]
-         (fus.search search))))))
+         (. fus (search search)))))))
 
 (rf/reg-sub
  ::search
@@ -72,7 +72,8 @@
              (for [[cat items] aurls
                    :when (not (empty? items))]
                [(or [deco/casual-note-heading (get labels cat)] "")
-                (into [:ul {:class "ml-2 list-inside list-disc"}]
+                (into [:ul {:class "ml-2 list-inside"
+                            :style {:list-style-image "url(\"/static/img/target-simple.svg\")"}}]
                       (for [itm items]
                         [:li [suggest-button location itm]]))]))]))
 
