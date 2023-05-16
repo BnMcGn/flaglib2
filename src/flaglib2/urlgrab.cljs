@@ -19,7 +19,7 @@
          titles (:title-store db)]
      (when (and (not-empty search) aurls)
        (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls titles))
-                            (clj->js {:include-score true :keys (list :url)}))]
+                            (clj->js {:include-score true :keys (list :url :title)}))]
          (js->clj (. fus (search search)) :keywordize-keys true))))))
 
 (rf/reg-sub
