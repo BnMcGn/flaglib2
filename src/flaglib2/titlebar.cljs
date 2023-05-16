@@ -87,12 +87,12 @@
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
         tinfo (when id @(rf/subscribe [:title-store id]))
-        [titl available] (if-let [t (or title (ipfs/has-title? tinfo))]
+        [titl available] (if-let [t (or title (misc/has-title? tinfo))]
                            [t true]
                            [url false])
         class ["mx-3"
                (if available "text-lg" "italic font-thin")
-               (when (ipfs/alternate-title? tinfo) deco/patch)]
+               (when (misc/alternate-title? tinfo) deco/patch)]
         title (or title (:title tinfo) " ")]
     [:span {:class class} titl]))
 

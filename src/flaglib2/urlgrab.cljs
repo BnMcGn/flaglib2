@@ -15,9 +15,10 @@
  :url-search-results
  (fn [db [_ location]]
    (let [search (::search (get-in db location))
-         aurls (:flaglib2.fetchers/author-urls db)]
+         aurls (:flaglib2.fetchers/author-urls db)
+         titles (:title-store db)]
      (when (and (not-empty search) aurls)
-       (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls))
+       (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls titles))
                             (clj->js {:include-score true :keys (list :url)}))]
          (js->clj (. fus (search search)) :keywordize-keys true))))))
 

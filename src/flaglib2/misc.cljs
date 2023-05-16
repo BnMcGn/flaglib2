@@ -51,6 +51,8 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:fx store))))
 
+;;Debugging tools
+
 (defn say [itm]
   (do (println itm)
       itm))
@@ -73,6 +75,8 @@
 (defn dive []
   (. js/window -dumped))
 
+
+
 (defn relative-to-range [start end num]
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
   (/ (- num start) (- end start)))
@@ -81,10 +85,24 @@
   "Complement of relative-to-range function. Treats num as if it were a fraction of the range specified by start and end. Returns the absolute number that results."
   (+ start (* num (- end start))))
 
-(defn reformat-urls-lists [lists]
+
+;; Title Utilities
+
+(defn has-title? [tinfo]
+  (when-let [title (:title tinfo)]
+    (when-not (empty? title) title)))
+
+(defn alternate-title? [tinfo]
+  (and (has-title? tinfo) (not (= :initial (:title-source tinfo)))))
+
+
+
+(defn reformat-urls-lists [lists titles]
   (for [[k urls] (seq lists)
-        url (or urls [])]
-    {:url url :category k}))
+        url (or urls [])
+        :let [title (has-title? (get titles url))
+              data {:url url :category k}]]
+    (if title (assoc data :title title) data)))
 
 (defn reformat-urls-lists-simple [lists]
   (for [l lists
