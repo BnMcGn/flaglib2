@@ -49,13 +49,13 @@
         margin (when grouped? "ml-4")]
     (string/join " " [base color margin])))
 
-(defn step-base [step]
+(defn step-base [step buttons]
   [rc/box
    :class (step-style true (:grouped step))
    :child
    [:div
     (:page step)
-    (:buttons step)]])
+    buttons]])
 
 (defn next-button [label]
   (let [indpos @(rf/subscribe [::index-pos])]
@@ -113,7 +113,7 @@
        [summary-button (:id step) (:label step)]
        (:label step))]
     (= :active (:status step))
-    [step-base (assoc step :buttons (or (:buttons step) (stepper-buttons)))]))
+    [step-base step (or (:buttons step) (stepper-buttons))]))
 
 (defn wf-stepper []
   (let [steplist @(rf/subscribe [::steplist])
