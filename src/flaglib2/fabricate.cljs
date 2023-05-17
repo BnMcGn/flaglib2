@@ -228,6 +228,8 @@
         text (if (empty? selection) "Set a Reference" (str "Reference: " selection))]
     [step/summary-button :reference text]))
 
+(defn reference-buttons []
+  [step/button-box [[step/next-button "Accept"]]])
 
 (rf/reg-event-db
  ::set-comment
@@ -295,6 +297,7 @@
    {:id :reference
     :page [specify-reference]
     :grouped true
+    :buttons [reference-buttons]
     :label [specify-reference-summary]}
    {:id :opine
     :label [opine]
