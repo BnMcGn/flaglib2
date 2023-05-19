@@ -44,8 +44,9 @@
 (defn specify-target-buttons []
   (let [url @(rf/subscribe [:selected-url [::specify-target]])]
     [step/button-box
-     [[step/previous-button nil] [rc/gap :size "3em"]
-      (if (empty? url) [step/next-button-disabled] [step/next-button nil])]]))
+     [[step/button-spacer
+       [[step/previous-button nil]]
+       [(if (empty? url) [step/next-button-disabled] [step/next-button nil])]]]]))
 
 ;;Decisioner: what to do if we don't have text
 

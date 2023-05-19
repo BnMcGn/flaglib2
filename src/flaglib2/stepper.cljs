@@ -82,6 +82,15 @@
    :class "mt-2 bg-gray-200"
    :children contents])
 
+(defn button-spacer [fore aft]
+  (let [one (reduce #(into %1 [[rc/gap :size "3em"] %2]) (cons [] fore))
+        two (reduce #(into %1 [[rc/gap :size "3em"] %2]) (cons [] aft))]
+    (reduce
+     into [[:<>]
+           (drop 1 one)
+           [[rc/gap :style {:flex-grow "1"} :size "1em"]]
+           (drop 1 two)])))
+
 (defn stepper-buttons [& {:keys [next previous buttons]
                           :or {previous true next true}}]
   (let [next (when next
@@ -89,15 +98,8 @@
         previous (when previous
                    [previous-button previous])]
     [button-box
-     (reduce into
-             [[]
-              (when previous
-                [previous [rc/gap :size "3em"]])
-              buttons
-              (when next
-                (if buttons
-                  [[rc/gap :size "3em"] next]
-                  [next]))])]))
+     (when previous [previous])
+     (if buttons (into buttons next) next)]))
 
 (defn summary-button [id label]
   [rc/button :label label
