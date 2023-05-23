@@ -79,7 +79,8 @@
 
 (defn button-box [contents]
   [rc/h-box
-   :class "mt-2 bg-gray-200"
+   :class "mt-2 bg-gray-200 relative px-12 py-2"
+   :style {:top "0.5rem" :left "-0.5rem"}
    :children contents])
 
 (defn button-spacer [fore aft]
