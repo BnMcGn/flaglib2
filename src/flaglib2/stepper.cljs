@@ -54,6 +54,7 @@
    :class (step-style true (:grouped step))
    :child
    [:div
+    {:style {:flex-grow "1"}}
     (:page step)
     buttons]])
 
@@ -68,19 +69,22 @@
 (defn next-button-disabled []
   [rc/button
    :label "Next"
+   :class "text-gray-500"
    :disabled? true])
 
 (defn previous-button [label]
-  (let [indpos @(rf/subscribe [::index-pos])]
+  (let [indpos @(rf/subscribe [::index-pos])
+        disabled (< (:index indpos) 1)]
     [rc/button
      :label (if (string? label) label "Previous")
      :on-click #(rf/dispatch [::previous])
-     :disabled? (if (< (:index indpos) 1) true false)]))
+     :class (when disabled "text-gray-500")
+     :disabled? disabled]))
 
 (defn button-box [contents]
   [rc/h-box
    :class "mt-2 bg-gray-200 relative px-12 py-2"
-   :style {:top "0.5rem" :left "-0.5rem"}
+   :style {:top "0.5rem" :left "-0.5rem" :width "calc(100% + 1rem)"}
    :children contents])
 
 (defn button-spacer [fore aft]
