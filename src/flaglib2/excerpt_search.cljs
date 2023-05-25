@@ -3,11 +3,14 @@
    [re-com-tailwind.core :as rc]
    [re-frame.core :as rf]
    [reagent.core :as reagent]
+
+   [re-com-tailwind.functions :refer [tw-btn-primary]]
    
    [flaglib2.misc :as misc]
    [flaglib2.suggester :as suggester]
    [flaglib2.excerpts :as excerpts]
-   [flaglib2.displayables :as disps]))
+   [flaglib2.displayables :as disps]
+   [flaglib2.stepper :as step]))
 
 (rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
@@ -180,15 +183,19 @@
 
 (defn excerpt-search-buttons []
   (let [status @(rf/subscribe [::excerpt-search-status])]
-    (rc/h-box
-     :children
-     (case (or status :empty)
-       :empty
-       [[rc/button :label "Accept" :disabled? true]]
-       :complete
-       [[rc/button :label "Accept" :on-click #(rf/dispatch [::accept-entry])]]
-       (:started :unstarted :failed)
-       [[rc/button :label "Accept as Entered" :on-click #(rf/dispatch [::accept-entry status])]]))))
+    [step/button-box
+     (step/button-spacer
+      nil
+      (case (or status :empty)
+        :empty
+        [[rc/button :label "Accept" :class (tw-btn-primary) :disabled? true]]
+        :complete
+        [[rc/button :label "Accept" :class (tw-btn-primary) :on-click #(rf/dispatch [::accept-entry])]]
+        (:started :unstarted :failed)
+        [[rc/button
+          :label "Accept as Entered"
+          :class (tw-btn-primary)
+          :on-click #(rf/dispatch [::accept-entry status])]]))]))
 
 (rf/reg-sub
  ::active-excerpt

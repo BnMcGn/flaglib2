@@ -7,6 +7,8 @@
    [clojure.string :as string]
    [clojure.walk :as walk]
 
+   [re-com-tailwind.functions :refer [tw-btn-primary]]
+
    [flaglib2.flags :as flags]
    [flaglib2.misc :as misc]
    [flaglib2.stepper :as step]))
@@ -188,10 +190,12 @@
 
 (defn opine-buttons []
   (let [ostatus @(rf/subscribe [:opinion-post-status])
-        astatus @(rf/subscribe [:alternate-post-status])]
+        astatus @(rf/subscribe [:alternate-post-status])
+        text (if (some #(= :failed %) [ostatus astatus]) "Retry" "Post")]
     [step/button-box
      (step/button-spacer
       nil
-      (if (some #(= :failed %) [ostatus astatus])
-        [[rc/button :label "Retry" :on-click #(rf/dispatch [:post-opinion])]]
-        [[rc/button :label "Post" :on-click #(rf/dispatch [:post-opinion])]]))]))
+      [[rc/button
+        :label text
+        :class (tw-btn-primary)
+        :on-click #(rf/dispatch [:post-opinion])]])]))

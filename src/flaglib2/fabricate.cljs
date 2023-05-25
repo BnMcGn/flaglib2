@@ -230,7 +230,7 @@
     [step/summary-button :reference text]))
 
 (defn reference-buttons []
-  [step/button-box [step/button-spacer nil [[step/next-button "Accept"]]]])
+  [step/button-box (step/button-spacer nil [[step/next-button "Accept"]])])
 
 (rf/reg-event-db
  ::set-comment
