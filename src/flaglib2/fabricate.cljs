@@ -44,9 +44,9 @@
 (defn specify-target-buttons []
   (let [url @(rf/subscribe [:selected-url [::specify-target]])]
     [step/button-box
-     [[step/button-spacer
-       [[step/previous-button nil]]
-       [(if (empty? url) [step/next-button-disabled] [step/next-button nil])]]]]))
+     (step/button-spacer
+      [[step/previous-button nil]]
+      [(if (empty? url) [step/next-button-disabled] [step/next-button nil])])]))
 
 ;;Decisioner: what to do if we don't have text
 
@@ -230,7 +230,7 @@
     [step/summary-button :reference text]))
 
 (defn reference-buttons []
-  [step/button-box [[step/next-button "Accept"]]])
+  [step/button-box [step/button-spacer nil [[step/next-button "Accept"]]]])
 
 (rf/reg-event-db
  ::set-comment

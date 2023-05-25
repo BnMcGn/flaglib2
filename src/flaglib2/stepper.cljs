@@ -91,7 +91,7 @@
   (let [one (reduce #(into %1 [[rc/gap :size "3em"] %2]) (cons [] fore))
         two (reduce #(into %1 [[rc/gap :size "3em"] %2]) (cons [] aft))]
     (reduce
-     into [[:<>]
+     into [[]
            (drop 1 one)
            [[rc/gap :style {:flex-grow "1"} :size "1em"]]
            (drop 1 two)])))
@@ -103,8 +103,9 @@
         previous (when previous
                    [previous-button previous])]
     [button-box
-     (when previous [previous])
-     (if buttons (into buttons next) next)]))
+     (button-spacer
+      (when previous [previous])
+      (if buttons (into buttons next) next))]))
 
 (defn summary-button [id label]
   [rc/button :label label
