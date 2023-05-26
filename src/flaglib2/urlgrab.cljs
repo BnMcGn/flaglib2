@@ -103,6 +103,7 @@
       [:div
        [rc/input-text
         :placeholder placeholder
+        :width "100%"
         :model search
         :on-change (fn [ev] (rf/dispatch [::enter-search location ev]))]
        (if search-res

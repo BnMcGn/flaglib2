@@ -244,6 +244,9 @@
     [:div
      [rc/input-textarea
       :model ""
+      :width "100%"
+      :height "14rem"
+      :placeholder "Enter a Comment"
       :on-change (fn [comment] (rf/dispatch [::set-comment comment]))]
      [rc/v-box
       :children
