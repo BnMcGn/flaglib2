@@ -126,7 +126,7 @@
 (defn wf-stepper []
   (let [steplist @(rf/subscribe [::steplist])
         steps @(rf/subscribe [::steps])]
-    (into [:div]
+    (into [:div {:class "max-w-[70em]"}]
           (for [id steplist
                 :let [step (get steps id)]
                 :when (and (:status step)
