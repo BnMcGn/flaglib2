@@ -14,6 +14,16 @@
 
 (println "This text is printed from src/flaglib2/core.cljs. Go ahead and edit it and see reloading in action.")
 
+(defn window-size []
+  (let [size (. js/window -innerWidth)]
+    ;;Sizes taken from tailwind. Should be kept syncronized.
+    (cond
+      (< size 640) :sm
+      (< size 768) :md
+      (< size 1024) :lg
+      (< size 1280) :xl
+      :else :xxl)))
+
 (rf/reg-event-db
  :initialize
  (fn [_ _]
@@ -22,6 +32,7 @@
      :opinion-store {}
      :text-store {}
      :title-store {}
+     :window-size (window-size)
      }
     (posters/init))))
 
@@ -49,6 +60,7 @@
 
 (defonce startup (do (rf/dispatch-sync [:initialize])
                      (rf/clear-subscription-cache!)
+                     (. js/window (addEventListener "resize" #(rf/dispatch [:window-size])))
                      true))
 
 (defn ^:dev/after-load clear-cache-and-render!
@@ -63,8 +75,15 @@
 
   )
 
+(rf/reg-event-db
+ :window-size
+ (fn [db _]
 
-
-
-
+   (let [screen (cond
+                  (< size 640) :sm
+                  (< size 768) :md
+                  (< size 1024) :lg
+                  (< size 1280) :xl
+                  :else :xxl)]
+     (assoc db :window-size (window-size)))))
 
