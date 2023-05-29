@@ -18,10 +18,11 @@
   (let [size (. js/window -innerWidth)]
     ;;Sizes taken from tailwind. Should be kept syncronized.
     (cond
-      (< size 640) :sm
-      (< size 768) :md
-      (< size 1024) :lg
-      (< size 1280) :xl
+      (< size 640) :xs
+      (< size 768) :sm
+      (< size 1024) :md
+      (< size 1280) :lg
+      (< size 1536) :xl
       :else :xxl)))
 
 (rf/reg-event-db
