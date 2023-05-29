@@ -79,12 +79,5 @@
 (rf/reg-event-db
  :window-size
  (fn [db _]
-
-   (let [screen (cond
-                  (< size 640) :sm
-                  (< size 768) :md
-                  (< size 1024) :lg
-                  (< size 1280) :xl
-                  :else :xxl)]
-     (assoc db :window-size (window-size)))))
+   (assoc db :window-size (window-size))))
 
