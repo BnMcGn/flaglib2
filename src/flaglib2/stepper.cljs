@@ -109,6 +109,8 @@
 
 (defn summary-button [id label]
   [rc/button :label label
+   :class "overflow-hidden max-w-full"
+   :parts {:wrapper {:class "w-full"}}
    :on-click (fn [] (rf/dispatch [::goto id]))])
 
 (defn step-display [step]
