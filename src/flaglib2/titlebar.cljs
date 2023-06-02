@@ -30,9 +30,9 @@
 (defn display-tree-address [])
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
-(defn display-warstats [& {:keys [warstats]}]
+(defn display-warstats [& {:keys [warstats class]}]
   [rc/h-box
-   :class "mr-3"
+   :class (str "mr-3 " class)
    :children
    (into []
          (map
@@ -70,10 +70,10 @@
       :value "Reply to Excerpt"]
      [:input :type "submit" :value "Reply"])])
 
-(defn reply-count [& {:keys [warstats]}]
+(defn reply-count [& {:keys [warstats class]}]
   (let [immediate (:replies-immediate warstats)
         total (:replies-total warstats)]
-    [:span {:class "text-base mr-3"
+    [:span {:class ["text-base mr-3" class]
             :title (str immediate " direct responses, " total " in conversation")}
      (str " (" immediate "/" total ")")]))
 
@@ -82,7 +82,7 @@
    [:img {:src "/static/img/white-external-link.svg"
           :alt "Original article" :title "Original article"}]])
 
-(defn headline [& {:keys [title url domain rootid opinionid]}]
+(defn headline [& {:keys [title url domain rootid opinionid class]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
@@ -91,7 +91,8 @@
                            [t true]
                            [url false])
         class ["mx-3"
-               (if available "text-lg" "italic font-thin")
+               class
+               (if available "text-lg" "italic font-thin truncate")
                (when (misc/alternate-title? tinfo) deco/patch)]
         title (or title (:title tinfo) " ")]
     [:span {:class class} titl]))

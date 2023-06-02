@@ -39,3 +39,14 @@
         border-image: repeating-linear-gradient(45deg, transparent, transparent 3px, theme('colors.blue.200') 4px, theme('colors.blue.200') 8px, transparent 9px, transparent 12px) 7.5/0.5rem;
     }
 }
+
+@layer utilities {
+
+    .whitespace-normaller {
+        white-space: normal !important;
+    }
+
+    .whitespace-nowrapper {
+        white-space: nowrap !important;
+    }
+}

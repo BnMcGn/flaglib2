@@ -78,6 +78,8 @@
     (rf/subscribe [:text-status target])])
  target-decision-core)
 
+(rf/reg-sub :window-size :-> :window-size)
+
 (rf/reg-sub
  :flaglib2.fabricate/active-text
  ;;FIXME: could consider caching a tdat?

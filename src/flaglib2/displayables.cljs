@@ -33,6 +33,28 @@
       (when-not hide-count
         [tb/reply-count :warstats warstats])]]))
 
+(defn root-title-mobile [& {:keys [url title display-depth intro-text hide-warstats
+                            warstats hide-reply hide-count reply-excerpt reply-offset
+                            hide-external-link warflagger-link children]}]
+  (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
+        class (str (nth deco/display-depths display-depth)
+                   " grid-cols-2 grid "
+                   ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
+                   ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
+    [:div
+     {:class class}
+     intro-text
+     [tb/headline :title title :rootid url :url url :class "col-span-2"]
+     (when (and url (not hide-external-link))
+       [tb/display-external-link :url url])
+     (when-not hide-warstats
+       [tb/display-warstats :warstats warstats :class "justify-self-end self-center"])
+     children
+     (when-not hide-reply
+       [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+     (when-not hide-count
+       [tb/reply-count :warstats warstats :class "justify-self-start"])]))
+
 (defn target-title-short [])
 (defn popup-side [])
 

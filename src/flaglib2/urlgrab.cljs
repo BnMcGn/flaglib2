@@ -57,11 +57,13 @@
 
 
 (defn suggest-button [location itm]
-  [rc/button
-   :class "border-white hover:border-stone-300 w-full"
-   :parts {:wrapper {:style {:width "calc(100% - 25px)"}}}
-   :label [disp/root-title :url itm :hide-reply true :hide-external-link true :display-depth 0]
-   :on-click (fn [] (rf/dispatch [::enter-search location itm]))])
+  (let [size @(rf/subscribe [:window-size])
+        rt (if (= size :xs) disp/root-title-mobile disp/root-title)]
+    [rc/button
+     :class "border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
+    :parts {:wrapper {:style {:width "calc(100% - 25px)"}}}
+    :label [rt :url itm :hide-reply true :hide-external-link true :display-depth 0]
+    :on-click (fn [] (rf/dispatch [::enter-search location itm]))]))
 
 (defn display-urls-in-categories [location]
   (let [labels {:rooturls "Previous Targets"
@@ -74,8 +76,7 @@
              (for [[cat items] aurls
                    :when (not (empty? items))]
                [(or [deco/casual-note-heading (get labels cat)] "")
-                (into [:ul {:class "ml-2 list-inside"
-                            :style {:list-style-image "url(\"/static/img/target-simple.svg\")"}}]
+                (into [:ul {:class "ml-2 sm:list-inside list-image-none sm:list-image-[url(/static/img/target-simple.svg)]"}]
                       (for [itm items]
                         [:li [suggest-button location itm]]))]))]))
 
