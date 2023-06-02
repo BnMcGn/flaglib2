@@ -60,7 +60,7 @@
   (let [size @(rf/subscribe [:window-size])
         rt (if (= size :xs) disp/root-title-mobile disp/root-title)]
     [rc/button
-     :class "border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
+     :class "sm:border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
     :parts {:wrapper {:class "sm:w-[calc(100%_-_25px)]"}}
     :label [rt :url itm :hide-reply true :hide-external-link true :display-depth 0]
     :on-click (fn [] (rf/dispatch [::enter-search location itm]))]))
@@ -83,8 +83,7 @@
 (defn display-searched-urls [location]
   (let [aurls @(rf/subscribe [:url-search-results location])]
     (when (not-empty aurls)
-      (into [:ul {:class "ml-2 list-inside"
-                 :style {:list-style-image "url(\"/static/img/target-simple.svg\")"}}]
+      (into [:ul {:class "ml-2 sm:list-inside sm:[list-style-image:url(/static/img/target-simple.svg)]"}]
            (for [itm aurls
                  :let [itm (:item itm)]]
              [:li [suggest-button location (:url itm)]])))))
