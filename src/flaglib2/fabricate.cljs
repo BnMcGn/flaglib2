@@ -178,21 +178,32 @@
 
 
 (defn flag-page []
-  (let [flag @(rf/subscribe [::flag-or-default])]
+  (let [flag @(rf/subscribe [::flag-or-default])
+        finfo (when flag (get flags/flags flag))
+        label-func
+        (fn [item]
+          [rc/h-box
+           :style {:left "0"}
+           :align :center
+           :children
+           [[:img {:src (titlebar/flag-icon (:id item))}]
+            [:span (str (:category item) ": " (:label item))]]]) ]
     [:div
      [rc/single-dropdown
       :model flag
       :placeholder "Choose a Flag"
+      :width "40rem"
       :choices (flag-options)
       :group-fn :category
       :on-change (fn [flag] (rf/dispatch [::set-flag flag]))
-      :render-fn
-      (fn [item]
-        [:span
-         [:img {:src (titlebar/flag-icon (:id item))}]
-         (str (:label item) " " (:description item))])]
-     ;;FIXME: Description shouldn't show if in summary mode
-     [:span (:description (get flag flags/flags))]]))
+      :label-fn label-func
+      :render-fn label-func]
+     (when flag [rc/info-button
+                 :info [:div
+                        [:div
+                         [:img {:src (titlebar/flag-icon (:id finfo))}]
+                         (str (:category finfo) ": " (:label finfo))]
+                        (:description finfo)]])]))
 
 (rf/reg-event-db
  ::set-excerpt
