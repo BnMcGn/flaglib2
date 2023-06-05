@@ -179,25 +179,24 @@
 
 (defn flag-page []
   (let [flag @(rf/subscribe [::flag-or-default])
-        finfo (when flag (get flags/flags flag))
-        label-func
-        (fn [item]
-          [rc/h-box
-           :style {:left "0"}
-           :align :center
-           :children
-           [[:img {:src (titlebar/flag-icon (:id item))}]
-            [:span (str (:category item) ": " (:label item))]]]) ]
+        finfo (when flag (get flags/flags flag))]
     [:div
+     {:class "w-full"}
      [rc/single-dropdown
       :model flag
       :placeholder "Choose a Flag"
-      :width "40rem"
+      :width "90%"
       :choices (flag-options)
       :group-fn :category
       :on-change (fn [flag] (rf/dispatch [::set-flag flag]))
-      :label-fn label-func
-      :render-fn label-func]
+      :label-fn (fn [item]
+                  [:span (str (:category item) ": " (:label item))])
+      :render-fn (fn [item]
+                   [rc/h-box
+                    :align :center
+                    :children
+                    [[:img {:src (titlebar/flag-icon (:id item))}]
+                     [:span (str (:category item) ": " (:label item))]]])]
      (when flag [rc/info-button
                  :info [:div
                         [:div

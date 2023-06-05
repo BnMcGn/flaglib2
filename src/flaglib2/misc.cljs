@@ -51,6 +51,9 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:fx store))))
 
+(defn class-string [& colls]
+  (str/join " " (flatten colls)))
+
 ;;Debugging tools
 
 (defn say [itm]
