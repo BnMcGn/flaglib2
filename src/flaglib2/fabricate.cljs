@@ -18,7 +18,8 @@
    [flaglib2.posters :as posters]
 
    [cljsjs.fuse :as fuse]
-   [re-com-tailwind.core :as rc]))
+   [re-com-tailwind.core :as rc]
+   [re-com-tailwind.functions :refer [tw-btn-danger]]))
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
@@ -197,12 +198,19 @@
                     :children
                     [[:img {:src (titlebar/flag-icon (:id item))}]
                      [:span (str (:category item) ": " (:label item))]]])]
-     (when flag [rc/info-button
-                 :info [:div
-                        [:div
-                         [:img {:src (titlebar/flag-icon (:id finfo))}]
-                         (str (:category finfo) ": " (:label finfo))]
-                        (:description finfo)]])]))
+     (if flag
+       [rc/info-button
+        :info [:div
+               [:div
+                [:img {:src (titlebar/flag-icon (:id finfo))}]
+                (str (:category finfo) ": " (:label finfo))]
+               (:description finfo)]]
+       [rc/md-circle-icon-button
+        :md-icon-name "zmdi-alert-triangle"
+        :size :smaller
+        :tooltip "Flag is mandatory"
+        :class (misc/class-string (tw-btn-danger))]
+         )]))
 
 (rf/reg-event-db
  ::set-excerpt
