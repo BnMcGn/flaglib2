@@ -174,6 +174,8 @@
                (cond
                  (= status :failed)
                  [(::raw-excerpt-search db) nil]
+                 (= status :empty)
+                 [nil nil]
                  (::excerpt-start db)
                  (excerpts/start-end->excerpt-offset
                   (::tdat db) (::excerpt-start db) (::excerpt-end db))
@@ -188,7 +190,8 @@
       nil
       (case (or status :empty)
         :empty
-        [[rc/button :label "Accept" :class (tw-btn-primary) :disabled? true]]
+        [[rc/button :label "Accept" :class (tw-btn-primary)
+          :on-click #(rf/dispatch [::accept-entry :empty])]]
         :complete
         [[rc/button :label "Accept" :class (tw-btn-primary) :on-click #(rf/dispatch [::accept-entry])]]
         (:started :unstarted :failed)
