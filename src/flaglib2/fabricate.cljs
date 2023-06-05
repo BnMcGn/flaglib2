@@ -202,8 +202,9 @@
        [rc/info-button
         :info [:div
                [:div
+                {:class "flex items-center mb-2"}
                 [:img {:src (titlebar/flag-icon (:id finfo))}]
-                (str (:category finfo) ": " (:label finfo))]
+                [:span {:class "ml-3"} (str (:category finfo) ": " (:label finfo))]]
                (:description finfo)]]
        [rc/md-circle-icon-button
         :md-icon-name "zmdi-alert-triangle"
