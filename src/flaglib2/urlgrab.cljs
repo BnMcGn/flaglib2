@@ -37,7 +37,7 @@
 
 (rf/reg-event-fx
  ::enter-search
- (fn [{:keys [db]} [_ location search]]
+ (fn [{:keys [db]} [_ location search & {:keys [is-click?]}]]
    (let [selection (when (misc/url? search) search)
          ndb (update-in
               db location
@@ -52,7 +52,8 @@
            [[:db ndb]
             (when disp
               [:dispatch disp])
-            (when (and selection onsel)
+            ;;For now, we'll just trigger selection when a suggest-button is clicked.
+            (when (and selection onsel is-click?)
               [:call-something [onsel selection]])]))))
 
 
@@ -63,7 +64,7 @@
      :class "sm:border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
     :parts {:wrapper {:class "sm:w-[calc(100%_-_25px)]"}}
     :label [rt :url itm :hide-reply true :hide-external-link true :display-depth 0]
-    :on-click (fn [] (rf/dispatch [::enter-search location itm]))]))
+    :on-click (fn [] (rf/dispatch [::enter-search location itm :is-click? true]))]))
 
 (defn display-urls-in-categories [location]
   (let [labels {:rooturls "Previous Targets"
