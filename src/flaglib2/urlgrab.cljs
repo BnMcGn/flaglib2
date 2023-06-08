@@ -97,7 +97,7 @@
 (rf/reg-event-db
  ::clear-url-search
  (fn [db [_ location]]
-   (update db location dissoc ::search ::selection)))
+   (update-in db location assoc ::search "" ::selection "")))
 
 (defn url-search [location & {:keys [on-select]}]
   (let [loc location
