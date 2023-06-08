@@ -32,6 +32,11 @@
  (fn [db [_ location]]
    (::selection (get-in db location))))
 
+(rf/reg-sub
+ ::suppress-search-result
+ (fn [db [_ location]]
+   (:suppress-search-result (get-in db location))))
+
 (defn selected-url-from-db [location db]
   (::selection (get-in db location)))
 
@@ -42,7 +47,7 @@
          ndb (update-in
               db location
               (fn [state]
-                (let [nstate (assoc state ::search search)]
+                (let [nstate (assoc state ::search search :suppress-search-result is-click?)]
                   (if selection
                     (assoc nstate ::selection selection)
                     nstate))))
@@ -53,7 +58,7 @@
             (when disp
               [:dispatch disp])
             ;;For now, we'll just trigger selection when a suggest-button is clicked.
-            (when (and selection onsel is-click?)
+            (when (and selection onsel)
               [:call-something [onsel selection]])]))))
 
 
@@ -92,7 +97,7 @@
 (rf/reg-event-db
  ::initialize-url-search
  (fn [db [_ location on-select]]
-   (assoc-in db location {:on-select on-select})))
+   (assoc-in db location {:on-select on-select :suppress-search-results false})))
 
 (rf/reg-event-db
  ::clear-url-search
@@ -105,17 +110,19 @@
     (rf/dispatch-sync [::initialize-url-search loc onsel]))
   (fn [location & {:keys [placeholder]}]
     (let [search @(rf/subscribe [::search location])
-          search-res @(rf/subscribe [:url-search-results location])]
+          search-res @(rf/subscribe [:url-search-results location])
+          suppress @(rf/subscribe [::suppress-search-result location])]
       [:div
        [rc/input-text
         :placeholder placeholder
         :width "100%"
         :model search
         :on-change (fn [ev] (rf/dispatch [::enter-search location ev]))]
-       (if search-res
+       (if (and (not suppress) search-res)
          [display-searched-urls location]
          [display-urls-in-categories location])])))
 
+;;Unused...
 (defn clear-button [location]
   (let [search @(rf/subscribe [::search location])
         sel @(rf/subscribe [:selected-url location])]

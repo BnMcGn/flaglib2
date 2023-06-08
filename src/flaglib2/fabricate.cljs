@@ -35,7 +35,6 @@
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
   [ug/url-search [::specify-target]
-   :on-select :flaglib2.stepper/next
    :placeholder "Target URL or search terms"])
 
 (defn specify-target-summary []
@@ -48,8 +47,7 @@
     [step/button-box
      (step/button-spacer
       [[step/previous-button nil]]
-      [[ug/clear-button [::specify-target]]
-       (if (empty? url) [step/next-button-disabled] [step/next-button nil])])]))
+      [(if (empty? url) [step/next-button-disabled] [step/next-button nil])])]))
 
 ;;Decisioner: what to do if we don't have text
 
@@ -251,8 +249,7 @@
     [step/summary-button :reference text]))
 
 (defn reference-buttons []
-  [step/button-box (step/button-spacer nil [[ug/clear-button [::specify-reference]]
-                                            [step/next-button "Accept"]])])
+  [step/button-box (step/button-spacer nil [[step/next-button "Accept"]])])
 
 (rf/reg-event-db
  ::set-comment
