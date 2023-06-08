@@ -35,3 +35,4 @@
 
 (def patch "border-dashed border border-slate-800")
 
+(def button-disabled "text-gray-500")

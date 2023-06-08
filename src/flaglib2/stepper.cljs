@@ -4,6 +4,8 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [flaglib2.misc :as misc]
+   [flaglib2.deco :as deco]
+
    [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-primary]]))
 
@@ -69,7 +71,7 @@
 (defn next-button-disabled []
   [rc/button
    :label "Next"
-   :class "text-gray-500"
+   :class deco/button-disabled
    :disabled? true])
 
 (defn previous-button [label]
@@ -78,7 +80,7 @@
     [rc/button
      :label (if (string? label) label "Previous")
      :on-click #(rf/dispatch [::previous])
-     :class (when disabled "text-gray-500")
+     :class (when disabled deco/button-disabled)
      :disabled? disabled]))
 
 (defn button-box [contents]

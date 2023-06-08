@@ -94,6 +94,11 @@
  (fn [db [_ location on-select]]
    (assoc-in db location {:on-select on-select})))
 
+(rf/reg-event-db
+ ::clear-url-search
+ (fn [db [_ location]]
+   (update db location dissoc ::search ::selection)))
+
 (defn url-search [location & {:keys [on-select]}]
   (let [loc location
         onsel on-select]
@@ -111,6 +116,17 @@
          [display-searched-urls location]
          [display-urls-in-categories location])])))
 
+(defn clear-button [location]
+  (let [search @(rf/subscribe [::search location])
+        sel @(rf/subscribe [:selected-url location])]
+    (if (and (empty? search) (empty? sel))
+      [rc/button
+       :label "Clear"
+       :class deco/button-disabled
+       :disabled? true]
+      [rc/button
+       :label "Clear"
+       :on-click #(rf/dispatch [::clear-url-search location])])))
 
 
 
