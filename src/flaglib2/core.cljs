@@ -12,7 +12,6 @@
    [flaglib2.posters :as posters]
    [cljs.reader]))
 
-(println "This text is printed from src/flaglib2/core.cljs. Go ahead and edit it and see reloading in action.")
 
 (defn window-size []
   (let [size (. js/window -innerWidth)]

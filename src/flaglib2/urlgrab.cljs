@@ -47,6 +47,7 @@
          ndb (update-in
               db location
               (fn [state]
+                ;;FIXME: What if click is from a search result suggest?
                 (let [nstate (assoc state ::search search :suppress-search-result is-click?)]
                   (if selection
                     (assoc nstate ::selection selection)
