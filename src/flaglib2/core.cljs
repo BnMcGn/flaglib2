@@ -45,19 +45,6 @@
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
 
-(defn make-opinion []
-  [:span "here!"])
-
-;;FIXME: temporary hack. Need a better way to store mount points.
-(defonce mount-point nil)
-;;FIXME: will go somewhere else
-(defn mount-make-opinion [element params]
-  (when element
-    (set! mount-point element))
-  ;;params, when available, should be sent to re-frame.
-
-  (rdom/render [make-opinion] mount-point))
-
 (defonce startup (do (rf/dispatch-sync [:initialize])
                      (rf/clear-subscription-cache!)
                      (. js/window (addEventListener "resize" #(rf/dispatch [:window-size])))
