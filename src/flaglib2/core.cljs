@@ -10,6 +10,7 @@
    [flaglib2.ipfs :as ip]
    [flaglib2.fabricate :as fab]
    [flaglib2.posters :as posters]
+   [flaglib2.mock-make :as mock]
    [cljs.reader]))
 
 
@@ -56,11 +57,7 @@
   ;; after shadow-cljs hot-reloads code. We force a UI update by clearing
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
-  (init/mount-registered-elements)
-  ;;FIXME
-  ;(mount-make-opinion nil nil)
-
-  )
+  (rf/dispatch [:remount-registered]))
 
 (rf/reg-event-db
  :window-size

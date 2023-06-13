@@ -12,15 +12,20 @@
 
 
 ;;FIXME: Need to handle multiple?
-(defn mount-registered-elements []
-  (when-let [spec @(rf/subscribe [:server-parameters])]
+(defn mount-registered-elements [db]
+  (when-let [spec (:server-parameters db)]
     (when-let [mp (gdom/getElement (:mount-point spec))]
-      (rdom/render [@(rf/subscribe [:root-element])] mp))))
+      (rdom/render [(:root-element db)] mp))))
 
 (rf/reg-fx
  :mount-registered
- (fn [_]
-   (mount-registered-elements)))
+ (fn [_ db]
+   (mount-registered-elements db)))
+
+(rf/reg-event-fx
+ :remount-registered
+ (fn [{:keys [db]} _]
+   {:fx [ [:mount-registered db] ]}))
 
 (defn server-side-setup [config]
   (let [config (js->clj config :keywordize-keys true)]

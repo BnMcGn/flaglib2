@@ -357,8 +357,9 @@
 (rf/reg-event-fx
  :make-opinion
  (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :target])]
-     {:db (assoc db :root-element make-opinion)
+   (let [target (get-in db [:server-parameters :target])
+         db (assoc db :root-element make-opinion)]
+     {:db db
       :fx [ [:dispatch
              (if target
                [::enter-search target]
@@ -366,4 +367,4 @@
            [:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize steps]]
            ;;FIXME: is this the right place?
-           [:mount-registered]]})))
+           [:mount-registered db]]})))
