@@ -40,7 +40,7 @@
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
-  (init/mount-registered-elements)
+  (rf/dispatch-sync [:remount-registered])
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
@@ -57,7 +57,7 @@
   ;; after shadow-cljs hot-reloads code. We force a UI update by clearing
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
-  (rf/dispatch [:remount-registered]))
+  (rf/dispatch-sync [:remount-registered]))
 
 (rf/reg-event-db
  :window-size

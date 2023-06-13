@@ -19,7 +19,7 @@
 
 (rf/reg-fx
  :mount-registered
- (fn [_ db]
+ (fn [db]
    (mount-registered-elements db)))
 
 (rf/reg-event-fx
