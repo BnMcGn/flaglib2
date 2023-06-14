@@ -29,7 +29,7 @@
 
 (defn server-side-setup [config]
   (let [config (js->clj config :keywordize-keys true)]
-    (rf/dispatch [::store-server-parameters config])
+    (rf/dispatch-sync [::store-server-parameters config])
     (rf/dispatch [(keyword (:entry-point config))])))
 
 

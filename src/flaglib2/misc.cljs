@@ -129,3 +129,10 @@
 (defn dump-rect [el]
   (let [rec (.getBoundingClientRect el)]
     {:left (.-left rec) :right (.-right rec) :top (.-top rec) :bottom (.-bottom rec)}))
+
+(defmacro when-let*
+          [bindings & body]
+          `(let ~bindings
+                (if (and ~@(take-nth 2 bindings))
+                  (do ~@body)
+                  )))

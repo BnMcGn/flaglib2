@@ -6,6 +6,7 @@
 
    [flaglib2.fabricate :as fab]
    [flaglib2.stepper :as step]
+   [flaglib2.misc :as misc]
 
    ))
 
@@ -16,7 +17,6 @@
    :opinion-store {},
    :flaglib2.fabricate/specify-target {:on-select nil, :suppress-search-results false},
    :flaglib2.posters/opinion-failure nil,
-   :server-parameters {},
    :text-store {},
    :warstats-store {},
    :flaglib2.posters/opinion-response nil,
@@ -33,12 +33,16 @@
 (rf/reg-event-fx
  :mock-make
  (fn [{:keys [db]} _]
-   (let [section (keyword (get-in db [:server-parameters :section]))]
-     {:db (merge
-           db
-           (get sections section)
-           {:root-element mock-make})
+   (let [section (keyword (get-in db [:server-parameters :section]))
+         db (merge
+             db
+             (get sections section)
+             {:root-element mock-make})]
+     {:db db
       :fx [
-           ;[:dispatch [:add-hooks fabricate-hooks]]
+           ;;[:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize fab/steps]]
-           [:mount-registered]]})))
+           [:mount-registered db]]})))
+
+
+
