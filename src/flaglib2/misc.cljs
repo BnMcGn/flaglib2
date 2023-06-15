@@ -4,6 +4,7 @@
    [reagent.dom.server :refer [render-to-string]]
    [re-frame.registrar]
    [re-frame.core :as rf]
+   [re-frame.db]
    [clojure.string :as str]))
 
 (defn encode-uri-component2 [uri]
@@ -50,6 +51,10 @@
 (defn list-fx []
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:fx store))))
+
+(defn reframe-db []
+  "Fetch the reframe db. Used for testing/console. Not for live code!"
+  @re-frame.db/app-db)
 
 (defn class-string [& colls]
   (str/join " " (flatten colls)))

@@ -33,9 +33,9 @@
    (::selection (get-in db location))))
 
 (rf/reg-sub
- ::suppress-search-result
+ ::suppress-search-results
  (fn [db [_ location]]
-   (:suppress-search-result (get-in db location))))
+   (:suppress-search-results (get-in db location))))
 
 (defn selected-url-from-db [location db]
   (::selection (get-in db location)))
@@ -48,7 +48,7 @@
               db location
               (fn [state]
                 ;;FIXME: What if click is from a search result suggest?
-                (let [nstate (assoc state ::search search :suppress-search-result is-click?)]
+                (let [nstate (assoc state ::search search :suppress-search-results is-click?)]
                   (if selection
                     (assoc nstate ::selection selection)
                     nstate))))
@@ -112,7 +112,7 @@
   (fn [location & {:keys [placeholder]}]
     (let [search @(rf/subscribe [::search location])
           search-res @(rf/subscribe [:url-search-results location])
-          suppress @(rf/subscribe [::suppress-search-result location])]
+          suppress @(rf/subscribe [::suppress-search-results location])]
       [:div
        [rc/input-text
         :placeholder placeholder
