@@ -73,16 +73,26 @@
 
 (def sections
   {:initial plain-db
-   :target-set
+   :opine
    (merge
     plain-db
     {:title-store title-store
      :text-store text-store
      :warstats-store warstats-store
-     :flaglib2.fabricate/specify-target specify-target
-     })})
+     :flaglib2.fabricate/specify-target specify-target})
+   :decision-reviewed
+   (merge
+    plain-db
+    {:title-store title-store
+     :text-store text-store
+     :warstats-store warstats-store
+     :flaglib2.fabricate/specify-target specify-target})})
 
-(def section-step {:target-set :opine})
+(def section-step {:opine :opine
+                   :decision-reviewed :target-decision
+                   :decision-available :target-decision
+                   :decision-wait :target-decision
+                   :decision-failure :target-decision})
 
 
 (defn mock-make [{:keys [section]}]

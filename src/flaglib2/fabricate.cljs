@@ -90,7 +90,7 @@
           [:li "You may supply the article text manually"]
           ;;FIXME
           ;;[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
-          [:li "You might not need the article text, for example, if you aren't using excerpts."]]])
+          [:li "You might not need the article text in some cases, for example, if you aren't using excerpts."]]])
       "")))
 
 
