@@ -60,7 +60,7 @@
                    have-text :available
                    ;;FIXME: Not sure that :wait is correct here. Perhaps add an appropriate message
                    ;; for the NIL circumstance
-                   :else (or (walk/keywordize-keys (:status status)) :wait))
+                   :else (or (keyword (walk/keywordize-keys (:status status))) :wait))
      :message (and status (:message status))}))
 
 (defn target-decision [db target]

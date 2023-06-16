@@ -79,7 +79,7 @@
 (def text-store-unavailable
   (update-in text-store [target-url] dissoc :text))
 
-(def text-failed {:status "failure" :message "Failure is happened!!"})
+(def text-failed {target-url {:status "failure" :message "Failure is happened!!"}})
 
 (def targetted-db
   (merge
