@@ -154,7 +154,10 @@ the Internet.
                        :text-status text-failed)
    :review-text (assoc targetted-db
                        :warstats-store warstats-store-unreviewed)
-   :opine-deluxe extra-db})
+   :opine-deluxe extra-db
+   :opine-bad-excerpt (assoc extra-db
+                             :flaglib2.fabricate/excerpt ["nonexist" 0])
+   :target-return extra-db})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -163,7 +166,9 @@ the Internet.
                    :decision-failure :target-decision
                    :supply-text :supply-text
                    :review-text :review-text
-                   :opine-deluxe :opine})
+                   :opine-deluxe :opine
+                   :opine-bad-excerpt :opine
+                   :target-return :specify-target})
 
 
 (defn mock-make [{:keys [section]}]
