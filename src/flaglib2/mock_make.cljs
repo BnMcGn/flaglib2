@@ -23,6 +23,38 @@
    :flaglib2.posters/alternate-failure nil,
    :flaglib2.fetchers/author-urls {}})
 
+(def sample-text "Sample Web Page
+
+A random photo, maximize your browser to enlarge.
+Frank da Cruz
+
+Sat Jan 17 12:07:32 2004
+
+* Creating a Web Page
+* HTML Syntax
+* Special Characters
+* Converting Plain Text to HTML
+* Effects
+* Lists
+* Links
+* Tables
+* Installing your Web Page on the Internet
+* Where to go from here
+
+This page was typed by hand. Anybody can do this, you don't need any
+  special \"web creation\" tools or HTML editors, and the pages you make can be
+viewed from any browser. To see how this page was made, chooseView Source (or View Page Source, or View Document Source) in your
+browser's menu. A simple web page like this one is just plain text with
+HTML commands (markup) mixed in. HTML commands themselves are plain text.
+When you're just learning and want to experiment, you can do everything on
+  your PC. Create a new directory (\"folder\") for your website, and then put
+the web-page files (HTML plus any pictures) in it. Use NotePad or other
+plain-text editor (not word processor) on your PC to create anindex.html file, which you can view locally with your Web browser.
+(You can also use word processors such as Word or WordPad if you save in
+  \"plain text\", \"text\", \"text document\", or \"text document MS-DOS format\".)Later I'll explain how you can install your web site on
+the Internet.
+
+  ... ")
 
 (def title-store
   {"http://www.columbia.edu/~fdc/sample.html"
@@ -44,7 +76,7 @@
    {:x-up 1, :x-down 1, :x-wrong 0, :x-right 0,
     :initial-status "failure",
     :controversy 4,
-    :text "",
+    :text sample-text,
     :text-source :initial,
     :replies-immediate 0,
     :tree-freshness "2021-02-01T14:53:58+0000",
@@ -100,13 +132,21 @@
    :decision-failure (assoc targetted-db
                             :warstats-store warstats-store-unreviewed
                             :text-store text-store-unavailable
-                            :text-status text-failed)})
+                            :text-status text-failed)
+   :supply-text (assoc targetted-db
+                       :warstats-store warstats-store-unreviewed
+                       :text-store text-store-unavailable
+                       :text-status text-failed)
+   :review-text (assoc targetted-db
+                       :warstats-store warstats-store-unreviewed)})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
                    :decision-available :target-decision
                    :decision-wait :target-decision
-                   :decision-failure :target-decision})
+                   :decision-failure :target-decision
+                   :supply-text :supply-text
+                   :review-text :review-text})
 
 
 (defn mock-make [{:keys [section]}]
