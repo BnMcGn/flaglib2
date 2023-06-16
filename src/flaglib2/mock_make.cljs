@@ -65,28 +65,42 @@
     :direction :neutral,
     :direction-on-root :neutral}})
 
+(def target-url "http://www.columbia.edu/~fdc/sample.html")
+
 (def specify-target
   {:on-select nil,
    :suppress-search-results true,
-   :flaglib2.urlgrab/search "http://www.columbia.edu/~fdc/sample.html",
-   :flaglib2.urlgrab/selection "http://www.columbia.edu/~fdc/sample.html"})
+   :flaglib2.urlgrab/search target-url,
+   :flaglib2.urlgrab/selection target-url})
+
+(def warstats-store-unreviewed
+  (assoc-in warstats-store [target-url :replies-total] 0))
+
+(def text-store-unavailable
+  (update-in text-store [target-url] dissoc :text))
+
+(def text-failed {:status "failure" :message "Failure is happened!!"})
+
+(def targetted-db
+  (merge
+   plain-db
+   {:title-store title-store
+    :text-store text-store
+    :warstats-store warstats-store
+    :flaglib2.fabricate/specify-target specify-target}))
 
 (def sections
   {:initial plain-db
-   :opine
-   (merge
-    plain-db
-    {:title-store title-store
-     :text-store text-store
-     :warstats-store warstats-store
-     :flaglib2.fabricate/specify-target specify-target})
-   :decision-reviewed
-   (merge
-    plain-db
-    {:title-store title-store
-     :text-store text-store
-     :warstats-store warstats-store
-     :flaglib2.fabricate/specify-target specify-target})})
+   :opine targetted-db
+   :decision-reviewed targetted-db
+   :decision-available (assoc targetted-db :warstats-store warstats-store-unreviewed)
+   :decision-wait (assoc targetted-db
+                         :warstats-store warstats-store-unreviewed
+                         :text-store text-store-unavailable)
+   :decision-failure (assoc targetted-db
+                            :warstats-store warstats-store-unreviewed
+                            :text-store text-store-unavailable
+                            :text-status text-failed)})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
