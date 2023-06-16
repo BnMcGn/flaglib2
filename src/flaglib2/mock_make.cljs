@@ -121,6 +121,21 @@ the Internet.
     :warstats-store warstats-store
     :flaglib2.fabricate/specify-target specify-target}))
 
+(def reference-url "http://google.com/")
+
+(def extra-db
+  (merge
+   targetted-db
+   {:warstats-store warstats-store-unreviewed
+    :flaglib2.fabricate/review-text "Adjusted text"
+    :flaglib2.fabricate/flag :custodial-blank
+    :flaglib2.fabricate/excerpt ["just" 0]
+    :flaglib2.fabricate/specify-reference {:on-select nil,
+                                           :suppress-search-results true,
+                                           :flaglib2.urlgrab/search reference-url,
+                                           :flaglib2.urlgrab/selection reference-url}
+    :flaglib2.fabricate/comment "This might be a comment"}))
+
 (def sections
   {:initial plain-db
    :opine targetted-db
@@ -138,7 +153,8 @@ the Internet.
                        :text-store text-store-unavailable
                        :text-status text-failed)
    :review-text (assoc targetted-db
-                       :warstats-store warstats-store-unreviewed)})
+                       :warstats-store warstats-store-unreviewed)
+   :opine-deluxe extra-db})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -146,7 +162,8 @@ the Internet.
                    :decision-wait :target-decision
                    :decision-failure :target-decision
                    :supply-text :supply-text
-                   :review-text :review-text})
+                   :review-text :review-text
+                   :opine-deluxe :opine})
 
 
 (defn mock-make [{:keys [section]}]
