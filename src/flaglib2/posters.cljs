@@ -15,11 +15,12 @@
 
 
 (defn init []
-  {::opinion-response nil
-   ::opinion-failure nil
-   ::alternate-response nil
-   ::alternate-failure nil})
-
+  {::opinion-status {:response nil
+                     :failure nil}
+   ::alternate-status {:response nil
+                     :failure nil}
+   ::alt-title-status {:response nil
+                     :failure nil}})
 
 ;;Low level
 
@@ -37,7 +38,7 @@
 
 (rf/reg-event-fx
  :post-opinion-to-server
- (fn [_ [_ opinion callback & {:keys [failure]}]]
+ (fn [_ [_ opinion opincat]]
    {:http-xhrio {:method :post
                  :uri "/opinion-post/"
                  :timeout 6000
@@ -46,21 +47,20 @@
                              remove-nulls)
                  :format (ajax/url-request-format)
                  :response-format (ajax/json-response-format)
-                 :on-success [::posted-opinion-to-server callback]
-                 :on-failure [::opinion-post-failed failure]}}))
+                 :on-success [::posted-opinion-to-server opincat]
+                 :on-failure [::opinion-post-failed opincat]}}))
 
-(rf/reg-event-fx
+(rf/reg-event-db
  ::posted-opinion-to-server
- (fn [_ [_ callback response]]
-   {:call-something (conj callback (walk/keywordize-keys response))}))
+ (fn [db [_ opincat response]]
+   (assoc-in db opincat {:response (walk/keywordize-keys response) :failure nil})))
 
-(rf/reg-event-fx
+(rf/reg-event-db
  ::opinion-post-failed
- (fn [_ [_ callback response]]
-   (if callback
-     {:call-something (conj callback response)}
-     {})))
-
+ ;;Response is an object that contains :success or :errors object, indexed with results from the
+ ;;submission.
+ (fn [db [_ opincat response]]
+   (assoc-in db opincat {:response nil :failure (walk/keywordize-keys response)})))
 
 ;;Text/Title utilities
 
@@ -71,6 +71,7 @@
 (defn stick-dirc-on-text [dbody text]
   (str "#(" dbody ")\n" text))
 
+;;FIXME: inconsistent flag format!
 (defn ttify-opinion [opinion tt suggest]
   (when (and (:flag opinion) (not (= '(:custodial :blank) (:flag opinion))))
     (throw (js/Error. "Flag for text/title opinion must be (:custodial :blank)")))
@@ -84,21 +85,8 @@
 
 ;;Post tool for fabricate form
 
-(defn opinion-post-status [db]
-  (let [response (::opinion-response db)
-        failure (::opinion-failure db)]
-    (cond
-      failure :failed
-      response
-      (cond
-        (:errors response) :failed
-        (:success response) :posted
-        :else (throw (js/Error. "Invalid status from server"))) ;;Shouldn't happen
-      :else :unposted)))
-
-(defn alternate-post-status [db]
-  (let [response (::alternate-response db)
-        failure (::alternate-failure db)]
+(defn post-status [db opincat]
+  (let [{:keys [response failure]} (get-in db opincat)]
     (cond
       failure :failed
       response
@@ -113,86 +101,61 @@
 (rf/reg-event-fx
  :post-opinion
  (fn [{:keys [db]} _]
-   (let [{:keys [opinion alternate]} @(rf/subscribe [:current-opinion])
+   (let [{:keys [opinion alternate alt-title]} @(rf/subscribe [:current-opinion])
          altop (when (and (string? alternate) (not-empty alternate))
-                 (ttify-opinion {:comment alternate} "text" false))]
-     {:fx [(when (and (not (= :posted (alternate-post-status db))) altop)
-             [:dispatch [:post-opinion-to-server
-                         altop [::alternate-response] :failure [::alternate-failure]]])
-           (when (not (= :posted (opinion-post-status db)))
-             [:dispatch [:post-opinion-to-server opinion [::opinion-response]
-                         :failure [::opinion-failure]]])]})))
+                 (ttify-opinion {:comment alternate} "text" false))
+         titop (when (and (string? alt-title) (not-empty alt-title))
+                 (ttify-opinion {:comment alt-title} "title" false))]
+     {:fx [(when (and (not (= :posted (post-status db [::alternate-status]))) altop)
+             [:dispatch [:post-opinion-to-server altop [::alternate-status]]])
+           (when (and (not (= :posted (post-status db [::alt-title-status]))) titop)
+             [:dispatch [:post-opinion-to-server titop [::alt-title-status]]])
+           (when (not (= :posted (post-status db [::opinion-status])))
+             [:dispatch [:post-opinion-to-server opinion [::opinion-status]]])]})))
 
-(rf/reg-event-db
- ::opinion-response
- (fn [db [_ response]]
-   (assoc db ::opinion-response response ::opinion-failure nil)))
 
-(rf/reg-event-db
- ::opinion-failure
- (fn [db [_ response]]
-   (assoc db ::opinion-failure response ::opinion-response nil)))
 
-(rf/reg-event-db
- ::alternate-response
- (fn [db [_ response]]
-   ;;Response is an object that contains :success or :errors object, indexed with results from the
-   ;;submission.
-   (assoc db ::alternate-response response ::alternate-failure nil)))
-
-(rf/reg-event-db
- ::alternate-failure
- (fn [db [_ response]]
-   (assoc db ::alternate-failure response ::alternate-response nil)))
-
-(rf/reg-sub ::opinion-failure :-> ::opinion-failure)
-(rf/reg-sub ::opinion-response :-> ::opinion-response)
-(rf/reg-sub ::alternate-failure :-> ::alternate-failure)
-(rf/reg-sub ::alternate-response :-> ::alternate-response)
+(rf/reg-sub ::opinion-status :-> ::opinion-status)
+(rf/reg-sub ::alternate-status :-> ::alternate-status)
+(rf/reg-sub ::alt-title-status :-> ::alt-title-status)
 
 ;;FIXME: may need resets for statuses. Shouldn't be too hard.
 (rf/reg-sub
- :opinion-post-status
- :<- [::opinion-response]
- :<- [::opinion-failure]
- (fn [[response failure] _]
-   (opinion-post-status {::opinion-response response ::opinion-failure failure})))
+ ::quick-status
+ :<- [::opinion-status]
+ :<- [::alternate-status]
+ :<- [::alt-title-status]
+ (fn [[op alt tit] _]
+   [(post-status op [])
+    (post-status alt [])
+    (post-status tit [])]))
 
-(rf/reg-sub
- :alternate-post-status
- :<- [::alternate-response]
- :<- [::alternate-failure]
- (fn [[response failure] _]
-   (alternate-post-status {::alternate-response response ::alternate-failure failure})))
+(defn- msg-format [status text1 text2]
+  (let [{:keys [response failure]} status]
+   (if failure
+     [(str text1 (:status-text failure))]
+     (if-let [errors (:errors response)]
+       (map (fn [[k v]] (str k ": " v)) errors)
+       (when (:success response)
+         [text2])))))
 
-;;FIXME: add indicator of message type.
+;;FIXME: add indicator of message type. Might want to color code.
 (rf/reg-sub
  :opinion-post-messages
- :<- [::opinion-response]
- :<- [::opinion-failure]
- :<- [::alternate-response]
- :<- [::alternate-failure]
- (fn [[oresp ofail aresp afail] _]
+ :<- [::opinion-status]
+ :<- [::alternate-status]
+ :<- [::alt-title-status]
+ (fn [[op alt tit] _]
    (into []
          (flatten
-          [(if afail
-             [(str "Reviewed text failed to post: " (:status-text afail))]
-             (if-let [errors (:errors aresp)]
-               (map (fn [[k v]] (str k ": " v)) errors)
-               (when (:success aresp)
-                 ["Reviewed text posted"])))
-           (if ofail
-             [(str "Opinion failed to post: " (:status-text ofail))]
-             (if-let [errors (:errors oresp)]
-               (map (fn [[k v]] (str k ": " v)) errors)
-               (when (:success oresp)
-                 ["Opinion posted"])))]))))
+          [(msg-format alt "Reviewed text failed to post: " "Reviewed text posted")
+           (msg-format tit "Edited title failed to post: " "Alternate title posted")
+           (msg-format op "Opinion failed to post: " "Opinion posted")]))))
 
 (defn opine-buttons []
-  (let [ostatus @(rf/subscribe [:opinion-post-status])
-        astatus @(rf/subscribe [:alternate-post-status])
+  (let [qstatus @(rf/subscribe [::quick-status])
         flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
-        text (if (some #(= :failed %) [ostatus astatus]) "Retry" "Post")]
+        text (if (some #(= :failed %) qstatus) "Retry" "Post")]
     [step/button-box
      (step/button-spacer
       nil
