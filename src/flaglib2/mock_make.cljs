@@ -170,6 +170,12 @@ the Internet.
                    :opine-bad-excerpt :opine
                    :target-return :specify-target})
 
+;;Lists of steps that, per page, should be set to summary mode
+(def summary-settings {:opine-deluxe [:specify-target :target-decision :review-text]
+                       :opine-bad-excerpt [:specify-target :target-decision :review-text]
+                       :target-return [:specify-target :target-decision :review-text
+                                       :excerpt :reference :flag :opine]})
+
 
 (defn mock-make [{:keys [section]}]
   [step/wf-stepper])
@@ -181,15 +187,19 @@ the Internet.
          db (merge
              db
              (get sections section)
-             {:root-element mock-make})]
+             {:root-element mock-make})
+         summaries (for [step (get summary-settings section)]
+                     [:dispatch [:flaglib2.stepper/set-summary step]])]
      (when-not (get sections section) (throw (js/Error. "Mockable not found")))
      {:db db
-      :fx [
-           ;;[:dispatch [:add-hooks fabricate-hooks]]
-           [:dispatch [:flaglib2.stepper/initialize fab/steps]]
-           (when-let [step (get section-step section)]
-             [:dispatch [:flaglib2.stepper/goto step]])
-           [:mount-registered db]]})))
+      :fx (into
+           [
+            ;;[:dispatch [:add-hooks fabricate-hooks]]
+            [:dispatch [:flaglib2.stepper/initialize fab/steps]]
+            (when-let [step (get section-step section)]
+              [:dispatch [:flaglib2.stepper/goto step]])
+            [:mount-registered db]]
+           summaries)})))
 
 
 
