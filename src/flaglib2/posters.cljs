@@ -71,14 +71,13 @@
 (defn stick-dirc-on-text [dbody text]
   (str "#(" dbody ")\n" text))
 
-;;FIXME: inconsistent flag format!
 (defn ttify-opinion [opinion tt suggest]
-  (when (and (:flag opinion) (not (= '(:custodial :blank) (:flag opinion))))
-    (throw (js/Error. "Flag for text/title opinion must be (:custodial :blank)")))
+  (when (and (:flag opinion) (not (= :custodial-blank (:flag opinion))))
+    (throw (js/Error. "Flag for text/title opinion must be :custodial-blank)")))
   (when (and (string? (:comment opinion)) (contains-tt-tag? (:comment opinion)))
     (throw (js/Error. "Already contains text/title directive")))
   (assoc opinion
-         :flag '(:custodial :blank)
+         :flag :custodial-blank
          :comment (stick-dirc-on-text
                    (str (if suggest "suggest-" "") "target-" tt)
                    (or (:comment opinion) ""))))
