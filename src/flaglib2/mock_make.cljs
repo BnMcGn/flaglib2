@@ -136,6 +136,18 @@ the Internet.
                                            :flaglib2.urlgrab/selection reference-url}
     :flaglib2.fabricate/comment "This might be a comment"}))
 
+(def server-success
+  {:flaglib2.posters/opinion-status {:response {:success true}}
+   :flaglib2.posters/alternate-status {:response {:success true}}
+   :flaglib2.posters/alt-title-status {:response {:success true}}})
+
+;;FIXME: Unsure how failure structure will actually look on arrival from server
+(def server-fail
+  {:flaglib2.posters/opinion-status {:failure {:status-text "Didn't make it"}}
+   :flaglib2.posters/alternate-status {:response {:success true}}
+   :flaglib2.posters/alt-title-status {:response {:errors {"comment" "Too wrong"
+                                                           "target" "Don't look there!"}}}})
+
 (def sections
   {:initial plain-db
    :opine targetted-db
@@ -157,7 +169,9 @@ the Internet.
    :opine-deluxe extra-db
    :opine-bad-excerpt (assoc extra-db
                              :flaglib2.fabricate/excerpt ["nonexist" 0])
-   :target-return extra-db})
+   :target-return extra-db
+   :post-success (merge extra-db server-success)
+   :post-fail (merge extra-db server-fail)})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -168,13 +182,17 @@ the Internet.
                    :review-text :review-text
                    :opine-deluxe :opine
                    :opine-bad-excerpt :opine
-                   :target-return :specify-target})
+                   :target-return :specify-target
+                   :post-success :opine
+                   :post-fail :opine})
 
 ;;Lists of steps that, per page, should be set to summary mode
 (def summary-settings {:opine-deluxe [:specify-target :target-decision :review-text]
                        :opine-bad-excerpt [:specify-target :target-decision :review-text]
                        :target-return [:specify-target :target-decision :review-text
-                                       :excerpt :reference :flag :opine]})
+                                       :excerpt :reference :flag :opine]
+                       :post-success [:specify-target :target-decision :review-text]
+                       :post-fail [:specify-target :target-decision :review-text]})
 
 
 (defn mock-make [{:keys [section]}]
