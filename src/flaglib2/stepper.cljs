@@ -118,12 +118,13 @@
 (defn step-display [step]
   (cond
     (= :summary (:status step))
-    [rc/box
-     :class (step-style false (:grouped step))
-     :child
-     (if (string? (:label step))
-       [summary-button (:id step) (:label step)]
-       (:label step))]
+    (when (:label step)
+      [rc/box
+       :class (step-style false (:grouped step))
+       :child
+       (if (string? (:label step))
+         [summary-button (:id step) (:label step)]
+         (:label step))])
     (= :active (:status step))
     [step-base step (or (:buttons step) (stepper-buttons))]))
 
