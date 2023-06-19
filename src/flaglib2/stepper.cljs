@@ -107,7 +107,7 @@
     [button-box
      (button-spacer
       (when previous [previous])
-      (if buttons (into buttons next) next))]))
+      (if buttons (into buttons [next]) [next]))]))
 
 (defn summary-button [id label]
   [rc/button :label label

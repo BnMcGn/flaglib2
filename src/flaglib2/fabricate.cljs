@@ -114,7 +114,7 @@
         (step/stepper-buttons
          :next "Flag Anyways"
          :buttons [[supply-text-button]]))
-     [])))
+      [])))
 
 (rf/reg-event-db
  ::reset-review-text
