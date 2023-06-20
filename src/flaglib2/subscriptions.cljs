@@ -81,16 +81,24 @@
 (rf/reg-sub :window-size :-> :window-size)
 
 (rf/reg-sub
+ :flaglib2.fabricate/existing-text
+ (fn [db _]
+   (when-let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
+     (get-in db [:text-store target :text]))))
+
+(rf/reg-sub
+ :flaglib2.fabricate/existing-title
+ (fn [db _]
+   (when-let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
+     (get-in db [:title-store target :title]))))
+
+(rf/reg-sub
  :flaglib2.fabricate/active-text
  ;;FIXME: could consider caching a tdat?
- (fn [db _]
-   (or
-    (:flaglib2.fabricate/supplied-text db)
-    (let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
-      (if target
-        (get-in db [:text-store target :text])
-        ;;FIXME: Should lack of text be an error? If so, what to do with it?
-        "")))))
+ :<- [:flaglib2.fabricate/supplied-text]
+ :<- [:flaglib2.fabricate/existing-text]
+ (fn [[supplied existing] _]
+   (or supplied existing)))
 
 (rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
 (rf/reg-sub

@@ -138,6 +138,28 @@
 (rf/reg-sub ::supplied-text :-> ::supplied-text)
 (rf/reg-sub ::supplied-title :-> ::supplied-title)
 
+(rf/reg-sub
+ ::text-supplied
+ :<- [::supplied-text]
+ :<- [::existing-text]
+ (fn [[supplied existing] _]
+   (if (not-empty supplied)
+     (if (= supplied existing)
+       false
+       true)
+     false)))
+
+(rf/reg-sub
+ ::title-supplied
+ :<- [::supplied-title]
+ :<- [::existing-title]
+ (fn [[supplied existing] _]
+   (if (not-empty supplied)
+     (if (= supplied existing)
+       false
+       true)
+     false)))
+
 ;;FIXME: Should also review title?
 (defn review-text []
   (let [text @(rf/subscribe [::review-text])]
@@ -354,15 +376,18 @@
  :<- [::comment]
  :<- [::supplied-text]
  :<- [::supplied-title]
- (fn [[flag [excerpt offset] target reference comment supplied-text supplied-title] _]
-   {:opinion {:target target
-              :flag flag
-              :excerpt excerpt
-              :excerpt-offset offset
-              :reference reference
-              :comment comment}
-    :alternate supplied-text
-    :alt-title supplied-title}))
+ :<- [::text-supplied]
+ :<- [::title-supplied]
+ (fn [[flag [excerpt offset] target reference comment supplied-text supplied-title text? title?] _]
+   (merge
+    {:opinion {:target target
+               :flag flag
+               :excerpt excerpt
+               :excerpt-offset offset
+               :reference reference
+               :comment comment}}
+    (when text? {:alternate supplied-text})
+    (when title? {:alt-title supplied-title}))))
 
 ;;Needs to be at bottom of file:
 
