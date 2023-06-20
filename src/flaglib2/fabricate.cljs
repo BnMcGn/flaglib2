@@ -117,15 +117,26 @@
       [])))
 
 (rf/reg-event-db
- ::reset-review-text
+ ::reset-supplied-tt
  (fn [db _]
    (let [target (ug/selected-url-from-db [::specify-target] db)]
-     (assoc db ::review-text (get-in db [:text-store target :text])))))
+     (assoc db
+            ::supplied-text (get-in db [:text-store target :text] "")
+            ::supplied-title (get-in db [:title-store target :title] "")))))
 
 (rf/reg-event-db
- ::set-review-text
+ ::set-supplied-text
  (fn [db [_ text]]
-   (assoc db ::review-text text)))
+   ;;FIXME: Perhaps some processing on text?
+   (assoc db ::supplied-text text)))
+
+(rf/reg-event-db
+ ::set-supplied-title
+ (fn [db [_ title]]
+   (assoc db ::supplied-title title)))
+
+(rf/reg-sub ::supplied-text :-> ::supplied-text)
+(rf/reg-sub ::supplied-title :-> ::supplied-title)
 
 ;;FIXME: Should also review title?
 (defn review-text []
@@ -138,23 +149,19 @@
       [:li "Check that the article text is complete."]
       [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]]
 
+     [rc/input-text
+      :model (rf/subscribe [::supplied-title])
+      :on-change (fn [title] (rf/dispatch [::set-supplied-title]))]
      [rc/input-textarea
-      :model :text
+      :model (rf/subscribe [::supplied-text])
       :rows 15
-      :on-change (fn [text] (rf/dispatch [::set-review-text text]))]]))
+      :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]]))
 
 ;;FIXME: How do we handle unchanged?
 (defn review-text-buttons []
   (step/stepper-buttons
-   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-review-text])]]))
+   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-supplied-tt])]]))
 
-(rf/reg-event-db
- ::set-supplied-text
- (fn [db [_ text]]
-   ;;FIXME: Perhaps some processing on text?
-   (assoc db ::supplied-text text)))
-
-(rf/reg-sub ::supplied-text :-> ::supplied-text)
 
 (defn supply-text []
   [:div
@@ -301,10 +308,12 @@
    {:id :review-text
     :page [review-text]
     :buttons [review-text-buttons]
-    :once [::reset-review-text]
+    :once [::reset-supplied-tt]
     :next :opine}
    {:id :supply-text
-    :previous :target-decision}
+    :page [supply-text]
+    :previous :target-decision
+    :next :opine}
    {:id :flag
     :page [flag-page]
     :label [flag-page]
@@ -338,14 +347,16 @@
  :<- [:selected-url [::specify-reference]]
  :<- [::comment]
  :<- [::supplied-text]
- (fn [[flag [excerpt offset] target reference comment supplied-text] _]
+ :<- [::supplied-title]
+ (fn [[flag [excerpt offset] target reference comment supplied-text supplied-title] _]
    {:opinion {:target target
               :flag flag
               :excerpt excerpt
               :excerpt-offset offset
               :reference reference
               :comment comment}
-    :alternate supplied-text}))
+    :alternate supplied-text
+    :alt-title supplied-title}))
 
 ;;Needs to be at bottom of file:
 
