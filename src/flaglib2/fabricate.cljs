@@ -170,7 +170,13 @@
     [:li "The article text could not be automatically downloaded and extracted."]
     [:li "You may supply the text by posting it into the box below."]
     [:li "The text should be an accurate representation of the linked article. No spelling corrections or other edits."]]
+
+   [rc/input-text
+    :model (rf/subscribe [::supplied-title])
+    :on-change (fn [title] (rf/dispatch [::set-supplied-title]))]
    [rc/input-textarea
+    :model (rf/subscribe [::supplied-text])
+    :rows 15
     :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]])
 
 (rf/reg-event-db
