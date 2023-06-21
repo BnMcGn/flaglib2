@@ -173,13 +173,17 @@
 
      [rc/input-text
       :model (rf/subscribe [::supplied-title])
+      :placeholder "Article Title"
       :on-change (fn [title] (rf/dispatch [::set-supplied-title]))]
      [rc/input-textarea
       :model (rf/subscribe [::supplied-text])
+      :placeholder "Article Text"
+      :width "100%"
+      :height "14rem"
       :rows 15
       :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]]))
 
-;;FIXME: How do we handle unchanged?
+;;FIXME: Previous button non-functional
 (defn review-text-buttons []
   (step/stepper-buttons
    :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::reset-supplied-tt])]]))
@@ -195,9 +199,13 @@
 
    [rc/input-text
     :model (rf/subscribe [::supplied-title])
+    :placeholder "Article Title"
     :on-change (fn [title] (rf/dispatch [::set-supplied-title]))]
    [rc/input-textarea
     :model (rf/subscribe [::supplied-text])
+    :placeholder "Article Text"
+    :width "100%"
+    :height "14rem"
     :rows 15
     :on-change (fn [text] (rf/dispatch [::set-supplied-text text]))]])
 
