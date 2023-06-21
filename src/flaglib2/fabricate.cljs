@@ -169,7 +169,11 @@
       [:li "This text is automatically extracted. Please ensure that it is formatted pleasantly."]
       [:li "Remove extraneous text that is not part of the article (Eg. footer and sidebar text, unrelated links)"]
       [:li "Check that the article text is complete."]
-      [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]]
+      [:li "Ensure that the title is uncluttered and informative."]
+      [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]
+      [:br]
+      [:li "To skip, click Next"]]
+     [:br]
 
      [rc/input-text
       :model (rf/subscribe [::supplied-title])
@@ -191,11 +195,13 @@
 
 (defn supply-text []
   [:div
-   [:h3 "Supply the article text"]
+   [:h3 "Supply the article text and title"]
    [:ul
     [:li "The article text could not be automatically downloaded and extracted."]
-    [:li "You may supply the text by posting it into the box below."]
+    [:li "You may supply the text and title by posting into the boxes below."]
+    [:br]
     [:li "The text should be an accurate representation of the linked article. No spelling corrections or other edits."]]
+   [:br]
 
    [rc/input-text
     :model (rf/subscribe [::supplied-title])
