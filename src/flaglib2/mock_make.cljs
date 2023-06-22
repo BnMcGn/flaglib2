@@ -5,6 +5,7 @@
    [re-frame.core :as rf]
 
    [flaglib2.fabricate :as fab]
+   [flaglib2.forms :as forms]
    [flaglib2.stepper :as step]
    [flaglib2.misc :as misc]
 
@@ -213,7 +214,7 @@ the Internet.
       :fx (into
            [
             ;;[:dispatch [:add-hooks fabricate-hooks]]
-            [:dispatch [:flaglib2.stepper/initialize fab/steps]]
+            [:dispatch [:flaglib2.stepper/initialize forms/steps-advanced]]
             (when-let [step (get section-step section)]
               [:dispatch [:flaglib2.stepper/goto step]])
             [:mount-registered db]]

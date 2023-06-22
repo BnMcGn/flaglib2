@@ -17,9 +17,6 @@
  (fn [db _]
    (:root-element db)))
 
-(rf/reg-sub :flaglib2.fabricate/review-text :-> :flaglib2.fabricate/review-text)
-
-
 (rf/reg-sub
  :flaglib2.fetchers/author-urls
  (fn [db _]
@@ -80,41 +77,3 @@
 
 (rf/reg-sub :window-size :-> :window-size)
 
-(rf/reg-sub
- :flaglib2.fabricate/existing-text
- (fn [db _]
-   (when-let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
-     (get-in db [:text-store target :text]))))
-
-(rf/reg-sub
- :flaglib2.fabricate/existing-title
- (fn [db _]
-   (when-let [target (urlgrab/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
-     (get-in db [:title-store target :title]))))
-
-(rf/reg-sub
- :flaglib2.fabricate/active-text
- ;;FIXME: could consider caching a tdat?
- :<- [:flaglib2.fabricate/supplied-text]
- :<- [:flaglib2.fabricate/existing-text]
- (fn [[supplied existing] _]
-   (or supplied existing)))
-
-(rf/reg-sub :flaglib2.fabricate/flag :-> :flaglib2.fabricate/flag)
-(rf/reg-sub
- :flaglib2.fabricate/flag-or-default
- :<- [:flaglib2.fabricate/flag]
- :<- [:server-parameters]
- (fn [[flag params] _]
-   (or flag (:flag params))))
-
-(rf/reg-sub :flaglib2.fabricate/excerpt :-> :flaglib2.fabricate/excerpt)
-(rf/reg-sub
- :flaglib2.fabricate/excerpt-or-default
- :<- [:flaglib2.fabricate/excerpt]
- :<- [:server-parameters]
- (fn [[excerpt params] _]
-   (or excerpt [(get params :excerpt "") (get params :offset nil)])))
-
-(rf/reg-sub :flaglib2.fabricate/excerpt-start :-> :flaglib2.fabricate/excerpt-start)
-(rf/reg-sub :flaglib2.fabricate/excerpt-search :-> :flaglib2.fabricate/excerpt-search)
