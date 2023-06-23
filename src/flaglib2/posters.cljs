@@ -101,10 +101,11 @@
  :post-opinion
  (fn [{:keys [db]} _]
    (let [{:keys [opinion alternate alt-title]} @(rf/subscribe [:current-opinion])
+         tg (:target opinion)
          altop (when (and (string? alternate) (not-empty alternate))
-                 (ttify-opinion {:comment alternate} "text" false))
+                 (ttify-opinion {:comment alternate :target tg} "text" false))
          titop (when (and (string? alt-title) (not-empty alt-title))
-                 (ttify-opinion {:comment alt-title} "title" false))]
+                 (ttify-opinion {:comment alt-title :target tg} "title" false))]
      {:fx [(when (and (not (= :posted (post-status db [::alternate-status]))) altop)
              [:dispatch [:post-opinion-to-server altop [::alternate-status]]])
            (when (and (not (= :posted (post-status db [::alt-title-status]))) titop)

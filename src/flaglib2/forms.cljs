@@ -216,6 +216,7 @@
       :on-change :flaglib2.fabricate/set-excerpt]
      [xsearch/excerpt-search-context]]))
 
+;;FIXME: should be a visual indication for missing excerpt
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default])
         text (if (empty? excerpt)
