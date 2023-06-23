@@ -126,7 +126,7 @@
      [rc/input-text
       :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
       :placeholder "Article Title"
-      :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title]))]
+      :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
      [rc/input-textarea
       :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
       :placeholder "Article Text"
@@ -139,7 +139,6 @@
 (defn review-text-buttons []
   (step/stepper-buttons
    :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [:flaglib2.fabricate/reset-supplied-tt])]]))
-
 
 (defn supply-text []
   [:div
@@ -154,7 +153,7 @@
    [rc/input-text
     :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
     :placeholder "Article Title"
-    :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title]))]
+    :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
    [rc/input-textarea
     :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
     :placeholder "Article Text"
