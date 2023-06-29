@@ -103,3 +103,10 @@
 (defn reference-excerpt-display [])
 (defn question [])
 (defn thread-opinion [])
+
+(defn opinion-casual [opid]
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        text (if opinion
+               (str "opinion by " (:authorname opinion))
+               "unknown opinion")]
+    [:span text]))

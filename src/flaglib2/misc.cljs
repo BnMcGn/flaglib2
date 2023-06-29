@@ -141,3 +141,10 @@
                 (if (and ~@(take-nth 2 bindings))
                   (do ~@body)
                   )))
+
+;; Opinion url recognizer
+
+(def ipfs-hash-pattern "baf[a-z0-9]{56}")
+
+(defn iid? [item]
+  (re-matches ipfs-hash-pattern item))

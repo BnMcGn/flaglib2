@@ -10,6 +10,7 @@
    [flaglib2.stepper :as step]
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
+   [flaglib2.displayables :as displayables]
    [flaglib2.excerpts :as excerpts]
    [flaglib2.excerpt-search :as xsearch]
    [flaglib2.typeahead :as ta]
@@ -252,6 +253,16 @@
             (for [m messages]
               [:div m]))]]))
 
+(defn confirm []
+  (let [opinion @(rf/subscribe [:current-opinion])
+        flag ((:flag opinion))
+        targid (:target opinion)]
+    [:div
+     [:h3 "Post the flag " [:bold (str (:category flag) ": " (:label flag))] " on the "
+      (if (misc/iid? targid)
+        (str "article at " (misc/url-domain targid))
+        [displayables/opinion-casual targid])]]))
+
 (rf/reg-event-fx
  ::opine-initialize
  (fn [{:keys [db]} _]
@@ -310,6 +321,16 @@
     :buttons [posters/opine-buttons]
     :once [::opine-initialize]
     }])
+
+(def steps-simple
+  [{:id :opine
+    :page [opine]
+    :buttons [posters/opine-buttons]}])
+
+(def steps-vote
+  [{:id :confirm
+    :page [confirm]
+    :buttons [posters/opine-buttons]}])
 
 ;;Needs to be at bottom of file:
 
