@@ -34,5 +34,23 @@
 
 
 
+(def local-store-keys ["advanced"])
 
+(defn do-save-to-local [storg]
+  (doseq [[k v] storg]
+    (.setItem js/localStorage (str k) v)))
 
+(rf/reg-cofx
+ :fetch-local-store
+ (fn [cofx _]
+   (assoc cofx :local-store (into {}
+                                  (for [key local-store-keys]
+                                    [(keyword key) (.getItem js/localStorage key)])))))
+
+(rf/reg-event-fx
+ :initialize-local-store
+ [(rf/inject-cofx :fetch-local-store)]
+ (fn [{:keys [db fetch-local-store]}]
+   {:db (assoc db :local fetch-local-store)}))
+
+(def save-to-local [(rf/path :local) (rf/after do-save-to-local)])

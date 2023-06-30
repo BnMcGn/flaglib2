@@ -26,17 +26,19 @@
       (< size 1536) :xl
       :else :xxl)))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :initialize
  (fn [_ _]
-   (conj
-    {:warstats-store {}
-     :opinion-store {}
-     :text-store {}
-     :title-store {}
-     :window-size (window-size)
-     }
-    (posters/init))))
+   {:db
+    (conj
+     {:warstats-store {}
+      :opinion-store {}
+      :text-store {}
+      :title-store {}
+      :window-size (window-size)
+      }
+     (posters/init))
+    :fx [:initialize-local-store]}))
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
