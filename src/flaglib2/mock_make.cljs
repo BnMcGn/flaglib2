@@ -175,11 +175,13 @@ the Internet.
    :post-success (merge extra-db server-success)
    :post-fail (merge extra-db server-fail)
    :simple-vote (assoc targetted-db
-                       :local {:advanced :false}
-                       :server-parameters {:flag :negative-dislike})
+                       :local {:advanced false}
+                       :server-parameters (assoc (:server-parameters targetted-db)
+                                                 :flag :negative-dislike))
    :simple-comment (assoc targetted-db
-                          :local {:advanced :false}
-                          :server-parameters {:flag :custodial-blank})})
+                          :local {:advanced false}
+                          :server-parameters (assoc (:server-parameters targetted-db)
+                                                    :flag :custodial-blank))})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -211,20 +213,24 @@ the Internet.
 (rf/reg-event-fx
  :mock-make
  (fn [{:keys [db]} _]
-   (let [section (keyword (get-in db [:server-parameters :section]))
+   (let [params (:server-parameters db)
+         section-name (keyword (:section params))
+         section (get sections section-name)
+         params (merge params (:server-parameters section))
          db (merge
              db
-             (get sections section)
-             {:root-element mock-make})
-         summaries (for [step (get summary-settings section)]
+             section
+             {:root-element mock-make
+              :server-parameters params})
+         summaries (for [step (get summary-settings section-name)]
                      [:dispatch [:flaglib2.stepper/set-summary step]])]
-     (when-not (get sections section) (throw (js/Error. "Mockable not found")))
+     (when-not section (throw (js/Error. "Mockable not found")))
      {:db db
       :fx (into
            [
             ;;[:dispatch [:add-hooks fabricate-hooks]]
             [:dispatch [:flaglib2.stepper/initialize (forms/what-opin-form? db)]]
-            (when-let [step (get section-step section)]
+            (when-let [step (get section-step section-name)]
               [:dispatch [:flaglib2.stepper/goto step]])
             [:mount-registered db]]
            summaries)})))

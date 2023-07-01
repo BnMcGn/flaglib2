@@ -147,4 +147,4 @@
 (def ipfs-hash-pattern "baf[a-z0-9]{56}")
 
 (defn iid? [item]
-  (re-matches ipfs-hash-pattern item))
+  (when (string? item) (re-matches ipfs-hash-pattern item)))

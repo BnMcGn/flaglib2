@@ -38,7 +38,7 @@
       :window-size (window-size)
       }
      (posters/init))
-    :fx [:initialize-local-store]}))
+    :fx [[:dispatch [:initialize-local-store]]]}))
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
