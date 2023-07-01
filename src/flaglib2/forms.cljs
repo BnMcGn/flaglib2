@@ -339,6 +339,15 @@
         search-res @(rf/subscribe [:url-search-results [:flaglib2.fabricate/specify-target]])]
     [step/wf-stepper]))
 
+(defn what-opin-form? [db]
+  (if (get-in db [:local :advanced])
+    steps-advanced
+    (case (get-in db [:server-parameters :flag])
+      (:positive-like :negative-dislike) steps-vote
+      :custodial-blank steps-simple
+      nil steps-advanced
+      :else steps-advanced)))
+
 (rf/reg-event-fx
  :make-opinion
  (fn [{:keys [db]} _]
@@ -350,6 +359,6 @@
                [:flaglib2.fabricate/enter-search target]
                [:flaglib2.fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]
-           [:dispatch [:flaglib2.stepper/initialize steps-advanced]]
+           [:dispatch [:flaglib2.stepper/initialize (what-opin-form? db)]]
            ;;FIXME: is this the right place?
            [:mount-registered db]]})))

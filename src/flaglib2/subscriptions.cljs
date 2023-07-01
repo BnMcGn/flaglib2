@@ -22,6 +22,11 @@
  (fn [db _]
    (:flaglib2.fetchers/author-urls db)))
 
+(rf/reg-sub
+ :advanced-options
+ (fn [db _]
+   (get-in db [:local :advanced])))
+
 
 (rf/reg-sub
  :warstats-store
