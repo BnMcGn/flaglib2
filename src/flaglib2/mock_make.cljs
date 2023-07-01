@@ -22,7 +22,8 @@
    :warstats-store {},
    :flaglib2.posters/opinion-response nil,
    :flaglib2.posters/alternate-failure nil,
-   :flaglib2.fetchers/author-urls {}})
+   :flaglib2.fetchers/author-urls {}
+   :local {:advanced true}})
 
 (def sample-text "Sample Web Page
 
@@ -172,7 +173,13 @@ the Internet.
                              :flaglib2.fabricate/excerpt ["nonexist" 0])
    :target-return extra-db
    :post-success (merge extra-db server-success)
-   :post-fail (merge extra-db server-fail)})
+   :post-fail (merge extra-db server-fail)
+   :simple-vote (assoc targetted-db
+                       :local {:advanced :false}
+                       :server-parameters {:flag :negative-dislike})
+   :simple-comment (assoc targetted-db
+                          :local {:advanced :false}
+                          :server-parameters {:flag :custodial-blank})})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -185,7 +192,9 @@ the Internet.
                    :opine-bad-excerpt :opine
                    :target-return :specify-target
                    :post-success :opine
-                   :post-fail :opine})
+                   :post-fail :opine
+                   :simple-vote :confirm
+                   :simple-comment :opine})
 
 ;;Lists of steps that, per page, should be set to summary mode
 (def summary-settings {:opine-deluxe [:specify-target :target-decision :review-text]
@@ -214,7 +223,7 @@ the Internet.
       :fx (into
            [
             ;;[:dispatch [:add-hooks fabricate-hooks]]
-            [:dispatch [:flaglib2.stepper/initialize forms/steps-advanced]]
+            [:dispatch [:flaglib2.stepper/initialize (forms/what-opin-form? db)]]
             (when-let [step (get section-step section)]
               [:dispatch [:flaglib2.stepper/goto step]])
             [:mount-registered db]]
