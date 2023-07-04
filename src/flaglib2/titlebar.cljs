@@ -24,9 +24,20 @@
    :x-right "Has supporting evidence"
    :x-wrong "Has contradicting evidence"})
 
-(defn flag-name [])
-(defn opinion-icon-core [])
-(defn opinion-icon [])
+(defn flag-name [opinion]
+  (let [flag (get flags/flags (:flag opinion))]
+    [:span (str (:category flag) " " (:label flag))]))
+
+;; Might not need, dependent on need for tooltip
+;;(defn opinion-icon-core [])
+
+(defn opinion-icon [opinion]
+  (let [flag (:flag opinion)
+        icon (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")]
+    [:a
+     :href (misc/make-opinion-url opinion)
+     (:img :src icon)]))
+
 (defn display-tree-address [])
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes

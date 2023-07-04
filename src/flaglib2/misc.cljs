@@ -7,6 +7,9 @@
    [re-frame.db]
    [clojure.string :as str]))
 
+(defn make-opinion-url [opinion]
+  (str "/o/" (:iid opinion)))
+
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
     (apply str
