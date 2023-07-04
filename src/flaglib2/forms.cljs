@@ -254,14 +254,14 @@
               [:div m]))]]))
 
 (defn confirm []
-  (let [opinion @(rf/subscribe [:current-opinion])
+  (let [opinion (:opinion @(rf/subscribe [:current-opinion]))
         flag (get flags/flags (:flag opinion))
         targid (:target opinion)]
     [:div
      [:h3 "Post the flag " (str (:category flag) ": " (:label flag)) " on the "
       (if (misc/iid? targid)
-        (str "article at " (misc/url-domain targid))
-        [displayables/opinion-casual targid])]]))
+        [displayables/opinion-casual targid]
+        (str "article at " (misc/url-domain targid)))]]))
 
 (rf/reg-event-fx
  ::opine-initialize
