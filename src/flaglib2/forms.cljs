@@ -356,7 +356,7 @@
      {:db db
       :fx [ [:dispatch
              (if target
-               [:flaglib2.fabricate/enter-search target]
+               [:flaglib2.urlgrab/enter-search target]
                [:flaglib2.fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize (what-opin-form? db)]]
