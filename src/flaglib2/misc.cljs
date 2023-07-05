@@ -10,6 +10,9 @@
 (defn make-opinion-url [opinion]
   (str "/o/" (:iid opinion)))
 
+(defn make-author-url [author]
+  (str "/u/" (js/encodeURIComponent author)))
+
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
     (apply str

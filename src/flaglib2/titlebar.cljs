@@ -2,8 +2,9 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-;   [clojure.string :as string]
 ;   [clojure.walk :as walk]
+   [goog.string :as string]
+
    [flaglib2.misc :as misc]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.flags :as flags]
@@ -28,17 +29,26 @@
   (let [flag (get flags/flags (:flag opinion))]
     [:span (str (:category flag) " " (:label flag))]))
 
+(defn flag-icon [type]
+  (let [flag (get flags/flags type)]
+    (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")))
+
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
 
-(defn opinion-icon [opinion]
-  (let [flag (:flag opinion)
-        icon (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")]
+(defn opinion-icon [opid]
+  (let [opinion @(rf/subscribe [:opinion-store opid])]
     [:a
      :href (misc/make-opinion-url opinion)
-     (:img :src icon)]))
+     (:img :src (flag-icon (:flag opinion)))]))
 
-(defn display-tree-address [])
+(defn display-tree-address [tree-address]
+  [rc/h-box
+   :children
+   (rest
+    (reduce into []
+            (for [id tree-address]
+              [" > " [opinion-icon id]])))])
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats class]}]
@@ -63,7 +73,10 @@
 
 (defn display-date-nicely [])
 (defn date-stamp [])
-(defn author-long [])
+
+(defn author-long [opinion]
+  (let [auth (or (:authorname opinion) (:author opinion))]
+    [:a :href (misc/make-author-url auth) auth]))
 
 (defn reply-link [& {:keys [url excerpt offset]}]
   [:form
@@ -108,10 +121,12 @@
         title (or title (:title tinfo) " ")]
     [:span {:class class} titl]))
 
-(defn comment-summary [])
+;;FIXME: read from text-store?
+(defn comment-summary [& {:keys [comment opinion truncate]}]
+  (let [comment (or comment (:comment opinion) "")]
+    [:span (if truncate
+             (string/truncate comment truncate)
+             comment)]))
 
-(defn flag-icon [type]
-  (let [flag (get flags/flags type)]
-    (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")))
 
 
