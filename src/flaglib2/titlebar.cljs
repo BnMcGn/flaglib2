@@ -71,8 +71,9 @@
                       :title (get warstat-text axis)}]]))
           '(:x-up :x-down :x-right :x-wrong)))])
 
-(defn display-date-nicely [])
-(defn date-stamp [])
+(defn date-stamp [opinion]
+  (let [[quantity unit] (misc/ago (:created opinion))]
+    [:span (str quantity " " unit " ago")]))
 
 (defn author-long [opinion]
   (let [auth (or (:authorname opinion) (:author opinion))]

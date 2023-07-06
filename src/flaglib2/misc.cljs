@@ -1,6 +1,8 @@
 (ns flaglib2.misc
   (:require
    [cljs-time.format]
+   [cljs-time.coerce :as timec]
+   [cljs-time.core :as time]
    [reagent.dom.server :refer [render-to-string]]
    [re-frame.registrar]
    [re-frame.core :as rf]
@@ -25,6 +27,31 @@
 (def formatter (cljs-time.format/formatters :date-time-no-ms))
 (defn parse-time [timestamp]
   (cljs-time.format/parse formatter timestamp))
+
+(def ms-second 1000)
+(def ms-minute (* 60 ms-second))
+(def ms-hour (* 60 ms-minute))
+(def ms-day (* 24 ms-hour))
+(def ms-week (* 7 ms-day))
+(def ms-month (* 30 ms-day)) ;Ok, things start to get weird.
+(def ms-year (* 365 ms-day))
+
+(defn ago [timestamp]
+  (let [now (timec/to-long (time/now))
+        diff (- now (timec/to-long timestamp))]
+    (when (neg? diff)
+      (throw (js/Error. "Future date!")))
+    (let [[quantity unit]
+          (cond
+            (> diff (* 2 ms-year)) [(int (/ diff ms-year)) "year"]
+            (> diff (* 2 ms-month)) [(int (/ diff ms-month)) "month"]
+            (> diff (* 2 ms-week)) [(int (/ diff ms-week)) "week"]
+            (> diff (* 2 ms-day)) [(int (/ diff ms-day)) "day"]
+            (> diff (* 1 ms-hour)) [(int (/ diff ms-hour)) "hour"]
+            (> diff (* 1 ms-minute)) [(int (/ diff ms-minute)) "minute"]
+            (> diff (* 1 ms-second)) [(int (/ diff ms-second)) "second"])
+          unit (if (> quantity 1) (str unit "s") unit)]
+      [quantity unit])))
 
 (def whitespace-characters #{\space \newline \backspace \tab \formfeed \return})
 
