@@ -168,6 +168,14 @@
   (let [rec (.getBoundingClientRect el)]
     {:left (.-left rec) :right (.-right rec) :top (.-top rec) :bottom (.-bottom rec)}))
 
+(defn position-difference [element1 element2]
+  (let [pos1 (. element1 (getBoundingClientRect))
+        pos2 (. element2 (getBoundingClientRect))]
+    {:top (- (. pos1 -top) (. pos2 -top))
+     :left (- (. pos1 -left) (. pos2 -left))
+     :bottom (- (. pos1 -bottom) (. pos2 -bottom))
+     :right (- (. pos1 -right) (. pos2 -right))}))
+
 (defmacro when-let*
           [bindings & body]
           `(let ~bindings

@@ -55,12 +55,36 @@
      (when-not hide-count
        [tb/reply-count :warstats warstats :class "justify-self-start"])]))
 
-(defn target-title-short [])
+(defn root-title-short [& {:as params}]
+  (reduce into
+   [root-title
+    :show-count false
+    :hide-warstats true
+    :hide-reply true
+    :hide-external-link true
+    :intro-text ""]
+   (for [[k v] params]
+     [k v])))
+
 (defn popup-side [])
+
+(defn- find-parent-hilited [element]
+  (when element
+    (if (= "hilited" (. element -className))
+      element
+      (recur (. element -parentElement)))))
+
+(defn is-selection-in-single-hilited-text? [selection]
+  (let [parent1 (find-parent-hilited (. selection -parentElement))]
+    (and (not (. selection -isCollapsed))
+         parent1
+         (= parent1 (find-parent-hilited (. selection -focusNode))))))
 
 (defn hilited-segment [])
 (defn plain-segment [])
 (defn parent-segment [])
+
+;;NOTE: remember "hilited" class
 (defn hilited-text [])
 (defn hilited-text-core [])
 
