@@ -66,6 +66,10 @@
    (for [[k v] params]
      [k v])))
 
+(defn opinion-info [])
+(defn opinion-summary [])
+(defn sub-opinion-list [])
+
 (defn popup-side [])
 
 (defn- find-parent-hilited [element]
@@ -111,10 +115,6 @@
 (defn hilited-text-core [])
 
 
-(defn sub-opinion-list [])
-(defn opinion-info [])
-(defn excerptless-opinions [])
-(defn opinion-summary [])
 
 
 (defn thread-excerpt-display
@@ -149,6 +149,8 @@
 (defn reference-excerpt-display [])
 (defn question [])
 (defn thread-opinion [])
+
+(defn excerptless-opinions [])
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
