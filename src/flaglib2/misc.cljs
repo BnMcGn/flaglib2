@@ -9,11 +9,23 @@
    [re-frame.db]
    [clojure.string :as str]))
 
+;; Opinion url recognizer
+
+(def ipfs-hash-pattern #"baf[a-z0-9]{56}")
+
+(defn iid? [item]
+  (when (string? item) (re-matches ipfs-hash-pattern item)))
+
+
 (defn make-opinion-url [opinion]
   (str "/o/" (:iid opinion)))
 
 (defn make-author-url [author]
   (str "/u/" (js/encodeURIComponent author)))
+
+(defn excerpt-reply-link [target excerpt]
+  (let [exstr (when excerpt (str "&excerpt=" (js/encodeURIComponent excerpt)))]
+    (str "/opinion/?target=" (js/encodeURIComponent target) exstr)))
 
 (defn encode-uri-component2 [uri]
   (let [ichars ":\",()/\\%?="]
@@ -23,6 +35,31 @@
                     itm
                     (str "%" (.toUpperCase (.toString (.charCodeAt itm 0) 16)))))
                 (seq uri)))))
+
+
+;;; Tree tools
+
+(defn opinion? [])
+(defn focus? [])
+(defn focus-parent? [])
+
+(defn all-descendant-ids [id opstore]
+  (if (iid? id)
+    (for [[opid opinion] opstore
+         :when (and (not (= id opid))
+                    ((set (:tree-address opinion)) id))]
+      opid)
+    (for [[opid opinion] opstore
+          :when (= id (:rooturl opinion))]
+      opid)))
+
+(defn immediate-children-ids [id opstore]
+  (let [descs (all-descendant-ids id opstore)
+        talen (if (iid? id) (inc (count (get-in opstore [id :tree-address]))) 1)]
+    (filter #(= talen (count (get-in opstore [% :tree-address]))) descs)))
+
+
+;;; Time tools
 
 (def formatter (cljs-time.format/formatters :date-time-no-ms))
 (defn parse-time [timestamp]
@@ -73,22 +110,6 @@
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
-(defn list-events []
-  (let [store @re-frame.registrar/kind->id->handler]
-    (keys (:event store))))
-
-(defn list-subs []
-  (let [store @re-frame.registrar/kind->id->handler]
-    (keys (:sub store))))
-
-(defn list-fx []
-  (let [store @re-frame.registrar/kind->id->handler]
-    (keys (:fx store))))
-
-(defn reframe-db []
-  "Fetch the reframe db. Used for testing/console. Not for live code!"
-  @re-frame.db/app-db)
-
 (defn class-string [& colls]
   (str/join " " (flatten colls)))
 
@@ -115,6 +136,24 @@
 
 (defn dive []
   (. js/window -dumped))
+
+(defn list-events []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:event store))))
+
+(defn list-subs []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:sub store))))
+
+(defn list-fx []
+  (let [store @re-frame.registrar/kind->id->handler]
+    (keys (:fx store))))
+
+(defn reframe-db []
+  "Fetch the reframe db. Used for testing/console. Not for live code!"
+  @re-frame.db/app-db)
+
+
 
 
 
@@ -183,9 +222,3 @@
                   (do ~@body)
                   )))
 
-;; Opinion url recognizer
-
-(def ipfs-hash-pattern #"baf[a-z0-9]{56}")
-
-(defn iid? [item]
-  (when (string? item) (re-matches ipfs-hash-pattern item)))

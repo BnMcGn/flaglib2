@@ -90,7 +90,7 @@
      {:class "absolute l-0 r-0 text-black opacity-40 text-center text-3xl top-[-1rem]"}
      quantity]))
 
-(defn hilited-segment [{:keys [text excerpt-opinions target]}]
+(defn hilited-segment [& {:keys [text excerpt-opinions target]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? (r/atom false)
         class1 "font-bold relative"
@@ -107,8 +107,24 @@
      :popover
      [sub-opinion-list excerpt-opinions :excerpt text :target target]]))
 
-(defn plain-segment [])
-(defn parent-segment [])
+(defn plain-segment [& {:keys [text]}]
+  [:span {:class "font-normal"} (excerpts/rebreak text)])
+
+;;FIXME: implement focus-parent stuff
+(defn parent-segment [& {:keys [text]}]
+  (let [focussed (misc/focus-parent?)
+        bg (if focussed "bg-white" "bg-neutral-400")]
+    [:span {:class (str "font-bold relative " bg)}
+     (excerpts/rebreak text)]))
+
+(defn- make-segments [text opinion-store & {:keys [tree-address ]}]
+  (let [current-id (last tree-address)
+        opins (misc/immediate-children-ids current-id opinion-store)
+        segpoints (excerpts/excerpt-segment-points
+                   (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
+                   (count text))
+        level (count tree-address)]
+    ))
 
 ;;NOTE: remember "hilited" class
 (defn hilited-text [])

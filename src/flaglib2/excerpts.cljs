@@ -108,6 +108,22 @@
     into
     (map (fn [tx] [tx [:br]]) (string/split-lines text)))))
 
+;;Find all the indices where excerpts start or stop.
+(defn excerpt-segment-points [opset end]
+  "End is the length of the text"
+  (sort - (reduce into #{0 (+ 1 end)}
+                  (for [itm opset
+                        :let [[start end] (:text-position itm)]]
+                    #{start (+ start end)}))))
+
+(defn has-excerpt? [opin]
+  (not (empty? (:excerpt opin))))
+
+(defn has-found-excerpt? [opin]
+  (and (has-excerpt? opin)
+       (when-let [pos (:text-position opin)]
+         (first pos))))
+
 (defn clean-string-for-excerpt [the-string]
   (loop [res nil
          last-was-white false
