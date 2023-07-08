@@ -40,7 +40,14 @@
 ;;; Tree tools
 
 (defn opinion? [])
-(defn focus? [])
+
+(defn focus? [focus tree-address]
+  (or
+   (and (empty? focus) (empty? tree-address))
+   (and (not (empty? focus))
+        (not (empty? tree-address))
+        (= (last focus) (last tree-address)))))
+
 (defn focus-parent? [])
 
 (defn all-descendant-ids [id opstore]

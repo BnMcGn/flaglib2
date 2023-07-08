@@ -108,6 +108,9 @@
     into
     (map (fn [tx] [tx [:br]]) (string/split-lines text)))))
 
+(defn overlap? [start1 end1 start2 end2]
+  (not (or (> start1 end2) (> start2 end1))))
+
 ;;Find all the indices where excerpts start or stop.
 (defn excerpt-segment-points [opset end]
   "End is the length of the text"

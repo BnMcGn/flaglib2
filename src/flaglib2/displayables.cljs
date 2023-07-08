@@ -90,7 +90,7 @@
      {:class "absolute l-0 r-0 text-black opacity-40 text-center text-3xl top-[-1rem]"}
      quantity]))
 
-(defn hilited-segment [& {:keys [text excerpt-opinions target]}]
+(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? (r/atom false)
         class1 "font-bold relative"
@@ -105,7 +105,7 @@
        (excerpts/rebreak text)]
       [segment-count (count excerpt-opinions)]]
      :popover
-     [sub-opinion-list excerpt-opinions :excerpt text :target target]]))
+     [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]))
 
 (defn plain-segment [& {:keys [text]}]
   [:span {:class "font-normal"} (excerpts/rebreak text)])
@@ -117,14 +117,32 @@
     [:span {:class (str "font-bold relative " bg)}
      (excerpts/rebreak text)]))
 
-(defn- make-segments [text opinion-store & {:keys [tree-address ]}]
-  (let [current-id (last tree-address)
+(defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url hide-popup]}]
+  (let [current-id (if tree-address (last tree-address) root-target-url)
         opins (misc/immediate-children-ids current-id opinion-store)
-        segpoints (excerpts/excerpt-segment-points
-                   (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
-                   (count text))
+        opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
+        segpoints (excerpts/excerpt-segment-points opins (count text))
         level (count tree-address)]
-    ))
+    (for [[start end] (partition 2 1 segpoints)
+          :let [id (str "lvl-" level "-pos-" end)
+                excerpt-opinions
+                (for [opin opins
+                      :let [[ostart oend] (:text-position opin)]
+                      :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
+                  (:id opin))
+                segtype (if (zero? (count excerpt-opinions))
+                          plain-segment
+                          (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
+      [segtype
+       :excerpt-opinions excerpt-opinions
+       :id id
+       :text text
+       :id-of-text current-id
+       :root-target-url root-target-url
+       :hide-popup hide-popup
+       :tree-address tree-address
+       :focus focus
+       :last-char-pos end])))
 
 ;;NOTE: remember "hilited" class
 (defn hilited-text [])
