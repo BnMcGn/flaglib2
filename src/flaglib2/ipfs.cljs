@@ -98,6 +98,13 @@
  (fn [db [_ key result]]
    (assoc-in db [:references key] (cljs.reader/read-string result))))
 
+(rf/reg-event-fx
+ ::received-opinion-tree
+ (fn [{:keys [db]} [_ key result]]
+   (let [result (cljs.reader/read-string result)]
+     {:db (assoc-in db [:opinion-tree-store key] result)
+      :fx [ [:dispatch [:load-opinions (flatten result)]]]})))
+
 (rf/reg-event-db
  ::failure
  (fn [db [_ iid type spec]]
@@ -158,3 +165,10 @@
                 [:dispatch [:text-status url :on-available ev]]
                 [:dispatch ev]))))}))
 
+(rf/reg-event-fx
+ :load-opinions
+ (fn [_ [_ opids]]
+   {:fx
+    (into []
+          (for [iid opids]
+            [:dispatch [:load-opinion iid]]))}))
