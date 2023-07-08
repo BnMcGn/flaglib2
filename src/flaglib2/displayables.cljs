@@ -2,6 +2,10 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [clojure.string :as string]
+
+   [cljsjs.rangy-textrange]
+
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
@@ -144,11 +148,16 @@
        :focus focus
        :last-char-pos end])))
 
-;;NOTE: remember "hilited" class
-(defn hilited-text [])
-(defn hilited-text-core [])
-
-
+(defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup]}]
+  (let [text (or text @(rf/subscribe [:text-store text-key]))
+        opstore @(rf/subscribe [:opinion-store])]
+    [:div
+     ;; :id ??
+     :class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")
+     (when text
+       ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
+       (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
+                      :root-target-url root-target-url :hide-popup hide-popup))]))
 
 
 (defn thread-excerpt-display

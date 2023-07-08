@@ -15,6 +15,7 @@
                  [day8.re-frame/http-fx "0.2.4"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [cljsjs/fuse "6.0.0-0"]
+                 [cljsjs/rangy-textrange "1.3.0-1"]
                  [rgm/tailwind-hiccup "0.2.0"]
                  [org.clojars.bnmcgn/re-com-tailwind "2.13.2.1"]]
 
