@@ -10,10 +10,11 @@
    [flaglib2.displayables :as disp]))
 
 
-(defn target-root-article [{:keys [focus rooturl]}]
+(defn target-root-article [& {:keys [focus rooturl]}]
   (let []
     [:div
      [disp/root-title
+      :display-depth 0
       :url rooturl
       :intro-text "Article: "]
      [deco/casual-note-heading "Text from article at " (misc/url-domain rooturl)]
@@ -27,12 +28,12 @@
 
 (defn target-root []
   (let [params @(rf/subscribe [:server-parameters])]
-    [target-root-article :rooturl (:target :params)]))
+    [target-root-article :rooturl (:rooturl params)]))
 
 (rf/reg-event-fx
  :target
  (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :target])
+   (let [target (get-in db [:server-parameters :rooturl])
          tmode (get-in db [:server-parameters :tmode])
          db (assoc db :root-element target-root)]
      {:db db

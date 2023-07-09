@@ -81,19 +81,19 @@
 
 (defn reply-link [& {:keys [url excerpt offset]}]
   [:form
-   :class "inline-block relative text-sm"
-   :action "/opinion/" :method "GET"
-   [:input {:type "hidden" :name "target" :value url}]
+   {:class "inline-block relative text-sm"
+    :action "/opinion/" :method "GET"}
+   [:input {:type "hidden" :name "target" :value (or url "")}]
    (when excerpt
      [:input {:type "hidden" :name "excerpt" :value (js/encodeURIComponent excerpt)}])
    (when offset
-     [:input {:type "hidden" :name "offset" :value offset}])
+     [:input {:type "hidden" :name "offset" :value (or offset "")}])
    (if excerpt
      [:input
-      :type "submit"
-      :title (str "Reply to the excerpt: \"" excerpt "\"")
-      :value "Reply to Excerpt"]
-     [:input :type "submit" :value "Reply"])])
+      {:type "submit"
+       :title (str "Reply to the excerpt: \"" excerpt "\"")
+       :value "Reply to Excerpt"}]
+     [:input {:type "submit" :value "Reply"}])])
 
 (defn reply-count [& {:keys [warstats class]}]
   (let [immediate (:replies-immediate warstats)
