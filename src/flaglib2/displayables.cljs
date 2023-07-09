@@ -149,11 +149,11 @@
        :last-char-pos end])))
 
 (defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup]}]
-  (let [text (or text @(rf/subscribe [:text-store text-key]))
+  (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         opstore @(rf/subscribe [:opinion-store])]
     [:div
      ;; :id ??
-     :class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")
+     {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")}
      (when text
        ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
        (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
