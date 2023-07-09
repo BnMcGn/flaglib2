@@ -10,6 +10,7 @@
    [flaglib2.ipfs :as ip]
    [flaglib2.fabricate :as fab]
    [flaglib2.forms :as forms]
+   [flaglib2.target]
    [flaglib2.posters :as posters]
    [flaglib2.mock-make :as mock]
    [cljs.reader]))
