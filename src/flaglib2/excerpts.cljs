@@ -103,10 +103,12 @@
     (excerpt-context (:text tdat) p1 (inc p2))))
 
 (defn rebreak [text]
-  (butlast
-   (reduce
-    into
-    (map (fn [tx] [tx [:br]]) (string/split-lines text)))))
+  (into
+   [:<>]
+   (butlast
+    (reduce
+     into
+     (map (fn [tx] [tx [:br]]) (string/split-lines text))))))
 
 (defn overlap? [start1 end1 start2 end2]
   (not (or (> start1 end2) (> start2 end1))))

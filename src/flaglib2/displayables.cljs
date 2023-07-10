@@ -121,8 +121,8 @@
 (defn parent-segment [& {:keys [text]}]
   (let [focussed (misc/focus-parent?)
         bg (if focussed "bg-white" "bg-neutral-400")]
-    [:span {:class (str "font-bold relative " bg)}
-     (excerpts/rebreak text)]))
+    (into [:span {:class (str "font-bold relative " bg)}]
+          (excerpts/rebreak text))))
 
 (defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url hide-popup]}]
   (let [current-id (if tree-address (last tree-address) root-target-url)
