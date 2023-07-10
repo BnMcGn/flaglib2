@@ -25,7 +25,7 @@
    ;;FIXME: could add indicator to db that request is pending...
    {:http-xhrio {:method :get
                  :uri (rooturl-data-url rooturl resource-type)
-                 :timeout 6000
+                 :timeout 24000
                  :response-format (ajax/text-response-format)
                  :on-success
                  [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))
@@ -39,7 +39,7 @@
    ;;FIXME: could add indicator to db that request is pending...
    {:http-xhrio {:method :get
                  :uri (opinion-data-url iid resource-type)
-                 :timeout 6000
+                 :timeout 24000
                  :response-format (ajax/text-response-format)
                  :on-success
                  [(keyword 'flaglib2.ipfs (string/join ["received-" resource-type]))

@@ -70,6 +70,9 @@
    (for [[k v] params]
      [k v])))
 
+(defn loading-indicator []
+  [:div "Loading..."])
+
 (defn opinion-info [])
 (defn opinion-summary [])
 (defn sub-opinion-list [])
@@ -127,37 +130,40 @@
         opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
         segpoints (excerpts/excerpt-segment-points opins (count text))
         level (count tree-address)]
-    (for [[start end] (partition 2 1 segpoints)
-          :let [id (str "lvl-" level "-pos-" end)
-                excerpt-opinions
-                (for [opin opins
-                      :let [[ostart oend] (:text-position opin)]
-                      :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
-                  (:id opin))
-                segtype (if (zero? (count excerpt-opinions))
-                          plain-segment
-                          (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
-      [segtype
-       :excerpt-opinions excerpt-opinions
-       :id id
-       :text text
-       :id-of-text current-id
-       :root-target-url root-target-url
-       :hide-popup hide-popup
-       :tree-address tree-address
-       :focus focus
-       :last-char-pos end])))
+    (into
+     []
+     (for [[start end] (partition 2 1 segpoints)
+           :let [id (str "lvl-" level "-pos-" end)
+                 excerpt-opinions
+                 (for [opin opins
+                       :let [[ostart oend] (:text-position opin)]
+                       :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
+                   (:id opin))
+                 segtype (if (zero? (count excerpt-opinions))
+                           plain-segment
+                           (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
+       [segtype
+        :excerpt-opinions excerpt-opinions
+        :id id
+        :text text
+        :id-of-text current-id
+        :root-target-url root-target-url
+        :hide-popup hide-popup
+        :tree-address tree-address
+        :focus focus
+        :last-char-pos end]))))
 
 (defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         opstore @(rf/subscribe [:opinion-store])]
-    [:div
-     ;; :id ??
-     {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")}
-     (when text
-       ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
-       (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
-                      :root-target-url root-target-url :hide-popup hide-popup))]))
+    (if text
+      (into [:div
+             ;; :id ??
+             {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")}]
+            ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
+            (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
+                           :root-target-url root-target-url :hide-popup hide-popup))
+      [loading-indicator])))
 
 
 (defn thread-excerpt-display

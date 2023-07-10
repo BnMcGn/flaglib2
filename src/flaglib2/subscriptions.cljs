@@ -51,6 +51,11 @@
    (get-in db [:opinion-store key])))
 
 (rf/reg-sub
+ :opinion-tree-store
+ (fn [db [_ key]]
+   (get-in db [:opinion-tree-store key])))
+
+(rf/reg-sub
  :text-status
  (fn [db [_ key]]
    (get-in db [:text-status key])))
