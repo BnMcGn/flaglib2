@@ -104,6 +104,7 @@
         class2 (apply mood/flavor+freshness warstats excerpt-opinions)]
     [rc/popover-anchor-wrapper
      :showing? popup-visible?
+     :position :below-left
      :anchor
      [:span
       [:span
@@ -150,7 +151,7 @@
        [segtype
         :excerpt-opinions excerpt-opinions
         :id id
-        :text text
+        :text (subs text start end)
         :id-of-text current-id
         :root-target-url root-target-url
         :hide-popup hide-popup
