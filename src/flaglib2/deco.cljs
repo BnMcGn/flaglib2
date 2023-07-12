@@ -10,6 +10,10 @@
    {:class "m-0 bold italic font-[0.9rem] bg-gray-300 leading-4"}
    contents])
 
+(defn casual-heading [contents]
+  [:h3
+   {:class "m-0 bold italic bg-gray-300 leading-4"}
+   contents])
 
 (def positive-magnitude
   '("bg-[#00ff0000]" "bg-[#00ff0033]" "bg-[#00ff0055]" "bg-[#00ff0088]" "bg-[#00ff00ff]"))

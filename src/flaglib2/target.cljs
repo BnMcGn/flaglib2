@@ -17,7 +17,7 @@
       :display-depth 0
       :url rooturl
       :intro-text "Article: "]
-     [deco/casual-note-heading "Text from article at " (misc/url-domain rooturl)]
+     [deco/casual-heading (str "Text from article at " (misc/url-domain rooturl))]
      [disp/hilited-text
       :text-key rooturl
       :root-target-url rooturl
