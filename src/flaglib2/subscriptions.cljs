@@ -38,17 +38,23 @@
 (rf/reg-sub
  :text-store
  (fn [db [_ key]]
-   (get-in db [:text-store key])))
+   (if key
+     (get-in db [:text-store key])
+     (:text-store db))))
 
 (rf/reg-sub
  :title-store
  (fn [db [_ key]]
-   (get-in db [:title-store key])))
+   (if key
+     (get-in db [:title-store key])
+     (:title-store db))))
 
 (rf/reg-sub
  :opinion-store
  (fn [db [_ key]]
-   (get-in db [:opinion-store key])))
+   (if key
+     (get-in db [:opinion-store key])
+     (:opinion-store db))))
 
 (rf/reg-sub
  :opinion-tree-store

@@ -9,11 +9,12 @@
 
 (defn freshness-from-warstats [warstats-coll]
   (let [now (tm/now)
-        old (tm/minus- now (tm/day 2))
-        recent (tm/minus- now (tm/hour 1))
-        newest (tm/latest
-                (map (fn [warstats] (:tree-freshness warstats)) warstats-coll))]
-    (cond (tm/before? newest old) "old"
+        old (tm/minus- now (tm/days 2))
+        recent (tm/minus- now (tm/hours 1))
+        newest (when-not (empty? warstats-coll)
+                 (tm/latest (map (fn [warstats] (:tree-freshness warstats)) warstats-coll)))]
+    (cond (not newest) "old"
+          (tm/before? newest old) "old"
           (tm/before? newest recent) "recent"
           :else "new")))
 

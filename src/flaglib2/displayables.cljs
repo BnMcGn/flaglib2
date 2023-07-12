@@ -125,7 +125,12 @@
           (excerpts/rebreak text))))
 
 (defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url hide-popup]}]
-  (let [current-id (if tree-address (last tree-address) root-target-url)
+  (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
+        opins (if (misc/iid? current-id)
+                (misc/immediate-children-ids current-id opinion-store)
+                (for [[k op] opinion-store
+                      :when (= current-id (:target op))]
+                  k))
         opins (misc/immediate-children-ids current-id opinion-store)
         opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
         segpoints (excerpts/excerpt-segment-points opins (count text))
