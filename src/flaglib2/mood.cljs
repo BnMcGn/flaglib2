@@ -3,7 +3,8 @@
    [cljs-time.core :as tm]
    [clojure.string :as str]
 
-   [flaglib2.misc :as misc]))
+   [flaglib2.misc :as misc]
+   [flaglib2.deco :as deco]))
 
 
 
@@ -56,14 +57,15 @@
         :contested
         :negative))))
 
-(defn flavor+freshness [warstats & ids]
+(defn flavor+freshness [warstats ids]
   (let [wcoll
-        (into {}
-              (for [id ids
-                    ws (get warstats id)
-                    :when ws]
-                [id ws]))]
-    (str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))))
+        (for [id ids
+              :let [ws (get warstats id)]
+              :when ws]
+          ws)]
+    ;;(str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))
+    ;; ignore freshness, use tailwind stuff
+    (get deco/flavor-background (flavor-from-warstats wcoll))))
 
 (defn flavor-from-own-warstats [warstats]
   (let [effect (:effect warstats)

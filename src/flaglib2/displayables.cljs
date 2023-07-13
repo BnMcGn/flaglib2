@@ -100,8 +100,8 @@
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? (r/atom false)
-        class1 "font-bold relative"
-        class2 (apply mood/flavor+freshness warstats excerpt-opinions)]
+        class1 "relative font-bold"
+        class2 (mood/flavor+freshness warstats excerpt-opinions)]
     [rc/popover-anchor-wrapper
      :showing? popup-visible?
      :position :below-left
@@ -110,8 +110,9 @@
       [:span
        {:class (str class1 " " class2)
         :on-click #(swap! popup-visible? not)}
-       (excerpts/rebreak text)]
-      [segment-count (count excerpt-opinions)]]
+       (excerpts/rebreak text)
+       [segment-count (count excerpt-opinions)]]
+      ]
      :popover
      [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]))
 
@@ -144,7 +145,7 @@
                  (for [opin opins
                        :let [[ostart oend] (:text-position opin)]
                        :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
-                   (:id opin))
+                   (:iid opin))
                  segtype (if (zero? (count excerpt-opinions))
                            plain-segment
                            (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
@@ -196,7 +197,7 @@
             (excerpts/excerpt-context text (nth tpos 0) (nth tpos 1))))]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
-     :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) opid)]))
+     :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) [opid])]))
 
 
 (defn reference [])
