@@ -97,9 +97,19 @@
      {:class "absolute left-0 right-0 text-black opacity-40 text-center text-4xl top-[-0.65rem]"}
      quantity]))
 
-(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text]}]
+(rf/reg-sub
+ ::popup-is-active?
+ (fn [db [_ id]]
+   (if (= (::active-popup db) id) true false)))
+
+(rf/reg-event-db
+ ::toggle-active-popup
+ (fn [db [_ id]]
+   (assoc db ::active-popup (if (= id (::active-popup db)) nil id))))
+
+(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id]}]
   (let [warstats @(rf/subscribe [:warstats-store])
-        popup-visible? (r/atom false)
+        popup-visible? @(rf/subscribe [::popup-is-active? id])
         class1 "relative font-bold"
         class2 (mood/flavor+freshness warstats excerpt-opinions)]
     [rc/popover-anchor-wrapper
@@ -109,7 +119,7 @@
      [:span
       [:span
        {:class (str class1 " " class2)
-        :on-click #(swap! popup-visible? not)}
+        :on-click #(rf/dispatch [::toggle-active-popup id])}
        [segment-count (count excerpt-opinions)]
        (excerpts/rebreak text)]
       ]
