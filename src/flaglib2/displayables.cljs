@@ -94,7 +94,7 @@
 (defn segment-count [quantity]
   (when (> quantity 1)
     [:span
-     {:class "absolute l-0 r-0 text-black opacity-40 text-center text-3xl top-[-1rem]"}
+     {:class "absolute left-0 right-0 text-black opacity-40 text-center text-4xl top-[-0.65rem]"}
      quantity]))
 
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text]}]
@@ -110,8 +110,8 @@
       [:span
        {:class (str class1 " " class2)
         :on-click #(swap! popup-visible? not)}
-       (excerpts/rebreak text)
-       [segment-count (count excerpt-opinions)]]
+       [segment-count (count excerpt-opinions)]
+       (excerpts/rebreak text)]
       ]
      :popover
      [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]))
