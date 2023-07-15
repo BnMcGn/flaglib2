@@ -96,7 +96,9 @@
 (rf/reg-event-db
  ::received-references
  (fn [db [_ key result]]
-   (assoc-in db [:references key] (cljs.reader/read-string result))))
+   ;;Make room for future incoming refs
+   (let [data (into {} (map vec (partition 2 (cljs.reader/read-string result))))]
+     (assoc-in db [:references key] (:references data)))))
 
 (rf/reg-event-fx
  ::received-opinion-tree
@@ -136,9 +138,11 @@
 
 (rf/reg-event-fx
  :load-rooturl
- (fn [_ [_ rooturl & {:keys [no-text]}]]
+ (fn [_ [_ rooturl & {:keys [no-text no-references]}]]
    {:fx [[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]]
          [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "title"]]
+         (when-not no-references
+           [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "references"]])
          (when-not no-text
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "text"]])]}))
 
@@ -156,11 +160,11 @@
 ;;FIXME: gently seems broken
 (rf/reg-event-fx
  :load-rooturls
- (fn [_ [_ rooturls & {:keys [no-text gently]}]]
+ (fn [_ [_ rooturls & {:keys [no-text gently no-references]}]]
    {:fx
     (into []
           (for [url rooturls]
-            (let [ev [:load-rooturl url :no-text no-text]]
+            (let [ev [:load-rooturl url :no-text no-text :no-references no-references]]
               (if gently
                 [:dispatch [:text-status url :on-available ev]]
                 [:dispatch ev]))))}))

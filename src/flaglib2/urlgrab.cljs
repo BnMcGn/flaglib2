@@ -52,7 +52,7 @@
                   (if selection
                     (assoc nstate ::selection selection)
                     nstate))))
-         disp (when selection [:load-rooturls [selection]])
+         disp (when selection [:load-rooturls [selection] :no-references true])
          onsel (:on-select (get-in ndb location))]
      (into {}
            [[:db ndb]
