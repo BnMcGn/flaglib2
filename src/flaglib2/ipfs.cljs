@@ -93,13 +93,18 @@
    {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key (proc-title result)))
     :fx [ [:dispatch [::start-debounce]] ]}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::received-references
- (fn [db [_ key result]]
-   (let [data (into {} (map vec (partition 2 (cljs.reader/read-string result))))]
-     (-> data
-      (assoc-in [:references key] (:references data))
-      (assoc-in [:refd key] (:refd data))))))
+ (fn [{:keys [db]} [_ key result]]
+   (let [{:keys [references refd]} (into {} (map vec (partition 2 (cljs.reader/read-string result))))
+         iids (into (filter misc/iid? references) (filter misc/iid? refd))
+         dispatches (map #([:dispatch [:load-opinion %]]) iids)]
+     {:db (-> db
+              (assoc-in [:references key] references)
+              (assoc-in [:refd key] refd))
+      ;;FIXME: Might want a way to disable auto load
+      ;;NOTE: Might switch to warpaks...
+      :fx (into [] dispatches)})))
 
 (rf/reg-event-fx
  ::received-opinion-tree
