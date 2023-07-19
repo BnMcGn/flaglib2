@@ -57,7 +57,7 @@
  (fn [{:keys [db]} _]
    {:dispatch [:load-rooturls
                (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
-               :no-text true]}))
+               :no-text true :no-references true]}))
 
 
 (rf/reg-event-db

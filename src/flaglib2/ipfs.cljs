@@ -96,9 +96,10 @@
 (rf/reg-event-db
  ::received-references
  (fn [db [_ key result]]
-   ;;Make room for future incoming refs
    (let [data (into {} (map vec (partition 2 (cljs.reader/read-string result))))]
-     (assoc-in db [:references key] (:references data)))))
+     (-> data
+      (assoc-in [:references key] (:references data))
+      (assoc-in [:refd key] (:refd data))))))
 
 (rf/reg-event-fx
  ::received-opinion-tree

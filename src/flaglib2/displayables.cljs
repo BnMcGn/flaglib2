@@ -73,7 +73,23 @@
 (defn loading-indicator []
   [:div "Loading..."])
 
-(defn opinion-info [])
+(defn opinion-info [opid]
+  (let [opinion @[rf/subscribe [:opinion-store opid]]
+        warstats @[rf/subscribe [:warstats-store opid]]]
+    [:div
+     {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
+     [tb/opinion-icon opid]
+     [:div
+      [tb/flag-name opinion]
+      [tb/date-stamp opinion]
+      [tb/author-long opinion]
+      [tb/display-warstats :warstats warstats]
+      [:div
+       (when-not (empty? (:comment opinion))
+         ;;FIXME: should be clean comment?
+         [:div (excerpts/rebreak (:comment opinion))]
+         [:div "Reference stuff..."])]]]))
+
 (defn opinion-summary [])
 (defn sub-opinion-list [])
 
