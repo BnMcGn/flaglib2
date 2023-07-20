@@ -102,9 +102,9 @@
             :title (str immediate " direct responses, " total " in conversation")}
      (str " (" immediate "/" total ")")]))
 
-(defn display-external-link [& {:keys [url]}]
+(defn display-external-link [& {:keys [url black]}]
   [:a {:href url}
-   [:img {:src "/static/img/white-external-link.svg"
+   [:img {:src (if black "/static/img/white-external-link.svg" "/static/img/black-external-link.svg")
           :alt "Original article" :title "Original article"}]])
 
 (defn headline [& {:keys [title url domain rootid opinionid class]}]
@@ -112,15 +112,26 @@
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
         tinfo (when id @(rf/subscribe [:title-store id]))
-        [titl available] (if-let [t (or title (misc/has-title? tinfo))]
-                           [t true]
-                           [url false])
+        [titl available? patch?] (cond
+                                   title [title true false]
+                                   (misc/has-title? tinfo)
+                                   (if (misc/alternate-title? tinfo)
+                                     [(:title tinfo) true true]
+                                     [(:title tinfo) true false])
+                                   :else [url false false])
+        domain (when domain (str "(" domain ")"))
         class ["mx-3"
                class
-               (if available "text-lg" "italic font-thin truncate")
-               (when (misc/alternate-title? tinfo) deco/patch)]
-        title (or title (:title tinfo) " ")]
-    [:span {:class class} titl]))
+               (if available? "text-lg" "italic font-thin truncate")
+               (when (and (not domain) patch?) deco/patch)]
+        core (if domain
+               (if patch?
+                 [[:span {:class deco/patch} titl] (str " " domain)]
+                 [(str titl " " domain)])
+               [titl])]
+    (if url
+      [:span {:class class} (into [:a {:href url}] core)]
+      (into [:span {:class class}] core))))
 
 ;;FIXME: read from text-store?
 (defn comment-summary [& {:keys [comment opinion truncate]}]
