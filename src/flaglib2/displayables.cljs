@@ -73,6 +73,8 @@
 (defn loading-indicator []
   [:div "Loading..."])
 
+(declare reference)
+
 (defn opinion-info [opid]
   (let [opinion @[rf/subscribe [:opinion-store opid]]
         warstats @[rf/subscribe [:warstats-store opid]]]
@@ -87,8 +89,9 @@
       [:div
        (when-not (empty? (:comment opinion))
          ;;FIXME: should be clean comment?
-         [:div (excerpts/rebreak (:comment opinion))]
-         [:div "Reference stuff..."])]]]))
+         [:div (excerpts/rebreak (:comment opinion))])
+       (when (:reference opinion)
+         [reference :reference (:reference opinion)])]]]))
 
 (defn opinion-summary [])
 (defn sub-opinion-list [])
@@ -226,9 +229,28 @@
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) [opid])]))
 
 
-(defn reference [])
-(defn reference-default-display [])
+(defn reference-default-display [reference & {:keys [minify]}]
+  (let [warstats @(rf/subscribe [:warstats-store reference])]
+    [:<>
+     [tb/headline
+      :domain (misc/url-domain reference)
+      :rootid reference
+      :url (misc/make-target-url reference)]
+     (when-not minify
+       [tb/display-external-link :url reference :black true])
+     [tb/display-warstats :warstats warstats]
+     ]))
+
 (defn reference-excerpt-display [])
+
+(defn reference [reference & {:keys [minify]}]
+  [:div
+   {:class "text-white bg-black"}
+   [:img {:src "/static/img/white-reference.svg"
+          :class (if minify "w-[21] h-[23]" "w-[42px] h-[45px]")}]
+   [(if (misc/iid? reference) reference-excerpt-display reference-default-display)
+    reference]])
+
 (defn question [])
 (defn thread-opinion [])
 

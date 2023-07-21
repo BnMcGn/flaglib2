@@ -23,6 +23,9 @@
 (defn make-author-url [author]
   (str "/u/" (js/encodeURIComponent author)))
 
+(defn make-target-url [identifier]
+  (str "/target/" (js/encodeURIComponent identifier)))
+
 (defn excerpt-reply-link [target excerpt]
   (let [exstr (when excerpt (str "&excerpt=" (js/encodeURIComponent excerpt)))]
     (str "/opinion/?target=" (js/encodeURIComponent target) exstr)))
