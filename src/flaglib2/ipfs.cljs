@@ -98,7 +98,7 @@
  (fn [{:keys [db]} [_ key result]]
    (let [{:keys [references refd]} (into {} (map vec (partition 2 (cljs.reader/read-string result))))
          iids (into (filter misc/iid? references) (filter misc/iid? refd))
-         dispatches (map #([:dispatch [:load-opinion %]]) iids)]
+         dispatches (map #(vector :dispatch [:load-opinion %]) iids)]
      {:db (-> db
               (assoc-in [:references key] references)
               (assoc-in [:refd key] refd))

@@ -76,8 +76,8 @@
 (declare reference)
 
 (defn opinion-info [opid]
-  (let (opinion @(rf/subscribe [:opinion-store opid])
-        warstats @(rf/subscribe [:warstats-store opid]))
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        warstats @(rf/subscribe [:warstats-store opid])]
     [:div
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      [tb/opinion-icon opid]
@@ -108,7 +108,19 @@
      [tb/display-warstats :warstats warstats]
      [tb/reply-link (:url opinion)]]))
 
-(defn sub-opinion-list [])
+(defn sub-opinion-list [& {:keys [text tree-address root-target-url excerpt-opinions]}]
+  (let [opstore @(rf/subscribe [:opinion-store])
+        items
+        (if (< 1 (count excerpt-opinions))
+          (for [itm excerpt-opinions]
+            [opinion-summary itm])
+          [:opinion-info (first excerpt-opinions)])]
+    (into [:div
+           [:a {:href (if (empty? tree-address)
+                        root-target-url
+                        (get-in opstore [(last tree-address) :url]))}
+            "Reply to the excerpt"]]
+          items)))
 
 (defn popup-side [])
 
