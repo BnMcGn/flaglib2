@@ -76,8 +76,8 @@
 (declare reference)
 
 (defn opinion-info [opid]
-  (let [opinion @[rf/subscribe [:opinion-store opid]]
-        warstats @[rf/subscribe [:warstats-store opid]]]
+  (let (opinion @(rf/subscribe [:opinion-store opid])
+        warstats @(rf/subscribe [:warstats-store opid]))
     [:div
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      [tb/opinion-icon opid]
@@ -93,7 +93,21 @@
        (when (:reference opinion)
          [reference :reference (:reference opinion)])]]]))
 
-(defn opinion-summary [])
+;;; Opinion-summary is used to display opinions in one line situations. It may be displayed with
+;;; tree address icons.
+(defn opinion-summary [opid & {:keys [hide-tree-address]}]
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        warstats @(rf/subscribe [:warstats-store opid])]
+    [:div
+     (if hide-tree-address
+       [tb/opinion-icon opid]
+       [tb/display-tree-address (:tree-address opinion)])
+     [tb/flag-name opinion]
+     [tb/date-stamp opinion]
+     [tb/author-long opinion]
+     [tb/display-warstats :warstats warstats]
+     [tb/reply-link (:url opinion)]]))
+
 (defn sub-opinion-list [])
 
 (defn popup-side [])
