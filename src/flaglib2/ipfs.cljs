@@ -85,12 +85,14 @@
   (let [{:as opinion} (cljs.reader/read-string data)]
     (assoc
      opinion
-     :created (misc/parse-time (:created opinion)))))
+     :created (misc/parse-time (:created opinion))
+     :flag (let [[a b] (:flag opinion)]
+             (keyword (str (name a) "-" (name b)))))))
 
 (rf/reg-event-fx
  ::received-opinion
  (fn [{:keys [db]} [_ key result]]
-   {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key (proc-title result)))
+   {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key (proc-opinion result)))
     :fx [ [:dispatch [::start-debounce]] ]}))
 
 (rf/reg-event-fx
