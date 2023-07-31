@@ -39,8 +39,8 @@
 (defn opinion-icon [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])]
     [:a
-     :href (misc/make-opinion-url opinion)
-     (:img :src (flag-icon (:flag opinion)))]))
+     {:href (misc/make-opinion-url opinion)}
+     [:img {:src (flag-icon (:flag opinion))}]]))
 
 (defn display-tree-address [tree-address]
   [rc/h-box
@@ -77,7 +77,7 @@
 
 (defn author-long [opinion]
   (let [auth (or (:authorname opinion) (:author opinion))]
-    [:a :href (misc/make-author-url auth) auth]))
+    [:a {:href (misc/make-author-url auth)} auth]))
 
 (defn reply-link [& {:keys [url excerpt offset]}]
   [:form

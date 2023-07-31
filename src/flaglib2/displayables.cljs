@@ -172,7 +172,8 @@
        [segment-count (count excerpt-opinions)]
        (excerpts/rebreak text)]]
      :popover
-     [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]))
+     [rc/popover-content-wrapper
+      :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]]))
 
 (defn plain-segment [& {:keys [text]}]
   [:span {:class "font-normal"} (excerpts/rebreak text)])
