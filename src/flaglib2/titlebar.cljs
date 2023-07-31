@@ -30,8 +30,10 @@
     [:span (str (:category flag) " " (:label flag))]))
 
 (defn flag-icon [type]
-  (let [flag (get flags/flags type)]
-    (str "/static/img/small/wf_flag-" (subs (:color flag) 1) ".svg")))
+  (let [flag (get flags/flags type)
+        ;;FIXME: unknown flag should have unique icon
+        color (if flag (subs (:color flag) 1) "fff")]
+    (str "/static/img/small/wf_flag-" color ".svg")))
 
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
