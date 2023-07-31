@@ -108,17 +108,21 @@
      [tb/display-warstats :warstats warstats]
      [tb/reply-link (:url opinion)]]))
 
-(defn sub-opinion-list [& {:keys [text tree-address root-target-url excerpt-opinions]}]
+(defn sub-opinion-list [excerpt-opinions
+                        & {:keys [excerpt tree-address root-target-url]}]
   (let [opstore @(rf/subscribe [:opinion-store])
         items
         (if (< 1 (count excerpt-opinions))
           (for [itm excerpt-opinions]
             [opinion-summary itm])
-          [:opinion-info (first excerpt-opinions)])]
+          [[opinion-info (first excerpt-opinions)]])]
     (into [:div
-           [:a {:href (if (empty? tree-address)
-                        root-target-url
-                        (get-in opstore [(last tree-address) :url]))}
+           ;;FIXME: what about offset?
+           [:a {:href (misc/excerpt-reply-link
+                       (if (empty? tree-address)
+                         root-target-url
+                         (get-in opstore [(last tree-address) :url]))
+                       excerpt)}
             "Reply to the excerpt"]]
           items)))
 
@@ -166,8 +170,7 @@
        {:class (str class1 " " class2)
         :on-click #(rf/dispatch [::toggle-active-popup id])}
        [segment-count (count excerpt-opinions)]
-       (excerpts/rebreak text)]
-      ]
+       (excerpts/rebreak text)]]
      :popover
      [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]))
 
