@@ -15,10 +15,21 @@
    {:class "m-0 bold italic bg-gray-300 leading-4"}
    contents])
 
-(def positive-magnitude
-  '("bg-[#00ff0000]" "bg-[#00ff0033]" "bg-[#00ff0055]" "bg-[#00ff0088]" "bg-[#00ff00ff]"))
-(def negative-magnitude
-  '("bg-[#ff000000]" "bg-[#ff000033]" "bg-[#ff000055]" "bg-[#ff000088]" "bg-[#ff0000ff]"))
+(def pos-mag-0 "bg-[#00ff0000]")
+(def pos-mag-1 "bg-[#00ff0033]")
+(def pos-mag-2 "bg-[#00ff0055]")
+(def pos-mag-3 "bg-[#00ff0088]")
+(def pos-mag-4 "bg-[#00ff00ff]")
+
+(def neg-mag-0 "bg-[#ff000000]")
+(def neg-mag-1 "bg-[#ff000033]")
+(def neg-mag-2 "bg-[#ff000055]")
+(def neg-mag-3 "bg-[#ff000088]")
+(def neg-mag-4 "bg-[#ff0000ff]")
+
+;; Weird hack to get around tailwindcss failure
+(def positive-magnitude [pos-mag-0 pos-mag-1 pos-mag-2 pos-mag-3 pos-mag-4])
+(def negative-magnitude [neg-mag-0 neg-mag-1 neg-mag-2 neg-mag-3 neg-mag-4])
 
 (def display-depths ["ml-0"
                      "ml-[2em]"

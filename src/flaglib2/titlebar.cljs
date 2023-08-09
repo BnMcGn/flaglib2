@@ -105,7 +105,7 @@
      (str " (" immediate "/" total ")")]))
 
 (defn display-external-link [& {:keys [url black]}]
-  [:a {:href url}
+  [:a {:href url :class "mr-3"}
    [:img {:src (if black "/static/img/white-external-link.svg" "/static/img/black-external-link.svg")
           :alt "Original article" :title "Original article"}]])
 
