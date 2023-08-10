@@ -5,6 +5,8 @@
 ;   [clojure.walk :as walk]
    [goog.string :as string]
 
+   [re-com-tailwind.functions :refer [tw-btn-default tw-btn]]
+
    [flaglib2.misc :as misc]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.flags :as flags]
@@ -95,7 +97,7 @@
       {:type "submit"
        :title (str "Reply to the excerpt: \"" excerpt "\"")
        :value "Reply to Excerpt"}]
-     [:input {:type "submit" :value "Reply"}])])
+     [:input {:type "submit" :value "Reply" :class (tw-btn (tw-btn-default))}])])
 
 (defn reply-count [& {:keys [warstats class]}]
   (let [immediate (:replies-immediate warstats)
@@ -107,6 +109,7 @@
 (defn display-external-link [& {:keys [url black]}]
   [:a {:href url :class "mr-3"}
    [:img {:src (if black "/static/img/white-external-link.svg" "/static/img/black-external-link.svg")
+          :style {:width "22px"}
           :alt "Original article" :title "Original article"}]])
 
 (defn headline [& {:keys [title url domain rootid opinionid class]}]
