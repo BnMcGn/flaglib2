@@ -12,7 +12,7 @@
 
 (defn casual-heading [contents]
   [:h3
-   {:class "m-0 bold italic bg-gray-300 leading-4"}
+   {:class "m-0 bold italic bg-gray-300 leading-4 my-1.5"}
    contents])
 
 (def pos-mag-0 "bg-[#00ff0000]")
