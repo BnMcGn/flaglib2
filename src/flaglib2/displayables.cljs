@@ -25,7 +25,7 @@
      :class class
      :align :center
      :children
-     [intro-text
+     [(when intro-text [:span {:class "font-bold"} intro-text])
       [tb/headline :title title :rootid url :url url]
       (when (and url (not hide-external-link))
         [tb/display-external-link :url url])

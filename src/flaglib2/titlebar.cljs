@@ -85,7 +85,9 @@
 
 (defn reply-link [& {:keys [url excerpt offset]}]
   [:form
-   {:class "inline-block relative text-sm"
+   {:class "inline-block relative text-sm mr-3"
+    ;;FIXME: Why doesn't form vertically center like other elements?
+    :style {:top "0.5em"}
     :action "/opinion/" :method "GET"}
    [:input {:type "hidden" :name "target" :value (or url "")}]
    (when excerpt
@@ -104,7 +106,7 @@
         total (:replies-total warstats)]
     [:span {:class ["text-base mr-3" class]
             :title (str immediate " direct responses, " total " in conversation")}
-     (str " (" immediate "/" total ")")]))
+     (when (and immediate total) (str " (" immediate "/" total ")"))]))
 
 (defn display-external-link [& {:keys [url black]}]
   [:a {:href url :class "mr-3"}
