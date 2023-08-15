@@ -80,12 +80,15 @@
         warstats @(rf/subscribe [:warstats-store opid])]
     [:div
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
-     [tb/opinion-icon opid]
+     [tb/opinion-icon opid :float-left true]
      [:div
-      [tb/flag-name opinion]
-      [tb/date-stamp opinion]
-      [tb/author-long opinion]
-      [tb/display-warstats :warstats warstats]
+      {:class "bg-white border-2 border-black ml-7"}
+      [:div
+       {:class "flex flex-row justify-around"}
+       [tb/flag-name opinion]
+       [tb/date-stamp opinion]
+       [tb/author-long opinion]
+       [tb/display-warstats :warstats warstats]]
       [:div
        (when-not (empty? (:comment opinion))
          ;;FIXME: should be clean comment?
@@ -118,12 +121,16 @@
           [[opinion-info (first excerpt-opinions)]])]
     (into [:div
            ;;FIXME: what about offset?
-           [:a {:href (misc/excerpt-reply-link
-                       (if (empty? tree-address)
-                         root-target-url
-                         (get-in opstore [(last tree-address) :url]))
-                       excerpt)}
-            "Reply to the excerpt"]]
+           [:div
+            {:class "mb-2"}
+            [:a {:href (misc/excerpt-reply-link
+                        (if (empty? tree-address)
+                          root-target-url
+                          (get-in opstore [(last tree-address) :url]))
+                        excerpt)
+                 :style {:color "black"}
+                 :class "m-0 bold italic bg-gray-300 leading-4"}
+             "Reply to the excerpt"]]]
           items)))
 
 (defn popup-side [])
@@ -174,7 +181,8 @@
      :popover
      [rc/popover-content-wrapper
       :parts {:border
-              {:style {:background-color "rgba(255, 255, 255, 0.7)"
+              {:class "sm:w-[70rem]"
+               :style {:background-color "rgba(255, 255, 255, 0.7)"
                        :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
                        :border-radius "3px"}}}
       :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]]))
