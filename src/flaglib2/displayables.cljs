@@ -82,9 +82,9 @@
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      [tb/opinion-icon opid :float-left true]
      [:div
-      {:class "bg-white border-2 border-black ml-7"}
+      {:class "bg-white border-[3px] border-black ml-7"}
       [:div
-       {:class "flex flex-row justify-around"}
+       {:class "flex flex-row gap-4 items-center"}
        [tb/flag-name opinion]
        [tb/date-stamp opinion]
        [tb/author-long opinion]

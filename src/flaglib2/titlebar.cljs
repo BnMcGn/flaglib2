@@ -82,7 +82,8 @@
 
 (defn author-long [opinion]
   (let [auth (or (:authorname opinion) (:author opinion))]
-    [:a {:href (misc/make-author-url auth)} auth]))
+    [:a {:style {:color "black"}
+         :href (misc/make-author-url auth)} auth]))
 
 (defn reply-link [& {:keys [url excerpt offset]}]
   [:form
