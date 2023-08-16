@@ -11,9 +11,10 @@
 
 
 (defn target-root-article [& {:keys [focus rooturl]}]
-  (let []
+  (let [size @(rf/subscribe [:window-size])
+        rt (if (= size :xs) disp/root-title-mobile disp/root-title)]
     [:div
-     [disp/root-title
+     [rt
       :display-depth 0
       :url rooturl
       :intro-text "Article: "]
