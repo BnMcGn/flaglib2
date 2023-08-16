@@ -77,18 +77,23 @@
 
 (defn opinion-info [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
-        warstats @(rf/subscribe [:warstats-store opid])]
+        warstats @(rf/subscribe [:warstats-store opid])
+        size @(rf/subscribe [:window-size])]
     [:div
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      [tb/opinion-icon opid :float-left true]
      [:div
       {:class "bg-white border-[3px] border-black ml-7"}
-      [:div
-       {:class "flex flex-row gap-4 items-center"}
-       [tb/flag-name opinion]
-       [tb/date-stamp opinion]
-       [tb/author-long opinion]
-       [tb/display-warstats :warstats warstats]]
+      (if (= size :xs)
+        [:div
+         {:class "flex flex-row gap-4 items-center"}
+         [tb/author-long opinion]]
+        [:div
+         {:class "flex flex-row gap-4 items-center"}
+         [tb/flag-name opinion]
+         [tb/date-stamp opinion]
+         [tb/author-long opinion]
+         [tb/display-warstats :warstats warstats]])
       [:div
        (when-not (empty? (:comment opinion))
          ;;FIXME: should be clean comment?
