@@ -190,6 +190,8 @@
                :style {:background-color "rgba(255, 255, 255, 0.7)"
                        :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
                        :border-radius "3px"}}}
+      :arrow-renderer deco/wf-arrow
+      :arrow-length 21
       :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]]))
 
 (defn plain-segment [& {:keys [text]}]

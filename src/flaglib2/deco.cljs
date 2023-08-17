@@ -51,3 +51,16 @@
 (def patch "border-dashed border border-slate-800")
 
 (def button-disabled "text-gray-500")
+
+(defn wf-arrow
+  "Render the triangle which connects the popover to the anchor (using SVG)"
+  [& {:keys [orientation pop-offset arrow-length arrow-width grey-arrow? no-border? popover-color popover-border-color parts]}]
+  [:svg {:style {:width "0.9em"
+                 :position "absolute"
+                 :left (if (nil? pop-offset) "50%" (str pop-offset "px"))
+                 (case orientation
+                   :above :bottom
+                   :below :top) "-20px"
+                 :margin-left "-10px"}
+         :viewBox "0 0 100 100"}
+   [:circle {:cx 50 :cy 50 :r 50 :fill "black" :stroke "black"}]])
