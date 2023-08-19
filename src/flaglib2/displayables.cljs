@@ -1,4 +1,4 @@
-(ns flaglib2.displayables
+(ns flaglib2.displayable:s
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
@@ -80,31 +80,37 @@
 
 (declare reference)
 
+(defn opinion-container [props & {:keys [iconid titlebar body]}]
+  [:div
+   props
+   [tb/opinion-icon iconid :float-left true]
+   [:div
+    {:class "bg-white border-[3px] border-black ml-7"}
+    [:div {:class "flex flex-row gap-4 items-center"} titlebar]
+    body]])
+
 (defn opinion-info [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
         size @(rf/subscribe [:window-size])]
-    [:div
+    [opinion-container
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
-     [tb/opinion-icon opid :float-left true]
+     :iconid opid
+     :titlebar
+     (if (= size :xs)
+       [tb/author-long opinion]
+       [:<>
+        [tb/flag-name opinion]
+        [tb/date-stamp opinion]
+        [tb/author-long opinion]
+        [tb/display-warstats :warstats warstats]])
+     :body
      [:div
-      {:class "bg-white border-[3px] border-black ml-7"}
-      (if (= size :xs)
-        [:div
-         {:class "flex flex-row gap-4 items-center"}
-         [tb/author-long opinion]]
-        [:div
-         {:class "flex flex-row gap-4 items-center"}
-         [tb/flag-name opinion]
-         [tb/date-stamp opinion]
-         [tb/author-long opinion]
-         [tb/display-warstats :warstats warstats]])
-      [:div
-       (when-not (empty? (:comment opinion))
-         ;;FIXME: should be clean comment?
-         [:div (excerpts/rebreak (:comment opinion))])
-       (when (:reference opinion)
-         [reference :reference (:reference opinion)])]]]))
+      (when-not (empty? (:comment opinion))
+        ;;FIXME: should be clean comment?
+        [:div (excerpts/rebreak (:comment opinion))])
+      (when (:reference opinion)
+        [reference :reference (:reference opinion)])]]))
 
 ;;; Opinion-summary is used to display opinions in one line situations. It may be displayed with
 ;;; tree address icons.
@@ -312,7 +318,47 @@
     reference]])
 
 (defn question [])
-(defn thread-opinion [])
+
+(defn thread-opinion [& {:keys [opid text]}]
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        warstats @(rf/subscribe [:warstats-store opid])
+        excerpt (r/atom "")
+        offset (r/atom nil)]
+    (when opinion
+      (let [tree-address (:tree-address opinion)
+            parid (when (< 1 (count tree-address))
+                    (nth tree-address (- (count tree-address) 2)))
+            parent (when parid
+                     @(rf/subscribe [:opinion-store parid]))
+            text (if parent
+                   (or (:comment parent) "")
+                   text)]
+        [opinion-container
+         {} ;; Depth stuff
+         :iconid opid
+         :titlebar
+         [:<>
+          [tb/flag-name opinion]
+          [tb/date-stamp opinion]
+          [tb/author-long opinion]
+          [tb/display-warstats :warstats warstats]
+          ;;FIXME: should handle excerpts, could use iid instead of url?
+          [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
+         :body
+         [:div
+          ;; {:overflow "overlay"} ??
+          (when (excerpts/has-excerpt? opinion)
+            [thread-excerpt :opinionid opid :text text])
+          (when (:comment opinion)
+            [hilited-text
+             :text (:comment opinion)
+             :tree-address tree-address
+             :hide-popup true
+             :excerpt excerpt
+             :offset offset])
+          [:div
+           ;; ref and question
+           ]]]))))
 
 (defn excerptless-opinions [])
 

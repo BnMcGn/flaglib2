@@ -14,20 +14,27 @@
 
 
 (defn target-root-article [& {:keys [focus rooturl]}]
-  (let [size @(rf/subscribe [:window-size])
-        rt (if (= size :xs) disp/root-title-mobile disp/root-title)]
+  [:div
+   [disp/root-title
+    :display-depth 0
+    :url rooturl
+    :intro-text "Article: "]
+   [deco/casual-heading (str "Text from article at " (misc/url-domain rooturl))]
+   [disp/hilited-text
+    :text-key rooturl
+    :root-target-url rooturl
+    :tree-address (list)
+    ;;[disp/excerptless-opinions]
+    ]])
+
+(defn target-root-thread [& {:keys [rooturl]}]
+  (let [optree @(rf/subscribe [:opinion-tree rooturl])]
     [:div
-     [rt
-      :display-depth 0
-      :url rooturl
-      :intro-text "Article: "]
-     [deco/casual-heading (str "Text from article at " (misc/url-domain rooturl))]
-     [disp/hilited-text
-      :text-key rooturl
-      :root-target-url rooturl
-      :tree-address (list)
-      ;;[disp/excerptless-opinions]
-      ]]))
+     [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
+     (into []
+           (map (fn [opid]
+                  [disp/thread-opinion :opid opid])
+                (flatten optree)))]))
 
 (defn target-root []
   (let [params @(rf/subscribe [:server-parameters])
@@ -35,13 +42,16 @@
                           (keyword tmode)
                           :article))]
     [:<> [rc/horizontal-tabs
+          :class "mt-1"
           :model current
           :tabs [{:id :article :label "Article View"}
                  {:id :comment :label "Comment View"}
                  {:id :summary :label "Summary"}]
           :on-change #(set! js/window.location.href
                             (uri/setParam js/window.location.href "tmode" (name %1)))]
-     [target-root-article :rooturl (:rooturl params)]]))
+     (case @current
+       :article [target-root-article :rooturl (:rooturl params)]
+       :comment [target-root-thread :rooturl (:rooturl params)])]))
 
 (rf/reg-event-fx
  :target
