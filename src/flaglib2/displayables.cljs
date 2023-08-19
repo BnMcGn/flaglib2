@@ -13,7 +13,7 @@
    [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
 
-(defn root-title [& {:keys [url title display-depth intro-text hide-warstats
+(defn root-title-fullscreen [& {:keys [url title display-depth intro-text hide-warstats
                             warstats hide-reply hide-count reply-excerpt reply-offset
                             hide-external-link warflagger-link children]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
@@ -58,6 +58,11 @@
        [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
      (when-not hide-count
        [tb/reply-count :warstats warstats :class "justify-self-start"])]))
+
+(defn root-title [& args]
+  (let [size @(rf/subscribe [:window-size])
+        rt (if (= size :xs) root-title-mobile root-title-fullscreen)]
+    (reduce into [rt] (seq args))))
 
 (defn root-title-short [& {:as params}]
   (reduce into
