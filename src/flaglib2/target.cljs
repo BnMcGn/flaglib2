@@ -1,8 +1,11 @@
 (ns flaglib2.target
   (:require
    [re-frame.core :as rf]
+   [reagent.core :as r]
+   [goog.uri.utils :as uri]
 
    [cljsjs.rangy-textrange]
+   [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
@@ -26,10 +29,19 @@
       ;;[disp/excerptless-opinions]
       ]]))
 
-
 (defn target-root []
-  (let [params @(rf/subscribe [:server-parameters])]
-    [target-root-article :rooturl (:rooturl params)]))
+  (let [params @(rf/subscribe [:server-parameters])
+        current (r/atom (if-let [tmode (:tmode params)]
+                          (keyword tmode)
+                          :article))]
+    [:<> [rc/horizontal-tabs
+          :model current
+          :tabs [{:id :article :label "Article View"}
+                 {:id :comment :label "Comment View"}
+                 {:id :summary :label "Summary"}]
+          :on-change #(set! js/window.location.href
+                            (uri/setParam js/window.location.href "tmode" (name %1)))]
+     [target-root-article :rooturl (:rooturl params)]]))
 
 (rf/reg-event-fx
  :target
