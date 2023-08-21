@@ -92,11 +92,11 @@
     :style {:top "0.5em"}
     :action "/opinion/" :method "GET"}
    [:input {:type "hidden" :name "target" :value (or url "")}]
-   (when excerpt
+   (when-not (empty? excerpt)
      [:input {:type "hidden" :name "excerpt" :value (js/encodeURIComponent excerpt)}])
    (when offset
      [:input {:type "hidden" :name "offset" :value (or offset "")}])
-   (if excerpt
+   (if (and excerpt (not (empty? excerpt)))
      [:input
       {:type "submit"
        :title (str "Reply to the excerpt: \"" excerpt "\"")

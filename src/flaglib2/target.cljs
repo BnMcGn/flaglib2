@@ -14,18 +14,24 @@
 
 
 (defn target-root-article [& {:keys [focus rooturl]}]
-  [:div
-   [disp/root-title
-    :display-depth 0
-    :url rooturl
-    :intro-text "Article: "]
-   [deco/casual-heading (str "Text from article at " (misc/url-domain rooturl))]
-   [disp/hilited-text
-    :text-key rooturl
-    :root-target-url rooturl
-    :tree-address (list)
-    ;;[disp/excerptless-opinions]
-    ]])
+  (let [excerpt (r/atom "")
+        offset (r/atom nil)]
+    [:div
+     [disp/root-title
+      :display-depth 0
+      :url rooturl
+      :intro-text "Article: "
+      :reply-excerpt @excerpt
+      :reply-offset @offset]
+     [deco/casual-heading (str "Text from article at " (misc/url-domain rooturl))]
+     [disp/hilited-text
+      :text-key rooturl
+      :root-target-url rooturl
+      :tree-address (list)
+      :excerpt excerpt
+      :offset offset
+      ;;[disp/excerptless-opinions]
+      ]]))
 
 (defn target-root-thread [& {:keys [rooturl]}]
   (let [optree @(rf/subscribe [:opinion-tree rooturl])]

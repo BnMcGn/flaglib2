@@ -1,10 +1,10 @@
-(ns flaglib2.displayable:s
+(ns flaglib2.displayables
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
    [clojure.string :as string]
 
-   [cljsjs.rangy-textrange]
+   [cljsjs.rangy-textrange :as rangy]
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
@@ -255,13 +255,30 @@
         :focus focus
         :last-char-pos end]))))
 
-(defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup]}]
+(defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup excerpt offset]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
-        opstore @(rf/subscribe [:opinion-store])]
+        opstore @(rf/subscribe [:opinion-store])
+        selection-change
+        (fn [ev]
+          (when (and (atom? excerpt) (atom? offset))
+            (if (excerpts/is-selection-in-single-hilited-text? (. rangy (getSelection)))
+              (let [textel this
+                    range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
+                    ex (excerpts/get-location-excerpt
+                        (excerpts/create-textdata (string/trim text))
+                        (. range -start) (. range -end))]
+                (reset! excerpt (:excerpt ex))
+                (reset! offset (:offset ex)))
+              (do
+                (reset! excerpt "")
+                (reset! offset nil)))))]
     (if text
       (into [:div
              ;; :id ??
-             {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")}]
+             {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")
+              :on-click #(.stopPropagation %)
+              :on-mouse-up selection-change
+              :on-key-press selection-change}]
             ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
             (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
                            :root-target-url root-target-url :hide-popup hide-popup))

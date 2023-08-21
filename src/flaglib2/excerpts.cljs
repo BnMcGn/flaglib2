@@ -147,6 +147,12 @@
     nil
     (count (filter (fn [i] (excerpt-here? tdat excerpt i)) (range startloc)))))
 
+(defn get-location-excerpt [tdat start end]
+  (let [excerpt (subs (:text tdat) start end)
+        excerpt (clean-string-for-excerpt excerpt)
+        offset (calculate-offset tdat excerpt start)]
+    {:excerpt excerpt :offset offset}))
+
 ;; Code for searching for excerpt.
 
 ;; Ideas:
