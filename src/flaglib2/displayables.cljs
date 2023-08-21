@@ -4,7 +4,7 @@
    [reagent.core :as r]
    [clojure.string :as string]
 
-   [cljsjs.rangy-textrange :as rangy]
+   [cljsjs.rangy-textrange]
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
@@ -12,6 +12,8 @@
    [flaglib2.excerpts :as excerpts]
    [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
+
+(def rangy js/rangy)
 
 (defn root-title-fullscreen [& {:keys [url title display-depth intro-text hide-warstats
                             warstats hide-reply hide-count reply-excerpt reply-offset
@@ -59,7 +61,7 @@
      (when-not hide-count
        [tb/reply-count :warstats warstats :class "justify-self-start"])]))
 
-(defn root-title [& args]
+(defn root-title [& {:as args}]
   (let [size @(rf/subscribe [:window-size])
         rt (if (= size :xs) root-title-mobile root-title-fullscreen)]
     (reduce into [rt] (seq args))))
@@ -260,18 +262,19 @@
         opstore @(rf/subscribe [:opinion-store])
         selection-change
         (fn [ev]
-          (when (and (atom? excerpt) (atom? offset))
-            (if (excerpts/is-selection-in-single-hilited-text? (. rangy (getSelection)))
-              (let [textel this
-                    range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
-                    ex (excerpts/get-location-excerpt
-                        (excerpts/create-textdata (string/trim text))
-                        (. range -start) (. range -end))]
-                (reset! excerpt (:excerpt ex))
-                (reset! offset (:offset ex)))
-              (do
-                (reset! excerpt "")
-                (reset! offset nil)))))]
+          (this-as this
+            (when (and excerpt offset)
+             (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
+               (let [textel this
+                     range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
+                     ex (excerpts/get-location-excerpt
+                         (excerpts/create-textdata (string/trim text))
+                         (. range -start) (. range -end))]
+                 (reset! excerpt (:excerpt ex))
+                 (reset! offset (:offset ex)))
+               (do
+                 (reset! excerpt "")
+                 (reset! offset nil))))))]
     (if text
       (into [:div
              ;; :id ??
