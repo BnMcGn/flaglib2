@@ -166,7 +166,7 @@
       (recur (. element -parentElement)))))
 
 (defn is-selection-in-single-hilited-text? [selection]
-  (let [parent1 (find-parent-hilited (. selection -parentElement))]
+  (let [parent1 (find-parent-hilited (. selection -anchorNode))]
     (and (not (. selection -isCollapsed))
          parent1
          (= parent1 (find-parent-hilited (. selection -focusNode))))))
@@ -259,26 +259,26 @@
 
 (defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup excerpt offset]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
+        id (str "hilited-text-" (gensym))
         opstore @(rf/subscribe [:opinion-store])
         selection-change
         (fn [ev]
-          (this-as this
-            (when (and excerpt offset)
-             (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
-               (let [textel this
-                     range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
-                     ex (excerpts/get-location-excerpt
-                         (excerpts/create-textdata (string/trim text))
-                         (. range -start) (. range -end))]
-                 (reset! excerpt (:excerpt ex))
-                 (reset! offset (:offset ex)))
-               (do
-                 (reset! excerpt "")
-                 (reset! offset nil))))))]
+          (when (and excerpt offset)
+            (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
+              (let [textel (. js/document (getElementById id))
+                    range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
+                    ex (excerpts/get-location-excerpt
+                        (excerpts/create-textdata (string/trim text))
+                        (. range -start) (. range -end))]
+                (reset! excerpt (:excerpt ex))
+                (reset! offset (:offset ex)))
+              (do
+                (reset! excerpt "")
+                (reset! offset nil)))))]
     (if text
       (into [:div
-             ;; :id ??
              {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")
+              :id id
               :on-click #(.stopPropagation %)
               :on-mouse-up selection-change
               :on-key-press selection-change}]
