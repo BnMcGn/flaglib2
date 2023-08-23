@@ -100,7 +100,8 @@
      [:input
       {:type "submit"
        :title (str "Reply to the excerpt: \"" excerpt "\"")
-       :value "Reply to Excerpt"}]
+       :value "Reply to Excerpt"
+       :class (tw-btn (tw-btn-default))}]
      [:input {:type "submit" :value "Reply" :class (tw-btn (tw-btn-default))}])])
 
 (defn reply-count [& {:keys [warstats class]}]

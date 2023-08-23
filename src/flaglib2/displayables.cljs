@@ -344,41 +344,42 @@
         warstats @(rf/subscribe [:warstats-store opid])
         excerpt (r/atom "")
         offset (r/atom nil)]
-    (when opinion
-      (let [tree-address (:tree-address opinion)
-            parid (when (< 1 (count tree-address))
-                    (nth tree-address (- (count tree-address) 2)))
-            parent (when parid
-                     @(rf/subscribe [:opinion-store parid]))
-            text (if parent
-                   (or (:comment parent) "")
-                   text)]
-        [opinion-container
-         {} ;; Depth stuff
-         :iconid opid
-         :titlebar
-         [:<>
-          [tb/flag-name opinion]
-          [tb/date-stamp opinion]
-          [tb/author-long opinion]
-          [tb/display-warstats :warstats warstats]
-          ;;FIXME: should handle excerpts, could use iid instead of url?
-          [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
-         :body
-         [:div
-          ;; {:overflow "overlay"} ??
-          (when (excerpts/has-excerpt? opinion)
-            [thread-excerpt :opinionid opid :text text])
-          (when (:comment opinion)
-            [hilited-text
-             :text (:comment opinion)
-             :tree-address tree-address
-             :hide-popup true
-             :excerpt excerpt
-             :offset offset])
-          [:div
-           ;; ref and question
-           ]]]))))
+    (fn [& {:as args}]
+      (when opinion
+        (let [tree-address (:tree-address opinion)
+              parid (when (< 1 (count tree-address))
+                      (nth tree-address (- (count tree-address) 2)))
+              parent (when parid
+                       @(rf/subscribe [:opinion-store parid]))
+              text (if parent
+                     (or (:comment parent) "")
+                     text)]
+          [opinion-container
+           {} ;; Depth stuff
+           :iconid opid
+           :titlebar
+           [:<>
+            [tb/flag-name opinion]
+            [tb/date-stamp opinion]
+            [tb/author-long opinion]
+            [tb/display-warstats :warstats warstats]
+            ;;FIXME: should handle excerpts, could use iid instead of url?
+            [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
+           :body
+           [:div
+            ;; {:overflow "overlay"} ??
+            (when (excerpts/has-excerpt? opinion)
+              [thread-excerpt :opinionid opid :text text])
+            (when (:comment opinion)
+              [hilited-text
+               :text (:comment opinion)
+               :tree-address tree-address
+               :hide-popup true
+               :excerpt excerpt
+               :offset offset])
+            [:div
+             ;; ref and question
+             ]]])))))
 
 (defn excerptless-opinions [])
 
