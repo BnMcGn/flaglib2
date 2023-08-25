@@ -181,6 +181,42 @@
                         seq)
                    (seq (. el -childNodes))))))
 
+(defn- proc-in-excerpt [nodes range]
+  (let [node (first nodes)
+        text (if (is-tag? "BR" node) "\n" (and node node.data))]
+    (cond
+      (= node (. range -endContainer)) [(subs text 0 (. range -endOffset))]
+      text (lazy-seq (cons text (proc-in-excerpt (next nodes) range)))
+      :else :fail)))
+
+(defn- proc-excerpt-start [nodes range]
+  (let [node (first nodes)
+        offset (. range -startOffset)
+        text (if (is-tag? "BR" node) "\n" node.data)]
+    (if (= node (. range -endContainer))
+      [(subs text 0 offset) :marker (subs text offset (. range -endOffset))]
+      (lazy-cat
+       [(subs text 0 offset) :marker (subs text offset)]
+       (proc-in-excerpt (next nodes) range)))))
+
+(defn- proc-pre-excerpt [nodes range]
+  (let [node (first nodes)]
+    (cond
+      (= node (. range -startContainer)) (proc-excerpt-start nodes range)
+      (is-tag? "BR" node) (lazy-seq (cons "\n" (proc-pre-excerpt (next nodes) range)))
+      (and node.nodeName (= "#text" node.nodeName))
+      (lazy-seq (cons node.data (proc-pre-excerpt (next nodes) range)))
+      :else :fail)))
+
+(defn text-location-from-dom-range [el range]
+  "el is presumed to be a hilited-text div"
+  (let [segments (proc-pre-excerpt (hilited-node-walk el) range)
+        [pre excerpt] (split-with string? segments)]
+    (when-not (or (= :fail (first excerpt)) (= :fail (last excerpt)))
+      (let [start (reduce + (map count pre))
+            excerpt (apply str (rest excerpt))
+            length (count excerpt)]
+        {:start start :end (+ length start) :excerpt excerpt :length length}))))
 
 ;; Code for searching for excerpt.
 
