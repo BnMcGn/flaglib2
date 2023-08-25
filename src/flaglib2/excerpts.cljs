@@ -153,6 +153,35 @@
         offset (calculate-offset tdat excerpt start)]
     {:excerpt excerpt :offset offset}))
 
+;; Need an accurate location for excerpt
+
+;;FIXME: cljs should have DOM tools
+(defn- anchor-wrapper? [node]
+  (when-let [att node.attributes]
+    (when-let [rcdat (. att (getNamedItem "data-rc"))]
+      (= "popover-anchor-wrapper" rcdat.value))))
+
+(defn- is-tag? [tag el]
+  (or (and el
+           el.tagName
+           (= el.tagName tag))
+      false))
+
+(defn- get-actual-span [span]
+  (if (anchor-wrapper? span) span.firstChild.firstChild span))
+
+;; Emits a lazyseq of text and <br> nodes, omitting the non-article stuff
+(defn hilited-node-walk [el]
+  (remove (partial is-tag? "SPAN")
+          (mapcat identity
+                  (map
+                   #(-> %1
+                        get-actual-span
+                        (. -childNodes)
+                        seq)
+                   (seq (. el -childNodes))))))
+
+
 ;; Code for searching for excerpt.
 
 ;; Ideas:
