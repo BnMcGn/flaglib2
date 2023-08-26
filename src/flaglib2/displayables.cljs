@@ -197,11 +197,10 @@
      :position :below-left
      :anchor
      [:span
-      [:span
-       {:class (str class1 " " class2)
-        :on-click #(rf/dispatch [::toggle-active-popup id])}
-       [segment-count (count excerpt-opinions)]
-       (excerpts/rebreak text)]]
+      {:class (str class1 " " class2)
+       :on-click #(rf/dispatch [::toggle-active-popup id])}
+      [segment-count (count excerpt-opinions)]
+      (excerpts/rebreak text)]
      :popover
      [rc/popover-content-wrapper
       :parts {:border
@@ -266,10 +265,11 @@
           (when (and excerpt offset)
             (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
               (let [textel (. js/document (getElementById id))
-                    range (.. rangy (getSelection) (getRangeAt 0) (toCharacterRange textel))
+                    range (.. rangy (getSelection) (getRangeAt 0))
+                    loc (excerpts/text-location-from-dom-range textel range)
                     ex (excerpts/get-location-excerpt
                         (excerpts/create-textdata (string/trim text))
-                        (. range -start) (. range -end))]
+                        (:start loc) (:end loc))]
                 (reset! excerpt (:excerpt ex))
                 (reset! offset (:offset ex)))
               (do

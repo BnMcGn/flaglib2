@@ -155,7 +155,6 @@
 
 ;; Need an accurate location for excerpt
 
-;;FIXME: cljs should have DOM tools
 (defn- anchor-wrapper? [node]
   (when-let [att node.attributes]
     (when-let [rcdat (. att (getNamedItem "data-rc"))]
@@ -167,6 +166,7 @@
            (= el.tagName tag))
       false))
 
+;;FIXME: Not very safe. Should identify span, throw error if not found
 (defn- get-actual-span [span]
   (if (anchor-wrapper? span) span.firstChild.firstChild span))
 
