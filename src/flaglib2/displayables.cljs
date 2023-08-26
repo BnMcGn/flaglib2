@@ -306,10 +306,10 @@
                     @(rf/subscribe [:opinion-store opinionid]))
         opid (or opinionid (:id opinion))
         {:keys [leading trailing excerpt]}
-        (if (and opinion (:leading opinion))
-          opinion
-          (let [tpos (:text-position opinion)]
-            (excerpts/excerpt-context text (nth tpos 0) (nth tpos 1))))]
+        (cond (and opinion (:leading opinion)) opinion
+              text (let [tpos (:text-position opinion)]
+                     (excerpts/excerpt-context text (nth tpos 0) (nth tpos 1)))
+              :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) [opid])]))

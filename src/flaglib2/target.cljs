@@ -35,13 +35,14 @@
        ]])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
-  (let [optree @(rf/subscribe [:opinion-tree rooturl])]
+  (let [optree @(rf/subscribe [:opinion-tree-store rooturl])]
     [:div
      [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
-     (into []
-           (map (fn [opid]
-                  [disp/thread-opinion :opid opid])
-                (flatten optree)))]))
+     (when optree
+       (into [:<>]
+             (map (fn [opid]
+                    [disp/thread-opinion :opid opid])
+                  (flatten optree))))]))
 
 (defn target-root []
   (let [params @(rf/subscribe [:server-parameters])
