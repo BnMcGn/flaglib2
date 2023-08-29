@@ -46,6 +46,7 @@
 
 (defn focus? [focus tree-address]
   (or
+   (not focus)
    (and (empty? focus) (empty? tree-address))
    (and (not (empty? focus))
         (not (empty? tree-address))

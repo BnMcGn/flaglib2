@@ -187,30 +187,34 @@
  (fn [db [_ id]]
    (assoc db ::active-popup (if (= id (::active-popup db)) nil id))))
 
-(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id]}]
+(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup?]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? @(rf/subscribe [::popup-is-active? id])
         class1 "relative font-bold"
-        class2 (mood/flavor+freshness warstats excerpt-opinions)]
-    [rc/popover-anchor-wrapper
-     :showing? popup-visible?
-     :position :below-left
-     :anchor
-     [:span
-      {:class (str class1 " " class2)
-       :on-click #(rf/dispatch [::toggle-active-popup id])}
-      [segment-count (count excerpt-opinions)]
-      (excerpts/rebreak text)]
-     :popover
-     [rc/popover-content-wrapper
-      :parts {:border
-              {:class "sm:w-[70rem]"
-               :style {:background-color "rgba(255, 255, 255, 0.7)"
-                       :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
-                       :border-radius "3px"}}}
-      :arrow-renderer deco/wf-arrow
-      :arrow-length 21
-      :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]]))
+        class2 (mood/flavor+freshness warstats excerpt-opinions)
+        textspan
+        [:span
+         {:class (str class1 " " class2)
+          :on-click (when-not disable-popup? #(rf/dispatch [::toggle-active-popup id]))}
+         [segment-count (count excerpt-opinions)]
+         (excerpts/rebreak text)]]
+    (if disable-popup?
+      textspan
+      [rc/popover-anchor-wrapper
+       :showing? popup-visible?
+       :position :below-left
+       :anchor
+       textspan
+       :popover
+       [rc/popover-content-wrapper
+        :parts {:border
+                {:class "sm:w-[70rem]"
+                 :style {:background-color "rgba(255, 255, 255, 0.7)"
+                         :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
+                         :border-radius "3px"}}}
+        :arrow-renderer deco/wf-arrow
+        :arrow-length 21
+        :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]])))
 
 (defn plain-segment [& {:keys [text]}]
   [:span {:class "font-normal"} (excerpts/rebreak text)])
@@ -219,10 +223,9 @@
 (defn parent-segment [& {:keys [text]}]
   (let [focussed (misc/focus-parent?)
         bg (if focussed "bg-white" "bg-neutral-400")]
-    (into [:span {:class (str "font-bold relative " bg)}]
-          (excerpts/rebreak text))))
+    [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url hide-popup]}]
+(defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url disable-popup?]}]
   (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
         opins (if (misc/iid? current-id)
                 (misc/immediate-children-ids current-id opinion-store)
@@ -251,12 +254,13 @@
         :text (subs text start end)
         :id-of-text current-id
         :root-target-url root-target-url
-        :hide-popup hide-popup
+        :disable-popup? disable-popup?
         :tree-address tree-address
         :focus focus
         :last-char-pos end]))))
 
-(defn hilited-text [& {:keys [text-key text tree-address focus root-target-url hide-popup excerpt offset]}]
+(defn hilited-text [& {:keys
+                       [text-key text tree-address focus root-target-url disable-popup? excerpt offset]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         id (str "hilited-text-" (gensym))
         opstore @(rf/subscribe [:opinion-store])
@@ -284,7 +288,7 @@
               :on-key-press selection-change}]
             ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
             (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
-                           :root-target-url root-target-url :hide-popup hide-popup))
+                           :root-target-url root-target-url :disable-popup? disable-popup?))
       [loading-indicator])))
 
 
@@ -355,7 +359,8 @@
                      (or (:comment parent) "")
                      text)]
           [opinion-container
-           {} ;; Depth stuff
+           {:class "mb-6"
+            :style {:margin-left (deco/thread-opinion-indent (count tree-address)) :width "80%"}}
            :iconid opid
            :titlebar
            [:<>
@@ -374,7 +379,8 @@
               [hilited-text
                :text (:comment opinion)
                :tree-address tree-address
-               :hide-popup true
+               :focus nil
+               :disable-popup? true
                :excerpt excerpt
                :offset offset])
             [:div

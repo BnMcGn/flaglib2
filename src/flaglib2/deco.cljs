@@ -64,3 +64,6 @@
                  :margin-left "-10px"}
          :viewBox "0 0 100 100"}
    [:circle {:cx 50 :cy 50 :r 50 :fill "black" :stroke "black"}]])
+
+(defn thread-opinion-indent [level]
+  (str (* 2 level) "rem"))
