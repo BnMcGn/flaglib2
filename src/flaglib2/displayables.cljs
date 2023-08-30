@@ -361,7 +361,7 @@
                        text)]
             [opinion-container
              {:class "mb-6"
-              :style {:margin-left (deco/thread-opinion-indent (count tree-address)) :width "80%"}
+              :style {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"}
               :on-click (fn [e]
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
                           (.stopPropagation e))}
