@@ -344,48 +344,52 @@
 (defn question [])
 
 (defn thread-opinion [& {:keys [opid text]}]
-  (let [opinion @(rf/subscribe [:opinion-store opid])
-        warstats @(rf/subscribe [:warstats-store opid])
-        excerpt (r/atom "")
+  (let [excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& {:as args}]
-      (when opinion
-        (let [tree-address (:tree-address opinion)
-              parid (when (< 1 (count tree-address))
-                      (nth tree-address (- (count tree-address) 2)))
-              parent (when parid
-                       @(rf/subscribe [:opinion-store parid]))
-              text (if parent
-                     (or (:comment parent) "")
-                     text)]
-          [opinion-container
-           {:class "mb-6"
-            :style {:margin-left (deco/thread-opinion-indent (count tree-address)) :width "80%"}}
-           :iconid opid
-           :titlebar
-           [:<>
-            [tb/flag-name opinion]
-            [tb/date-stamp opinion]
-            [tb/author-long opinion]
-            [tb/display-warstats :warstats warstats]
-            ;;FIXME: should handle excerpts, could use iid instead of url?
-            [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
-           :body
-           [:div
-            ;; {:overflow "overlay"} ??
-            (when (excerpts/has-excerpt? opinion)
-              [thread-excerpt :opinionid opid :text text])
-            (when (:comment opinion)
-              [hilited-text
-               :text (:comment opinion)
-               :tree-address tree-address
-               :focus nil
-               :disable-popup? true
-               :excerpt excerpt
-               :offset offset])
-            [:div
-             ;; ref and question
-             ]]])))))
+      (let
+          [opinion @(rf/subscribe [:opinion-store opid])
+           warstats @(rf/subscribe [:warstats-store opid])]
+        (when opinion
+          (let [tree-address (:tree-address opinion)
+                parid (when (< 1 (count tree-address))
+                        (nth tree-address (- (count tree-address) 2)))
+                parent (when parid
+                         @(rf/subscribe [:opinion-store parid]))
+                text (if parent
+                       (or (:comment parent) "")
+                       text)]
+            [opinion-container
+             {:class "mb-6"
+              :style {:margin-left (deco/thread-opinion-indent (count tree-address)) :width "80%"}
+              :on-click (fn [e]
+                          (set! (. js/window -location) (misc/make-opinion-url opinion))
+                          (.stopPropagation e))}
+             :iconid opid
+             :titlebar
+             [:<>
+              [tb/flag-name opinion]
+              [tb/date-stamp opinion]
+              [tb/author-long opinion]
+              [tb/display-warstats :warstats warstats]
+              ;;FIXME: should handle excerpts, could use iid instead of url?
+              #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
+             :body
+             [:div
+              ;; {:overflow "overlay"} ??
+              (when (excerpts/has-excerpt? opinion)
+                [thread-excerpt :opinionid opid :text text])
+              (when (:comment opinion)
+                [hilited-text
+                 :text (:comment opinion)
+                 :tree-address tree-address
+                 :focus nil
+                 :disable-popup? true
+                 :excerpt excerpt
+                 :offset offset])
+              [:div
+               ;; ref and question
+               ]]]))))))
 
 (defn excerptless-opinions [])
 
