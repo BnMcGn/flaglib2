@@ -296,10 +296,13 @@
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
   (if (or leading-context trailing-context)
     [:div
-     {:class "thread-excerpt"}
-     [:span (excerpts/rebreak leading-context)]
-     [:span {:class excerpt-class} (excerpts/rebreak excerpt)]
-     [:span (excerpts/rebreak trailing-context)]]
+     {:class "thread-excerpt italic text-sm mt-2 mb-4 mr-40 min-h-[3em] ml-6"}
+     [:img {:src "/static/img/black-wf-quote.svg"
+            :style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}}]
+     [:span {:style {:background-color "#eee"}}
+      [:span (excerpts/rebreak leading-context)]
+      [:span {:class excerpt-class} (excerpts/rebreak excerpt)]
+      [:span (excerpts/rebreak trailing-context)]]]
     [:div
      {:class "thread-excerpt thread-excerpt-unfound"}
      [:span {:class excerpt-class} (excerpts/rebreak excerpt)]]))
@@ -376,6 +379,7 @@
               #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
              :body
              [:div
+              {:class "m-4 mt-1"}
               ;; {:overflow "overlay"} ??
               (when (excerpts/has-excerpt? opinion)
                 [thread-excerpt :opinionid opid :text text])
