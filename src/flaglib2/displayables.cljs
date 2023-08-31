@@ -85,7 +85,7 @@
 (defn opinion-container [props & {:keys [iconid titlebar body]}]
   [:div
    props
-   [tb/opinion-icon iconid :float-left true]
+   [tb/opinion-icon iconid :style {:float "left" :position "relative" :top "3px"}]
    [:div
     {:class "bg-white border-[3px] border-black ml-7"}
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
@@ -302,7 +302,7 @@
         {:src "/static/img/black-wf-quote.svg" :style icon-style}
         {:src "/static/img/red-wf-quote.svg"
          :style icon-style
-         :alt "Excerpt Not Found"})]
+         :title "Excerpt Not Found"})]
      [:span {:style {:background-color "#eee"}}
       [:span (excerpts/rebreak leading-context)]
       [:span {:class excerpt-class} (excerpts/rebreak excerpt)]

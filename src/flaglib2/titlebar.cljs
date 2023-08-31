@@ -40,11 +40,11 @@
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
 
-(defn opinion-icon [opid & {:keys [float-left]}]
+(defn opinion-icon [opid & {:keys [style]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])]
     [:a
      {:href (misc/make-opinion-url opinion)
-      :style (when float-left {:float "left"})}
+      :style (or style {})}
      [:img {:src (flag-icon (:flag opinion))}]]))
 
 (defn display-tree-address [tree-address]
