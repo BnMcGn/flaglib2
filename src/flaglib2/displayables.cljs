@@ -294,18 +294,19 @@
 
 (defn thread-excerpt-display
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
-  (if (or leading-context trailing-context)
+  (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}]
     [:div
      {:class "thread-excerpt italic text-sm mt-2 mb-4 mr-40 min-h-[3em] ml-6"}
-     [:img {:src "/static/img/black-wf-quote.svg"
-            :style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}}]
+     [:img
+      (if (or leading-context trailing-context)
+        {:src "/static/img/black-wf-quote.svg" :style icon-style}
+        {:src "/static/img/red-wf-quote.svg"
+         :style icon-style
+         :alt "Excerpt Not Found"})]
      [:span {:style {:background-color "#eee"}}
       [:span (excerpts/rebreak leading-context)]
       [:span {:class excerpt-class} (excerpts/rebreak excerpt)]
-      [:span (excerpts/rebreak trailing-context)]]]
-    [:div
-     {:class "thread-excerpt thread-excerpt-unfound"}
-     [:span {:class excerpt-class} (excerpts/rebreak excerpt)]]))
+      [:span (excerpts/rebreak trailing-context)]]]))
 
 (defn thread-excerpt
   [& {:keys [opinion opinionid text]}]
