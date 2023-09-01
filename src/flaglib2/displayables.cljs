@@ -28,7 +28,7 @@
      :align :center
      :children
      [(when intro-text [:span {:class "font-bold"} intro-text])
-      [tb/headline :title title :rootid url :url url]
+      [tb/headline :title title :rootid url :url true]
       (when (and url (not hide-external-link))
         [tb/display-external-link :url url])
       (when-not hide-warstats
@@ -50,7 +50,7 @@
     [:div
      {:class class}
      intro-text
-     [tb/headline :title title :rootid url :url url :class "col-span-2"]
+     [tb/headline :title title :rootid url :url true :class "col-span-2"]
      (when (and url (not hide-external-link))
        [tb/display-external-link :url url])
      (when-not hide-warstats
@@ -323,26 +323,25 @@
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) [opid])]))
 
 
-(defn reference-default-display [reference & {:keys [minify]}]
+(defn reference-root-display [reference & {:keys [minify]}]
   (let [warstats @(rf/subscribe [:warstats-store reference])]
     [:<>
      [tb/headline
       :domain (misc/url-domain reference)
       :rootid reference
-      :url (misc/make-target-url reference)]
+      :url true]
      (when-not minify
        [tb/display-external-link :url reference :black true])
-     [tb/display-warstats :warstats warstats]
-     ]))
+     [tb/display-warstats :warstats warstats]]))
 
 (defn reference-excerpt-display [])
 
 (defn reference [reference & {:keys [minify]}]
   [:div
-   {:class "text-white bg-black"}
+   {:class "text-white bg-black flex flex-row items-center gap-4"}
    [:img {:src "/static/img/white-reference.svg"
           :class (if minify "w-[21] h-[23]" "w-[42px] h-[45px]")}]
-   [(if (misc/iid? reference) reference-excerpt-display reference-default-display)
+   [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
     reference]])
 
 (defn question [])
@@ -379,20 +378,22 @@
               ;;FIXME: should handle excerpts, could use iid instead of url?
               #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
              :body
-             [:div
-              {:class "m-4 mt-1"}
-              ;; {:overflow "overlay"} ??
-              (when (excerpts/has-excerpt? opinion)
-                [thread-excerpt :opinionid opid :text text])
-              (when (:comment opinion)
-                [hilited-text
-                 :text (:comment opinion)
-                 :tree-address tree-address
-                 :focus nil
-                 :disable-popup? true
-                 :excerpt excerpt
-                 :offset offset])
+             [:<>
               [:div
+               {:class "m-4 mt-1"}
+               ;; {:overflow "overlay"} ??
+               (when (excerpts/has-excerpt? opinion)
+                 [thread-excerpt :opinionid opid :text text])
+               (when (:comment opinion)
+                 [hilited-text
+                  :text (:comment opinion)
+                  :tree-address tree-address
+                  :focus nil
+                  :disable-popup? true
+                  :excerpt excerpt
+                  :offset offset])]
+              [:div
+               (when-let [ref (:reference opinion)] [reference ref])
                ;; ref and question
                ]]]))))))
 

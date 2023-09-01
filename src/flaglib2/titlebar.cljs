@@ -128,7 +128,10 @@
                                    (if (misc/alternate-title? tinfo)
                                      [(:title tinfo) true true]
                                      [(:title tinfo) true false])
-                                   :else [url false false])
+                                   :else [(cond rootid rootid
+                                                opinionid ""
+                                                :else "")
+                                          false false])
         domain (when domain (str "(" domain ")"))
         class ["mx-3"
                class
@@ -138,7 +141,13 @@
                (if patch?
                  [[:span {:class deco/patch} titl] (str " " domain)]
                  [(str titl " " domain)])
-               [titl])]
+               [titl])
+        url (cond
+              (string? url) url
+              (true? url) (cond rootid (misc/make-target-url rootid)
+                                opinionid (misc/make-opinion-url {:iid opinionid})
+                                :else false)
+              :else false)]
     (if url
       [:span {:class class} (into [:a {:href url}] core)]
       (into [:span {:class class}] core))))
