@@ -100,7 +100,12 @@
  (fn [{:keys [db]} [_ key result]]
    (let [{:keys [references refd]} (into {} (map vec (partition 2 (cljs.reader/read-string result))))
          iids (into (filter misc/iid? references) (filter misc/iid? refd))
-         dispatches (map #(vector :dispatch [:load-opinion %]) iids)]
+         rooturls (remove misc/iid? references)
+         dispatches (map #(vector :dispatch [:load-opinion %]) iids)
+         dispatches (into dispatches (when rooturls
+                                       [:dispatch [:load-rooturls rooturls
+                                                   :no-text true
+                                                   :no-references true]]))]
      {:db (-> db
               (assoc-in [:references key] references)
               (assoc-in [:refd key] refd))
