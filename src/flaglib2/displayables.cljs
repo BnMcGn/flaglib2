@@ -338,13 +338,21 @@
 
 (defn reference [reference & {:keys [minify]}]
   [:div
-   {:class "text-white bg-black flex flex-row items-center gap-4"}
+   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2"}
    [:img {:src "/static/img/white-reference.svg"
-          :class (if minify "w-[21] h-[23]" "w-[42px] h-[45px]")}]
+          :class (if minify "w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
     reference]])
 
-(defn question [])
+(defn question-container [props & {:keys [body minify]}]
+  [:div
+   (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5"} props)
+   [:img {:src "/static/img/black-wf-question.svg"
+          :class (if minify "w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
+   body])
+
+(defn question []
+  )
 
 (defn thread-opinion [& {:keys [opid text]}]
   (let [excerpt (r/atom "")
@@ -393,9 +401,9 @@
                   :excerpt excerpt
                   :offset offset])]
               [:div
+               {:class "flex flex-row child:grow child:basis-0"}
                (when-let [ref (:reference opinion)] [reference ref])
-               ;; ref and question
-               ]]]))))))
+               (when (:question warstats) [question-container {}])]]]))))))
 
 (defn excerptless-opinions [])
 

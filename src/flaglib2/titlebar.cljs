@@ -114,7 +114,7 @@
 (defn display-external-link [& {:keys [url black]}]
   [:a {:href url :class "mr-3"}
    [:img {:src (if black "/static/img/white-external-link.svg" "/static/img/black-external-link.svg")
-          :style {:width "22px"}
+          :style {:min-width "22px"}
           :alt "Original article" :title "Original article"}]])
 
 (defn headline [& {:keys [title url domain rootid opinionid class]}]
