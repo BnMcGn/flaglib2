@@ -102,10 +102,12 @@
          iids (into (filter misc/iid? references) (filter misc/iid? refd))
          rooturls (remove misc/iid? references)
          dispatches (map #(vector :dispatch [:load-opinion %]) iids)
-         dispatches (into dispatches (when rooturls
-                                       [:dispatch [:load-rooturls rooturls
-                                                   :no-text true
-                                                   :no-references true]]))]
+         dispatches (if (empty? rooturls)
+                      dispatches
+                      (cons [:dispatch [:load-rooturls rooturls
+                                        :no-text true
+                                        :no-references true]]
+                            dispatches))]
      {:db (-> db
               (assoc-in [:references key] references)
               (assoc-in [:refd key] refd))
