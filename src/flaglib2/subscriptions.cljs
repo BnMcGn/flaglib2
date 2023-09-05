@@ -66,6 +66,22 @@
  (fn [db [_ key]]
    (get-in db [:text-status key])))
 
+(defn- get-sub-tree [db [_ key]]
+  (let [opinion (get-in db [:opinion-store key])
+        optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
+    (when (and opinion optree)
+      (misc/sub-tree (:tree-address opinion) optree))))
+
+(rf/reg-sub :sub-tree get-sub-tree)
+
+(rf/reg-sub
+ :immediate-children
+ (fn [db [_ key]]
+   (let [subtree (if (misc/iid? key)
+                   (get-sub-tree db [nil key])
+                   (get-in db [:opinion-tree-store key]))]
+     (map first subtree))))
+
 (defn target-decision-core [[warstat text status] _]
   (let [have-text (and text (:text text))
         responses (and warstat (not (zero? (:replies-total warstat))))]
@@ -92,4 +108,3 @@
  target-decision-core)
 
 (rf/reg-sub :window-size :-> :window-size)
-

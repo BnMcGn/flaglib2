@@ -69,6 +69,12 @@
         talen (if (iid? id) (inc (count (get-in opstore [id :tree-address]))) 1)]
     (filter #(= talen (count (get-in opstore [% :tree-address]))) descs)))
 
+(defn sub-tree [treead optree]
+  (if (empty? treead)
+    optree
+    (recur (rest treead)
+           (rest (first (filter #(= (first treead) (first %1)) optree))))))
+
 
 ;;; Time tools
 
