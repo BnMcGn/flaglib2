@@ -225,15 +225,12 @@
         bg (if focussed "bg-white" "bg-neutral-400")]
     [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(defn- make-segments [text opinion-store & {:keys [tree-address focus root-target-url disable-popup?]}]
+(defn- make-segments [text
+                      opinion-store
+                      opids
+                      & {:keys [tree-address focus root-target-url disable-popup?]}]
   (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
-        opins (if (misc/iid? current-id)
-                (misc/immediate-children-ids current-id opinion-store)
-                (for [[k op] opinion-store
-                      :when (= current-id (:target op))]
-                  k))
-        opins (misc/immediate-children-ids current-id opinion-store)
-        opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opins))
+        opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opids))
         segpoints (excerpts/excerpt-segment-points opins (count text))
         level (count tree-address)]
     (into
@@ -264,6 +261,7 @@
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         id (str "hilited-text-" (gensym))
         opstore @(rf/subscribe [:opinion-store])
+        opids @(rf/subscribe [:immediate-children (or root-target-url (last tree-address))])
         selection-change
         (fn [ev]
           (when (and excerpt offset)
@@ -287,7 +285,7 @@
               :on-mouse-up selection-change
               :on-key-press selection-change}]
             ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
-            (make-segments (string/trim text) opstore :tree-address tree-address :focus focus
+            (make-segments (string/trim text) opstore opids :tree-address tree-address :focus focus
                            :root-target-url root-target-url :disable-popup? disable-popup?))
       [loading-indicator])))
 
@@ -405,7 +403,16 @@
                (when-let [ref (:reference opinion)] [reference ref])
                (when (:question warstats) [question-container {}])]]]))))))
 
-(defn excerptless-opinions [])
+(defn excerptless-opinions [target-id]
+  (let [opstore @(rf/subscribe [:opinion-store])
+        idlist @(rf/subscribe [:immediate-children target-id])]
+    (when-not (empty? idlist)
+      [:div
+       [:h3 "Replies:"]
+       [:div
+        (into [] (for [id idlist
+                       :when (not (excerpts/has-excerpt? (get opstore id)))]
+                   [thread-opinion :opid id]))]])))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])

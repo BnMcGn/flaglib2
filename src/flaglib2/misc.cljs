@@ -54,21 +54,6 @@
 
 (defn focus-parent? [])
 
-(defn all-descendant-ids [id opstore]
-  (if (iid? id)
-    (for [[opid opinion] opstore
-         :when (and (not (= id opid))
-                    ((set (:tree-address opinion)) id))]
-      opid)
-    (for [[opid opinion] opstore
-          :when (= id (:rooturl opinion))]
-      opid)))
-
-(defn immediate-children-ids [id opstore]
-  (let [descs (all-descendant-ids id opstore)
-        talen (if (iid? id) (inc (count (get-in opstore [id :tree-address]))) 1)]
-    (filter #(= talen (count (get-in opstore [% :tree-address]))) descs)))
-
 (defn sub-tree [treead optree]
   (if (empty? treead)
     optree

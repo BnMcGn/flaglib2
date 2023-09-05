@@ -31,8 +31,7 @@
        :tree-address (list)
        :excerpt excerpt
        :offset offset
-       ;;[disp/excerptless-opinions]
-       ]])))
+       [disp/excerptless-opinions]]])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
   (let [optree @(rf/subscribe [:opinion-tree-store rooturl])]
