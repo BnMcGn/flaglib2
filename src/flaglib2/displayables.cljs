@@ -409,10 +409,9 @@
     (when-not (empty? idlist)
       [:div
        [:h3 "Replies:"]
-       [:div
-        (into [] (for [id idlist
-                       :when (not (excerpts/has-excerpt? (get opstore id)))]
-                   [thread-opinion :opid id]))]])))
+       (into [:div] (for [id idlist
+                          :when (not (excerpts/has-excerpt? (get opstore id)))]
+                      [thread-opinion :opid id]))])))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
