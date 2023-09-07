@@ -91,6 +91,16 @@
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
     body]])
 
+(defn opinion-container-mobile [props & {:keys [opinion titlebar body box-props]}]
+  [:div
+   (or props {})
+   [tb/display-tree-address (:tree-address opinion)]
+   [:div
+    (merge (or box-props {})
+           {:class "bg-white border-[3px] border-black"})
+    [:div {:class "flex flex-row gap-4 items-center"} titlebar]
+    body]])
+
 (defn opinion-info [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
@@ -367,22 +377,33 @@
                          @(rf/subscribe [:opinion-store parid]))
                 text (if parent
                        (or (:comment parent) "")
-                       text)]
-            [opinion-container
+                       text)
+                small  (= :xs @(rf/subscribe [:window-size]))
+                tbar (if small
+                       [:<>
+                        [tb/author-long opinion]
+                        [tb/display-warstats :warstats warstats]]
+                       [:<>
+                        [tb/flag-name opinion]
+                        [tb/date-stamp opinion]
+                        [tb/author-long opinion]
+                        [tb/display-warstats :warstats warstats]
+                        ;;FIXME: should handle excerpts, could use iid instead of url?
+                        #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]])
+                main-style
+                (if
+                  small
+                  {:width "100%"}
+                  {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"})]
+            [(if small opinion-container-mobile opinion-container)
              {:class "mb-6"
-              :style {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"}
+              :style main-style
               :on-click (fn [e]
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
                           (.stopPropagation e))}
              :iconid opid
-             :titlebar
-             [:<>
-              [tb/flag-name opinion]
-              [tb/date-stamp opinion]
-              [tb/author-long opinion]
-              [tb/display-warstats :warstats warstats]
-              ;;FIXME: should handle excerpts, could use iid instead of url?
-              #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]]
+             :opinion opinion
+             :titlebar tbar
              :body
              [:<>
               [:div
