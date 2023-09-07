@@ -44,22 +44,22 @@
                             hide-external-link warflagger-link children]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
         class (str (nth deco/display-depths display-depth)
-                   " grid-cols-2 grid "
+                   " grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2 "
                    ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
                    ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
     [:div
      {:class class}
-     intro-text
+     ;;intro-text
      [tb/headline :title title :rootid url :url true :class "col-span-2"]
      (when (and url (not hide-external-link))
        [tb/display-external-link :url url])
-     (when-not hide-warstats
-       [tb/display-warstats :warstats warstats :class "justify-self-end self-center"])
-     children
      (when-not hide-reply
        [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+     (when-not hide-warstats
+       [tb/display-warstats :warstats warstats])
+     children
      (when-not hide-count
-       [tb/reply-count :warstats warstats :class "justify-self-start"])]))
+       [tb/reply-count :warstats warstats])]))
 
 (defn root-title [& {:as args}]
   (let [size @(rf/subscribe [:window-size])
@@ -408,6 +408,7 @@
         idlist @(rf/subscribe [:immediate-children target-id])]
     (when-not (empty? idlist)
       [:div
+       {:class "mt-4"}
        [:h3 "Replies:"]
        (into [:div] (for [id idlist
                           :when (not (excerpts/has-excerpt? (get opstore id)))]
