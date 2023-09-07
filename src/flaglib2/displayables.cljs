@@ -420,7 +420,7 @@
                   :excerpt excerpt
                   :offset offset])]
               [:div
-               {:class "flex flex-row child:grow child:basis-0"}
+               {:class "sm:flex sm:flex-row child:sm:grow child:sm:basis-0"}
                (when-let [ref (:reference opinion)] [reference ref])
                (when (:question warstats) [question-container {}])]]]))))))
 
