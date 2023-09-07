@@ -304,7 +304,7 @@
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
   (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}]
     [:div
-     {:class "thread-excerpt italic text-sm mt-2 mb-4 mr-40 min-h-[3em] ml-6"}
+     {:class "thread-excerpt italic text-sm mt-2 mb-4 sm:mr-40 mr-6 min-h-[3em] ml-6 sm:break-words break-all"}
      [:img
       (if (or leading-context trailing-context)
         {:src "/static/img/black-wf-quote.svg" :style icon-style}
@@ -396,7 +396,7 @@
                   {:width "100%"}
                   {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"})]
             [(if small opinion-container-mobile opinion-container)
-             {:class "mb-6"
+             {:class "mb-6 sm:break-words break-all"
               :style main-style
               :on-click (fn [e]
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
