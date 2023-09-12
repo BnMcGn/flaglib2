@@ -10,7 +10,9 @@
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
    [flaglib2.deco :as deco]
-   [flaglib2.displayables :as disp]))
+   [flaglib2.displayables :as disp]
+
+   [flaglib2.target-summary :as tsum]))
 
 
 (defn target-root-article [& {:keys [focus rooturl]}]
@@ -60,7 +62,8 @@
                             (uri/setParam js/window.location.href "tmode" (name %1)))]
      (case @current
        :article [target-root-article :rooturl (:rooturl params)]
-       :comment [target-root-thread :rooturl (:rooturl params)])]))
+       :comment [target-root-thread :rooturl (:rooturl params)]
+       :summary [tsum/target-summary :rooturl (:rooturl params)])]))
 
 (rf/reg-event-fx
  :target
