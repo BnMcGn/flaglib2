@@ -7,7 +7,7 @@
    [re-frame.registrar]
    [re-frame.core :as rf]
    [re-frame.db]
-   [clojure.string :as str]))
+   [clojure.string :as string]))
 
 ;; Opinion url recognizer
 
@@ -101,11 +101,11 @@
 
 (defn url-domain [url]
   (let [domain (-> url
-                   (str/split "//")
+                   (string/split "//")
                    second
-                   (str/split "/")
+                   (string/split "/")
                    first)]
-    (if (str/starts-with? domain "www.")
+    (if (string/starts-with? domain "www.")
       (subs domain 4)
       domain)))
 
@@ -113,7 +113,7 @@
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
 (defn class-string [& colls]
-  (str/join " " (flatten colls)))
+  (string/join " " (flatten colls)))
 
 ;;Debugging tools
 
