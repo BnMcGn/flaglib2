@@ -107,19 +107,22 @@
          :negative-logical-fallacy :negative-out-of-bounds :positive-funny
          :positive-interesting :custodial-redundant :custodial-out-of-date
          :custodial-flag-abuse :custodial-offtopic :custodial-arcane]]
-    (into [:div [:h3 "Flags"]]
-          (for [flag flags
-                :let [flinfo (flags/flags flag)]]
-            [:div
-             {:class "border-[3px]"
-              :style (cond
-                       (not (warstats flag)) {:background-color "lightgrey"
-                                              :border-color "grey"}
-                       (< 5 (warstats flag)) {:background-color (str (flinfo :color) "99")
-                                              :border-color (flinfo :color)}
-                       :else {:background-color "white"
-                              :border-color (str (flinfo :color) "bb")})}
-             (:label flinfo)]))))
+    [:div [:h3 "Flags"]
+     (into [:div
+            {:class "grid gap-2 grid-cols-3 text-sm"}]
+           (for [flag flags
+                 :let [flinfo (flags/flags flag)]]
+             [:div
+              {:class "border-[2px] rounded w-44 flex justify-center"
+               :style (cond
+                        (not (warstats flag)) {:background-color "lightgrey"
+                                               :color "#333"
+                                               :border-color "grey"}
+                        (< 5 (warstats flag)) {:background-color (str (flinfo :color) "99")
+                                               :border-color (flinfo :color)}
+                        :else {:background-color "white"
+                               :border-color (str (flinfo :color) "bb")})}
+              (:label flinfo)]))]))
 
 (defn target-summary [& {:keys [rooturl]}]
   [:div
