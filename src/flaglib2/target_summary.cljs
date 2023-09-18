@@ -7,6 +7,7 @@
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
+   [flaglib2.titlebar :as tb]
    [flaglib2.deco :as deco]
    [flaglib2.flags :as flags]
    [flaglib2.displayables :as disp]))
@@ -60,7 +61,7 @@
         colsize 20
         col2 70
         highest (max (:x-right warstats) (:x-wrong warstats) (:x-up warstats) (:x-down warstats))]
-    [:<>
+    [:div {:class "float-left"}
      [:h3 "Score"]
      [:div
       {:class "border-[3px] border-black"}
@@ -124,7 +125,21 @@
                                :border-color (str (flinfo :color) "bb")})}
               (:label flinfo)]))]))
 
+(defn references-summary [targetid]
+  (let [references @(rf/subscribe [:references targetid])
+        opstore @(rf/subscribe [:opinion-store])]
+    (when-not (empty? references)
+      [:div
+       [:h3 "References Made"]
+       (into [:div]
+             (for [r references
+                   :let [opinion (opstore r)]]
+               [:div
+                [tb/display-tree-address (:tree-address opinion)]
+                [disp/reference (:reference opinion)]]))])))
+
 (defn target-summary [& {:keys [rooturl]}]
   [:div
    [summary-scores-chart rooturl]
-   [display-other-flags]])
+   [display-other-flags rooturl]
+   [references-summary rooturl]])
