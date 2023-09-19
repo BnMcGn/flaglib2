@@ -63,43 +63,44 @@
         highest (max (:x-right warstats) (:x-wrong warstats) (:x-up warstats) (:x-down warstats))]
     [:div {:class "float-left"}
      [:h3 "Score"]
-     [:div
-      {:class "border-[3px] border-black"}
-      [:svg {:width (+ w (m 1) (m 3))
-             :height (+ h (m 0) (m 2))
-             :transform (translate (m 3) (m 0))}
-       [positive-bar
-        :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
-        :label (:x-up warstats)
-        :title "Up"
-        :height (misc/as-in-range
-                 0 bar-height-max
-                 (misc/relative-to-range 0 highest (:x-up warstats)))
-        :transform (translate colsize 0)]
-       [positive-bar
-        :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
-        :label (:x-right warstats)
-        :title "Right"
-        :height (misc/as-in-range
-                 0 bar-height-max
-                 (misc/relative-to-range 0 highest (:x-right warstats)))
-        :transform (translate col2 0)]
-       [negative-bar
-        :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
-        :label (:x-down warstats)
-        :title "Down"
-        :height (misc/as-in-range
-                 0 bar-height-max
-                 (misc/relative-to-range 0 highest (:x-down warstats)))
-        :transform (translate colsize centerline)]
-       [negative-bar
-        :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
-        :label (:x-wrong warstats)
-        :title "Wrong"
-        :height (misc/as-in-range
-                 0 bar-height-max
-                 (misc/relative-to-range 0 highest (:x-wrong warstats)))
-        :transform (translate col2 centerline)]]]]))
+     (when warstats
+       [:div
+        {:class "border-[3px] border-black"}
+        [:svg {:width (+ w (m 1) (m 3))
+               :height (+ h (m 0) (m 2))
+               :transform (translate (m 3) (m 0))}
+         [positive-bar
+          :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
+          :label (:x-up warstats)
+          :title "Up"
+          :height (misc/as-in-range
+                   0 bar-height-max
+                   (misc/relative-to-range 0 highest (:x-up warstats)))
+          :transform (translate colsize 0)]
+         [positive-bar
+          :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
+          :label (:x-right warstats)
+          :title "Right"
+          :height (misc/as-in-range
+                   0 bar-height-max
+                   (misc/relative-to-range 0 highest (:x-right warstats)))
+          :transform (translate col2 0)]
+         [negative-bar
+          :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
+          :label (:x-down warstats)
+          :title "Down"
+          :height (misc/as-in-range
+                   0 bar-height-max
+                   (misc/relative-to-range 0 highest (:x-down warstats)))
+          :transform (translate colsize centerline)]
+         [negative-bar
+          :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
+          :label (:x-wrong warstats)
+          :title "Wrong"
+          :height (misc/as-in-range
+                   0 bar-height-max
+                   (misc/relative-to-range 0 highest (:x-wrong warstats)))
+          :transform (translate col2 centerline)]]])]))
 
 (defn display-other-flags [targetid]
   (let [warstats @(rf/subscribe [:warstats-store targetid])
@@ -109,21 +110,22 @@
          :positive-interesting :custodial-redundant :custodial-out-of-date
          :custodial-flag-abuse :custodial-offtopic :custodial-arcane]]
     [:div [:h3 "Flags"]
-     (into [:div
-            {:class "grid gap-2 grid-cols-3 text-sm"}]
-           (for [flag flags
-                 :let [flinfo (flags/flags flag)]]
-             [:div
-              {:class "border-[2px] rounded w-44 flex justify-center"
-               :style (cond
-                        (not (warstats flag)) {:background-color "lightgrey"
-                                               :color "#333"
-                                               :border-color "grey"}
-                        (< 5 (warstats flag)) {:background-color (str (flinfo :color) "99")
-                                               :border-color (flinfo :color)}
-                        :else {:background-color "white"
-                               :border-color (str (flinfo :color) "bb")})}
-              (:label flinfo)]))]))
+     (when warstats
+       (into [:div
+             {:class "grid gap-2 grid-cols-3 text-sm"}]
+            (for [flag flags
+                  :let [flinfo (flags/flags flag)]]
+              [:div
+               {:class "border-[2px] rounded w-44 flex justify-center"
+                :style (cond
+                         (not (warstats flag)) {:background-color "lightgrey"
+                                                :color "#333"
+                                                :border-color "grey"}
+                         (< 5 (warstats flag)) {:background-color (str (flinfo :color) "99")
+                                                :border-color (flinfo :color)}
+                         :else {:background-color "white"
+                                :border-color (str (flinfo :color) "bb")})}
+               (:label flinfo)])))]))
 
 (defn references-summary [targetid]
   (let [references @(rf/subscribe [:references targetid])

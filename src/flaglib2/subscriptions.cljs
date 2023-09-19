@@ -66,6 +66,16 @@
  (fn [db [_ key]]
    (get-in db [:text-status key])))
 
+(rf/reg-sub
+ :references
+ (fn [db [_ key]]
+   (get-in db [:references key])))
+
+(rf/reg-sub
+ :refd
+ (fn [db [_ key]]
+   (get-in db [:refd key])))
+
 (defn- get-sub-tree [db [_ key]]
   (let [opinion (get-in db [:opinion-store key])
         optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
