@@ -47,8 +47,10 @@
       :style (or style {})}
      [:img {:src (flag-icon (:flag opinion))}]]))
 
-(defn display-tree-address [tree-address]
+(defn display-tree-address [tree-address & {:keys [style class]}]
   [rc/h-box
+   :style style
+   :class class
    :children
    (rest
     (reduce into []

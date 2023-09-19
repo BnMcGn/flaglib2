@@ -112,7 +112,7 @@
     [:div [:h3 "Flags"]
      (when warstats
        (into [:div
-             {:class "grid gap-2 grid-cols-3 text-sm"}]
+             {:class "grid gap-1 grid-cols-3 sm:grid-cols-1 text-sm"}]
             (for [flag flags
                   :let [flinfo (flags/flags flag)]]
               [:div
@@ -136,12 +136,16 @@
        (into [:div]
              (for [r references
                    :let [opinion (opstore r)]]
-               [:div
-                [tb/display-tree-address (:tree-address opinion)]
-                [disp/reference (:reference opinion)]]))])))
+               [disp/tree-address-container
+                {}
+                :tree-address (:tree-address opinion)
+                :body
+                [disp/reference (:reference opinion) :minify true]]))])))
 
 (defn target-summary [& {:keys [rooturl]}]
-  [:div
-   [summary-scores-chart rooturl]
-   [display-other-flags rooturl]
+  [:div {:class "flex flex-col gap-4 mb-8"}
+   [:div
+    {:class "flex flex-row gap-4"}
+    [summary-scores-chart rooturl]
+    [display-other-flags rooturl]]
    [references-summary rooturl]])

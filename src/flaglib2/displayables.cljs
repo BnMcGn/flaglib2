@@ -101,6 +101,22 @@
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
     body]])
 
+(defn tree-address-container [props & {:keys [tree-address body fold-at]
+                                       :or {:fold-at 7}}]
+  (let [size @(rf/subscribe [:window-size])
+        fold (or (= size :xs) (>= (count tree-address) fold-at))]
+    (if fold
+      [:div
+       props
+       [tb/display-tree-address tree-address]
+       body]
+      [:div
+       (merge
+        {:class "flex flex-row"}
+        props)
+       [tb/display-tree-address tree-address :class "justify-right basis-30 shrink-0 grow-0"]
+       body])))
+
 (defn opinion-info [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
