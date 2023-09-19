@@ -133,7 +133,7 @@
     (when-not (empty? references)
       [:div
        [:h3 "References Made"]
-       (into [:div]
+       (into [:div {:class "child:p-1"}]
              (for [r references
                    :let [opinion (opstore r)]]
                [disp/tree-address-container

@@ -102,7 +102,7 @@
     body]])
 
 (defn tree-address-container [props & {:keys [tree-address body fold-at]
-                                       :or {:fold-at 7}}]
+                                       :or {fold-at 7}}]
   (let [size @(rf/subscribe [:window-size])
         fold (or (= size :xs) (>= (count tree-address) fold-at))]
     (if fold
@@ -112,9 +112,14 @@
        body]
       [:div
        (merge
-        {:class "flex flex-row"}
-        props)
-       [tb/display-tree-address tree-address :class "justify-right basis-30 shrink-0 grow-0"]
+        props
+        (merge {:style {:display "grid"
+                        :grid-template-columns "13rem auto"
+                        :grid-gap "0.25rem"}}
+               (get props :style {})))
+       [:div
+        {:class "justify-self-end basis-52 shrink-0 grow-0"}
+        [tb/display-tree-address tree-address]]
        body])))
 
 (defn opinion-info [opid]
