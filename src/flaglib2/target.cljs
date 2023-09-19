@@ -49,8 +49,9 @@
   (let [params @(rf/subscribe [:server-parameters])
         current (r/atom (if-let [tmode (:tmode params)]
                           (keyword tmode)
-                          :article))]
-    [:<> [rc/horizontal-tabs
+                          :article))
+        size @(rf/subscribe [:window-size])]
+    [:<> [(if (= :xs size) rc/vertical-bar-tabs rc/horizontal-tabs)
           :model current
           :tabs [{:id :article :label "Article View"}
                  {:id :comment :label "Comment View"}

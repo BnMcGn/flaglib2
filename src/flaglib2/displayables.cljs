@@ -367,7 +367,7 @@
 
 (defn reference [reference & {:keys [minify]}]
   [:div
-   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2"}
+   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"}
    [:img {:src "/static/img/white-reference.svg"
           :class (if minify "w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)

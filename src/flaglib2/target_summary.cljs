@@ -143,9 +143,11 @@
                 [disp/reference (:reference opinion) :minify true]]))])))
 
 (defn target-summary [& {:keys [rooturl]}]
-  [:div {:class "flex flex-col gap-4 mb-8"}
-   [:div
-    {:class "flex flex-row gap-4"}
-    [summary-scores-chart rooturl]
-    [display-other-flags rooturl]]
-   [references-summary rooturl]])
+  [:div
+   [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
+   [:div {:class "flex flex-col gap-4 mb-8"}
+     [:div
+      {:class "flex flex-row gap-4"}
+      [summary-scores-chart rooturl]
+      [display-other-flags rooturl]]
+     [references-summary rooturl]]])
