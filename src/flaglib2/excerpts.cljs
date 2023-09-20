@@ -129,6 +129,13 @@
        (when-let [pos (:text-position opin)]
          (first pos))))
 
+;;Can an opinion be considered 'bookmark' for an excerpt? As such it might serve as a target
+;; for inrefs. If so, it should look like a utility opinion.
+(defn qualifies-as-excerpt-marker? [opin]
+  (and (has-excerpt? opin)
+       (= :custodial-blank (:flag opin))
+       (or (not (:comment opin)) (empty? (:comment opin)))))
+
 (defn clean-string-for-excerpt [the-string]
   (loop [res nil
          last-was-white false
