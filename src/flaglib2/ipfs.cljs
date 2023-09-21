@@ -89,11 +89,22 @@
      :flag (let [[a b] (:flag opinion)]
              (keyword (str (name a) "-" (name b)))))))
 
+;;Always returns the whole warstats-tmp db, change or no
+(defn proc-refd-warstat [opinion db]
+  (if-let [refd (:refd-opinion opinion)]
+    (update-in
+     (::warstats-tmp db) [refd :refd]
+     #(conj (or %1 #{}) (:iid opinion)))
+    (::warstats-tmp db)))
+
 (rf/reg-event-fx
  ::received-opinion
  (fn [{:keys [db]} [_ key result]]
-   {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key (proc-opinion result)))
-    :fx [ [:dispatch [::start-debounce]] ]}))
+   (let [opinion (proc-opinion result)
+         warstats (proc-refd-warstat opinion db)]
+     {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key opinion)
+                 ::warstats-tmp warstats)
+     :fx [ [:dispatch [::start-debounce]] ]})))
 
 (rf/reg-event-fx
  ::received-references
@@ -136,12 +147,19 @@
      {:db (assoc db ::debouncing true)
       :fx [ [:dispatch-later {:ms 500 :dispatch [::complete-debounce]}] ]})))
 
+(defn merge-warstats [& ws]
+  (let [refd (apply clojure.set/union (keep :refd ws))
+        w (apply merge ws)]
+    (if (empty? refd)
+      w
+      (assoc w :refd refd))))
+
 (rf/reg-event-db
  ::complete-debounce
  (fn [db _]
    (assoc
     db
-    :warstats-store (merge (:warstats-store db) (::warstats-tmp db))
+    :warstats-store (misc/merge-map merge-warstats (:warstats-store db) (::warstats-tmp db))
     ::warstats-tmp {}
     :text-store (merge (:text-store db) (::text-tmp db))
     ::text-tmp {}

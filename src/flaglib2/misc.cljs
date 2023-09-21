@@ -224,3 +224,14 @@
                   (do ~@body)
                   )))
 
+;;Acts like merge when only one of the maps has a given entry, passes the decision to fn when there are
+;; more than one. Considers nil to not be an entry
+(defn merge-map [fn & maps]
+  (let [keycoll (reduce into #{} (map keys maps))]
+    (into {}
+          (for [k keycoll
+                :let [entries (vec (keep #(get %1 k) maps))]
+                :when (not (empty? entries))]
+            [k (if (= 1 (count entries))
+                 (entries 0)
+                 (apply fn entries))]))))
