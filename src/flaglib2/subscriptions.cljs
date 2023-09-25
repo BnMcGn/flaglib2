@@ -76,6 +76,24 @@
  (fn [db [_ key]]
    (get-in db [:refd key])))
 
+(rf/reg-sub
+ :core-db
+ :<- [:warstats-store]
+ :<- [:text-store]
+ :<- [:title-store]
+ :<- [:opinion-store]
+ :<- [:opinion-tree-store]
+ :<- [:references]
+ :<- [:refd]
+ (fn [[ws txt titl op optree ref refd] _]
+   {:warstats-store ws
+    :text-store txt
+    :title-store titl
+    :opinion-store op
+    :opinion-tree-store optree
+    :references ref
+    :refd refd}))
+
 (defn- get-sub-tree [db [_ key]]
   (let [opinion (get-in db [:opinion-store key])
         optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]

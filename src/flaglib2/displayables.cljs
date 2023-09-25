@@ -148,14 +148,14 @@
 ;;; Opinion-summary is used to display opinions in one line situations. It may be displayed with
 ;;; tree address icons.
 ;;FIXME: Would be nice to have an icon that indicates presence of a comment
-(defn opinion-summary [opid & {:keys [hide-tree-address]}]
+(defn opinion-summary [opid & {:keys [hide-tree-address hide-icon]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
         size @(rf/subscribe [:window-size])]
     [:div
      {:class "flex flex-row gap-4 items-center"}
      (if hide-tree-address
-       [tb/opinion-icon opid]
+       (when-not hide-icon [tb/opinion-icon opid])
        [tb/display-tree-address (:tree-address opinion)])
      (if (= size :xs)
        [tb/author-long opinion]

@@ -153,6 +153,53 @@
                    :let [opinion (opstore r)]]
                [disp/display-refd-root-pov opinion]))])))
 
+(defn summary-score-val [db opid]
+  (let [effect (get-in db [:warstats-store opid :effect])]
+    (and effect (< 2 effect) effect)))
+
+(defn summary-controversy-val [db opid]
+  (let [controversy (get-in db [:warstats-store opid :controversy])]
+    (and controversy (< 2 controversy) controversy)))
+
+(defn organize-opinion-tree [optree score-func]
+  (let [res (for [opid (flatten optree)
+                  :let [score (score-func opid)]
+                  :when score]
+              [opid score])]
+    (map first (sort-by second res))))
+
+(defn high-scores [rooturl]
+  (let [db @(rf/subscribe [:core-db])
+        optree (get-in db [:opinion-tree-store rooturl])
+        opids (organize-opinion-tree optree (partial summary-score-val db))]
+    (when-not (empty? opids)
+      [:div
+       [:h3 "High Scoring Replies"]
+       (into [:div {:class "child:p-1"}]
+             (for [o opids
+                   :let [opinion (get-in db [:opinion-store o])]]
+               [disp/tree-address-container
+                {}
+                :tree-address (:tree-address opinion)
+                :body
+                [disp/opinion-summary o :hide-tree-address true :hide-icon true]]))])))
+
+(defn controversial [rooturl]
+  (let [db @(rf/subscribe [:core-db])
+        optree (get-in db [:opinion-tree-store rooturl])
+        opids (organize-opinion-tree optree (partial summary-controversy-val db))]
+    (when-not (empty? opids)
+      [:div
+       [:h3 "Controversial Replies"]
+       (into [:div {:class "child:p-1"}]
+             (for [o opids
+                   :let [opinion (get-in db [:opinion-store o])]]
+               [disp/tree-address-container
+                {}
+                :tree-address (:tree-address opinion)
+                :body
+                [disp/opinion-summary o :hide-tree-address true :hide-icon true]]))])))
+
 (defn target-summary [& {:keys [rooturl]}]
   [:div
    [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
@@ -161,4 +208,7 @@
       {:class "flex flex-row gap-4"}
       [summary-scores-chart rooturl]
       [display-other-flags rooturl]]
-     [references-summary rooturl]]])
+    [references-summary rooturl]
+    [refd-summary rooturl]
+    [high-scores rooturl]
+    [controversial rooturl]]])
