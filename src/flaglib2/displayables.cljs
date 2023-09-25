@@ -373,6 +373,30 @@
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
     reference]])
 
+;;Various ways to describe incoming references. Viewing the root article. Need to cover refs to root,
+;; refs to excerpt of root, and refs to opinions in discussion of root.
+(defn display-refd-root-pov [refopid & {:keys [minify]}]
+  (let [refop @(rf/subscribe [:opinion-store refopid])
+        from-domain (misc/url-domain (:rooturl refop))
+        refdop (when-let [refd (:refd refop)] @(rf/subscribe [:opinion-store refd]))
+        ref-to-root-excerpt? (and refdop (excerpts/qualifies-as-excerpt-marker? refdop)
+                                  (not (misc/deep-opinion? refdop)))]
+    [:div
+     {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
+      :style {:background-color (deco/stripes-45 "transparent" "#fff7")
+              :background-size "20px 20px"}}
+     [:a {:href (misc/make-opinion-url refop)}
+      [:img {:src "/static/img/white-reference.svg"
+             :class (if minify "w-[21] h-[23]" "min-w-[42px] h-[45px]")}]]
+     (cond
+       ref-to-root-excerpt?
+       [:<> (str "From " from-domain " To Excerpt:" )
+        [:a {:class "italic" :href (misc/make-opinion-url refop)} (:excerpt refdop)]]
+       refdop
+       [:<> (str "From " from-domain " To: ") [tb/display-tree-address (:tree-address refdop)]]
+       :else
+       (str "From " from-domain))]))
+
 (defn question-container [props & {:keys [body minify]}]
   [:div
    (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5"} props)

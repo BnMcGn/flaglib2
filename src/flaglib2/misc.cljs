@@ -60,6 +60,9 @@
     (recur (rest treead)
            (rest (first (filter #(= (first treead) (first %1)) optree))))))
 
+(defn deep-opinion? [opinion]
+  (< 1 (count (:tree-address opinion))))
+
 
 ;;; Time tools
 

@@ -67,3 +67,11 @@
 
 (defn thread-opinion-indent [level]
   (str (* 2 level) "rem"))
+
+(defn stripes-45 [color1 color2]
+  (str "repeating-linear-gradient(45deg, "
+       color1 ", "
+       color1 " 25%,"
+       color2 " 25%,"
+       color2 " 50%,"
+       color1 " 50%)"))

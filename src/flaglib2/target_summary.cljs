@@ -142,6 +142,17 @@
                 :body
                 [disp/reference (:reference opinion) :minify true]]))])))
 
+(defn refd-summary [targetid]
+  (let [refd @(rf/subscribe [:refd targetid])
+        opstore @(rf/subscribe [:opinion-store])]
+    (when-not (empty? refd)
+      [:div
+       [:h3 "Incoming References"]
+       (into [:div {:class "child:p-1"}]
+             (for [r refd
+                   :let [opinion (opstore r)]]
+               [disp/display-refd-root-pov opinion]))])))
+
 (defn target-summary [& {:keys [rooturl]}]
   [:div
    [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
