@@ -182,7 +182,7 @@
                 {}
                 :tree-address (:tree-address opinion)
                 :body
-                [disp/opinion-summary o :hide-tree-address true :hide-icon true]]))])))
+                [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]]))])))
 
 (defn controversial [rooturl]
   (let [db @(rf/subscribe [:core-db])
@@ -198,7 +198,7 @@
                 {}
                 :tree-address (:tree-address opinion)
                 :body
-                [disp/opinion-summary o :hide-tree-address true :hide-icon true]]))])))
+                [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]]))])))
 
 (defn target-summary [& {:keys [rooturl]}]
   [:div
