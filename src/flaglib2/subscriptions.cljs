@@ -59,7 +59,9 @@
 (rf/reg-sub
  :opinion-tree-store
  (fn [db [_ key]]
-   (get-in db [:opinion-tree-store key])))
+   (if key
+     (get-in db [:opinion-tree-store key])
+     (:opinion-tree-store db))))
 
 (rf/reg-sub
  :text-status
@@ -69,12 +71,16 @@
 (rf/reg-sub
  :references
  (fn [db [_ key]]
-   (get-in db [:references key])))
+   (if key
+     (get-in db [:references key])
+     (:references db))))
 
 (rf/reg-sub
  :refd
  (fn [db [_ key]]
-   (get-in db [:refd key])))
+   (if key
+     (get-in db [:refd key])
+     (:refd db))))
 
 (rf/reg-sub
  :core-db
