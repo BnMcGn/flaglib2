@@ -404,8 +404,17 @@
           :class (if minify "w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
-(defn question []
-  )
+(defn question [opid & {:keys [minify]}]
+  (when-let [opinion @(rf/subscribe [:opinion-store opid])]
+    [question-container
+     {}
+     :minify minify
+     :body
+     [:<>
+      [:a {:href (misc/make-opinion-url opinion)}
+       ;;FIXME: Should manually truncate?
+       [tb/comment-summary :opinion opinion :truncate 120]]
+      [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])]]]))
 
 (defn thread-opinion [& {:keys [opid text]}]
   (let [excerpt (r/atom "")

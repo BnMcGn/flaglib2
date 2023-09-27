@@ -63,6 +63,9 @@
 (defn deep-opinion? [opinion]
   (< 1 (count (:tree-address opinion))))
 
+(defn answer? [opinion]
+  (#{:negative-evidence :negative-disagree} (:flag opinion)))
+
 
 ;;; Time tools
 

@@ -200,6 +200,30 @@
                 :body
                 [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]]))])))
 
+(defn and-answers [qid]
+  (let [opstore @(rf/subscribe [:opinion-store])
+        replies @(rf/subscribe [:immediate-children qid])
+        answers (keep #(misc/answer? (opstore qid)) replies)]
+    (for [o answers
+          :let [opinion (get opstore o)]]
+      [disp/tree-address-container
+       {}
+       :tree-address (:tree-address opinion)
+       :body
+       [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]])))
+
+(defn questions-and-answers [rooturl]
+  (let [warstats-store @(rf/subscribe [:warstats-store])
+        optree @(rf/subscribe [:opinion-tree-store rooturl])
+        questions (filter #(:question (warstats-store %1)) (flatten optree))]
+    (when-not (empty? questions)
+      [:div
+       [:h3 "Questions and Answers"]
+       (into [:div {:class "child:p-1"}]
+             (for [q questions
+                   r (cons [disp/question q :minify true] (and-answers q))]
+               r))])))
+
 (defn target-summary [& {:keys [rooturl]}]
   [:div
    [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
@@ -210,5 +234,6 @@
       [display-other-flags rooturl]]
     [references-summary rooturl]
     [refd-summary rooturl]
+    [questions-and-answers rooturl]
     [high-scores rooturl]
     [controversial rooturl]]])
