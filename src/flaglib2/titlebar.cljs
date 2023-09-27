@@ -157,9 +157,7 @@
 ;;FIXME: read from text-store?
 (defn comment-summary [& {:keys [comment opinion truncate]}]
   (let [comment (or comment (:comment opinion) "")]
-    [:span (if truncate
-             (string/truncate comment truncate)
-             comment)]))
+    [:span {:class (if truncate "truncate" "")} comment]))
 
 
 

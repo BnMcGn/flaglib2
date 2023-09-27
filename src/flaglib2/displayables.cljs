@@ -325,7 +325,7 @@
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
   (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}]
     [:div
-     {:class "thread-excerpt italic text-sm mt-2 mb-4 sm:mr-40 mr-6 min-h-[3em] ml-6 sm:break-words break-all"}
+     {:class "thread-excerpt italic text-sm mt-2 mb-4 sm:mr-40 mr-6 min-h-[3em] ml-6 sm:break-normal break-all sm:break-words"}
      [:img
       (if (or leading-context trailing-context)
         {:src "/static/img/black-wf-quote.svg" :style icon-style}
@@ -399,7 +399,7 @@
 
 (defn question-container [props & {:keys [body minify]}]
   [:div
-   (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5"} props)
+   (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5 gap-4"} props)
    [:img {:src "/static/img/black-wf-question.svg"
           :class (if minify "w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
@@ -413,7 +413,7 @@
      [:<>
       [:a {:href (misc/make-opinion-url opinion)}
        ;;FIXME: Should manually truncate?
-       [tb/comment-summary :opinion opinion :truncate 120]]
+       [tb/comment-summary :opinion opinion :truncate minify]]
       [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])]]]))
 
 (defn thread-opinion [& {:keys [opid text]}]
@@ -450,7 +450,7 @@
                   {:width "100%"}
                   {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"})]
             [(if small opinion-container-mobile opinion-container)
-             {:class "mb-6 sm:break-words break-all"
+             {:class "mb-6 sm:break-normal break-all sm:break-words"
               :style main-style
               :on-click (fn [e]
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
