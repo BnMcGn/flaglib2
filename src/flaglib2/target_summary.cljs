@@ -112,11 +112,11 @@
     [:div [:h3 "Flags"]
      (when warstats
        (into [:div
-             {:class "grid gap-1 grid-cols-3 sm:grid-cols-1 text-sm"}]
+             {:class "grid gap-1 grid-cols-2 sm:grid-cols-1 text-xs sm:text-sm"}]
             (for [flag flags
                   :let [flinfo (flags/flags flag)]]
               [:div
-               {:class "border-[2px] rounded w-44 flex justify-center"
+               {:class "border-[2px] rounded sm:w-44 w-36 flex justify-center"
                 :style (cond
                          (not (warstats flag)) {:background-color "lightgrey"
                                                 :color "#333"
@@ -229,7 +229,7 @@
    [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
    [:div {:class "flex flex-col gap-4 mb-8"}
      [:div
-      {:class "flex flex-row gap-4"}
+      {:class "flex flex-col sm:flex-row gap-4"}
       [summary-scores-chart rooturl]
       [display-other-flags rooturl]]
     [references-summary rooturl]
