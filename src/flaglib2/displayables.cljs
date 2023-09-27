@@ -369,7 +369,7 @@
   [:div
    {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"}
    [:img {:src "/static/img/white-reference.svg"
-          :class (if minify "w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
+          :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
     reference]])
 
@@ -387,7 +387,7 @@
               :background-size "20px 20px"}}
      [:a {:href (misc/make-opinion-url refop)}
       [:img {:src "/static/img/white-reference.svg"
-             :class (if minify "w-[21] h-[23]" "min-w-[42px] h-[45px]")}]]
+             :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]]
      (cond
        ref-to-root-excerpt?
        [:<> (str "From " from-domain " To Excerpt:" )
@@ -401,7 +401,7 @@
   [:div
    (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5 gap-4"} props)
    [:img {:src "/static/img/black-wf-question.svg"
-          :class (if minify "w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
+          :class (if minify "min-w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
 (defn question [opid & {:keys [minify]}]
