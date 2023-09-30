@@ -57,8 +57,7 @@
                  {:id :comment :label "Comment View"}
                  {:id :summary :label "Summary"}]
           :parts {:wrapper {:class "mt-2"}
-                  ;;FIXME: might need to redefine tw-tab-active func
-                  :anchor {:class "text-neutral-600"}}
+                  :anchor {:style {:color "#777"}}}
           :on-change #(set! js/window.location.href
                             (uri/setParam js/window.location.href "tmode" (name %1)))]
      (case @current
