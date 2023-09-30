@@ -21,6 +21,12 @@
    :x-right "check_mark"
    :x-wrong "ballot_x"})
 
+(def indicator-names-black
+  {:x-up "thumbs_up_white"
+   :x-down "thumbs_down_white"
+   :x-right "check_mark_white"
+   :x-wrong "ballot_x_white"})
+
 (def warstat-text
   {:x-up "Has approval"
    :x-down "Has disapproval"
@@ -58,7 +64,7 @@
               [" > " [opinion-icon id]])))])
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
-(defn display-warstats [& {:keys [warstats class]}]
+(defn display-warstats [& {:keys [warstats class black]}]
   [rc/h-box
    :class (str "mr-3 " class)
    :children
@@ -67,13 +73,16 @@
           (fn [axis]
             (let [stat (get warstats axis)
                   mag (if (integer? stat) (mood/magnitude stat) 0)
-                  opacity (when (or (not stat) (zero? stat)) " opacity-25")
+                  opacity (if black "opacity-50" "opacity-25")
+                  opacity (when (or (not stat) (zero? stat)) (str " " opacity))
                   mags (if (#{:x-up :x-right} axis)
                          deco/positive-magnitude
                          deco/negative-magnitude)]
               [:span
                {:class (str (nth mags mag) opacity)}
-               [:img {:src (str "/static/img/" (get indicator-names axis) ".svg")
+               [:img {:src (str "/static/img/" (get (if black
+                                                      indicator-names-black
+                                                      indicator-names) axis) ".svg")
                       :style {:width "12px" :height "12px"}
                       :title (get warstat-text axis)}]]))
           '(:x-up :x-down :x-right :x-wrong)))])

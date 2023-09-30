@@ -361,7 +361,7 @@
       :url true]
      (when-not minify
        [tb/display-external-link :url reference :black true])
-     [tb/display-warstats :warstats warstats]]))
+     [tb/display-warstats :warstats warstats :black true]]))
 
 (defn reference-excerpt-display [])
 
