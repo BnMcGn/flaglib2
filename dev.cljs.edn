@@ -4,6 +4,11 @@
   :open-url "https://127.0.0.1/target2/1"
    }
 {:main flaglib2.core
+ :target :bundle
+ :bundle-cmd {:none ["npx" "webpack" "--mode=development" "--entry"
+                     :output-to "--output-path" 
+                     :final-output-dir
+                     "--output-filename" :final-output-filename]}
  :asset-path "/static/cljs-out/dev"
  :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
  :preloads        [day8.re-frame-10x.preload]}
