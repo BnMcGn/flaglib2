@@ -82,12 +82,13 @@
 
 (declare reference)
 
-(defn opinion-container [props & {:keys [iconid titlebar body]}]
+(defn opinion-container [props & {:keys [iconid titlebar body box-props]
+                                  :or {box-props {:class "bg-white border-[3px] border-black ml-7"}}}]
   [:div
    props
    [tb/opinion-icon iconid :style {:float "left" :position "relative" :top "3px"}]
    [:div
-    {:class "bg-white border-[3px] border-black ml-7"}
+    box-props
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
     body]])
 
@@ -416,6 +417,14 @@
        [tb/comment-summary :opinion opinion :truncate minify]]
       [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])]]]))
 
+(defn opinion-extras [opid]
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        warstats @(rf/subscribe [:warstats-store opid])]
+    [:div
+     {:class "sm:flex sm:flex-row child:sm:grow child:sm:basis-0"}
+     (when-let [ref (:reference opinion)] [reference ref])
+     (when (:question warstats) [question-container {}])]))
+
 (defn thread-opinion [& {:keys [opid text]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
@@ -473,10 +482,7 @@
                   :disable-popup? true
                   :excerpt excerpt
                   :offset offset])]
-              [:div
-               {:class "sm:flex sm:flex-row child:sm:grow child:sm:basis-0"}
-               (when-let [ref (:reference opinion)] [reference ref])
-               (when (:question warstats) [question-container {}])]]]))))))
+              [opinion-extras opid]]]))))))
 
 (defn excerptless-opinions [target-id]
   (let [opstore @(rf/subscribe [:opinion-store])

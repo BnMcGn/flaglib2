@@ -68,7 +68,7 @@
        false)
       false)))
 
-(defn find-excerpt-position [tdat excerpt & {:keys [offset] :or {:offset 0}}]
+(defn find-excerpt-position [tdat excerpt & {:keys [offset] :or {offset 0}}]
   (let [exdat (create-textdata excerpt)]
     (loop [i (range (count (:text tdat)))
            offset offset]

@@ -64,28 +64,30 @@
               [" > " [opinion-icon id]])))])
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
-(defn display-warstats [& {:keys [warstats class black]}]
-  [rc/h-box
-   :class (str "mr-3 " class)
-   :children
-   (into []
-         (map
-          (fn [axis]
-            (let [stat (get warstats axis)
-                  mag (if (integer? stat) (mood/magnitude stat) 0)
-                  opacity (if black "opacity-50" "opacity-25")
-                  opacity (when (or (not stat) (zero? stat)) (str " " opacity))
-                  mags (if (#{:x-up :x-right} axis)
-                         deco/positive-magnitude
-                         deco/negative-magnitude)]
-              [:span
-               {:class (str (nth mags mag) opacity)}
-               [:img {:src (str "/static/img/" (get (if black
-                                                      indicator-names-black
-                                                      indicator-names) axis) ".svg")
-                      :style {:width "12px" :height "12px"}
-                      :title (get warstat-text axis)}]]))
-          '(:x-up :x-down :x-right :x-wrong)))])
+(defn display-warstats [& {:keys [warstats target-id class black]}]
+  (let [warstats (or warstats
+                     @(rf/subscribe [:warstats-store target-id]))]
+    [rc/h-box
+     :class (str "mr-3 " class)
+     :children
+     (into []
+           (map
+            (fn [axis]
+              (let [stat (get warstats axis)
+                    mag (if (integer? stat) (mood/magnitude stat) 0)
+                    opacity (if black "opacity-50" "opacity-25")
+                    opacity (when (or (not stat) (zero? stat)) (str " " opacity))
+                    mags (if (#{:x-up :x-right} axis)
+                           deco/positive-magnitude
+                           deco/negative-magnitude)]
+                [:span
+                 {:class (str (nth mags mag) opacity)}
+                 [:img {:src (str "/static/img/" (get (if black
+                                                        indicator-names-black
+                                                        indicator-names) axis) ".svg")
+                        :style {:width "12px" :height "12px"}
+                        :title (get warstat-text axis)}]]))
+            '(:x-up :x-down :x-right :x-wrong)))]))
 
 (defn date-stamp [opinion]
   (let [[quantity unit] (misc/ago (:created opinion))]
