@@ -74,3 +74,26 @@
          :tree-address treead
          :focus focus])
       [disp/opinion-extras opid]]]))
+
+(defn opinion-page [& {:keys [focus rooturl]}]
+  (let [curve-locator (curve-locator-by-index layers-curve (count focus))
+        excerpt (r/atom "")
+        offset (r/atom nil)]
+    (fn [& {:as args}]
+      (into
+       [:div [opinion-root :rooturl rooturl :focus focus]]
+       (for [opid focus]
+         [opinion-layer :opid opid :curve-locator curve-locator :focus focus
+          :excerpt excerpt :offset offset])))))
+
+(rf/reg-event-fx
+ :opinion-page
+ (fn [{:keys [db]} _]
+   (let [rooturl (get-in db [:server-parameters :rooturl])
+         focus (get-in db [:server-parameters :focus])
+         db (assoc db :root-element opinion-page)]
+     {:db db
+      ;;Might need this...
+      :fx [ ;;[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
+           [:dispatch [:load-rooturl rooturl]]
+           [:mount-registered db]]})))
