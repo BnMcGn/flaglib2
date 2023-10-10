@@ -8,13 +8,26 @@
 
    [flaglib2.misc :as misc]
    [flaglib2.displayables :as disp]
-   [flaglib2.titlebar :as tb]
+   [flaglib2.titlebar :as tb]))
 
-   [react-helmet :as helmet]))
+
+(rf/reg-fx
+ :set-opinion-meta
+ (fn [opinion]
+   (misc/set-meta-property! "opinml:opinion" (:url opinion))
+   (misc/set-meta-property! "opinml:rooturl" (:rooturl opinion))
+   (misc/set-meta-property! "opinml:target" (:target opinion))))
+
+(defn meta-manager []
+  (r/create-class
+   {:component-did-mount
+    :component-did-update}))
 
 
 (defn opinion-meta [& {:keys [url rooturl target]}]
-  [helmet
+  (println "in opinion-meta")
+  (println react-helmet)
+  [react-helmet
    [:meta :property "opinml:opinion" :content url]
    [:meta :property "opinml:rooturl" :content rooturl]
    [:meta :property "opinml:target" :content target]])
@@ -30,11 +43,7 @@
      [disp/hilited-text
       :focus focus
       :root-target-url rooturl
-      :tree-address '()]
-     [opinion-meta
-      :url (:url opinion)
-      :rooturl rooturl
-      :target (:target opinion)]]))
+      :tree-address '()]]))
 
 (defn random-gray []
   (rand-nth ["#aa9" "#bbb" "#888" "#ccd" "#988" "#ddd"]))
@@ -96,4 +105,8 @@
       ;;Might need this...
       :fx [ ;;[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:load-rooturl rooturl]]
-           [:mount-registered db]]})))
+           [:mount-registered db]]
+      :set-opinion-meta {:rooturl rooturl :opinion (last focus)
+                         :target (if (= 1 (count focus))
+                                   rooturl
+                                   (last (butlast focus)))}})))

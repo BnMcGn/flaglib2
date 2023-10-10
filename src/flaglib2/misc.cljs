@@ -241,3 +241,30 @@
             [k (if (= 1 (count entries))
                  (entries 0)
                  (apply fn entries))]))))
+
+
+;; Head tools
+
+(defn get-meta-elements []
+  (let [head (first (seq (. js/document (getElementsByTagName "head"))))]
+    (seq (. head (getElementsByTagName "meta")))))
+
+(defn get-meta-map-by-property [& elements]
+  (let [elements (or elements (get-meta-elements))]
+    (into {}
+          (for [e elements
+                :let [prop (. e (getAttribute "property"))]
+                :when prop]
+            [prop e]))))
+
+(defn add-meta-tag! [el]
+  (let [head (first (seq (. js/document (getElementsByTagName "head"))))]
+    (. head (appendChild el))))
+
+(defn set-meta-property! [property content]
+  (if-let [el ((get-meta-map-by-property) property)]
+    (. el (setAttribute "content" content))
+    (let [el (. js/document (createElement "meta"))]
+      (. el (setAttribute "property" property))
+      (. el (setAttribute "content" content))
+      (add-meta-tag! el))))
