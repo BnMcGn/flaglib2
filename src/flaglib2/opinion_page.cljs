@@ -43,7 +43,7 @@
 (defn layers-curve [input]
   (+ 5.0 (* 3 (Math.pow (- 1 input) 2))))
 
-(defn opinion-layer [{:keys [opid curve-locator focus excerpt offset]}]
+(defn opinion-layer [& {:keys [opid curve-locator focus excerpt offset]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         treead (:tree-address opinion)
         topmost (and opinion (= (count treead) (count focus)))]
@@ -71,8 +71,9 @@
          :focus focus])
       [disp/opinion-extras opid]]]))
 
-(defn opinion-page [& {:keys [focus rooturl]}]
-  (let [curve-locator (curve-locator-by-index layers-curve (count focus))
+(defn opinion-page []
+  (let [{:keys [focus rooturl]} @(rf/subscribe [:server-parameters])
+        curve-locator (curve-locator-by-index layers-curve (count focus))
         excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& {:as args}]
