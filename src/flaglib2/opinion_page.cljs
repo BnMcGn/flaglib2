@@ -18,20 +18,6 @@
    (misc/set-meta-property! "opinml:rooturl" (:rooturl opinion))
    (misc/set-meta-property! "opinml:target" (:target opinion))))
 
-(defn meta-manager []
-  (r/create-class
-   {:component-did-mount
-    :component-did-update}))
-
-
-(defn opinion-meta [& {:keys [url rooturl target]}]
-  (println "in opinion-meta")
-  (println react-helmet)
-  [react-helmet
-   [:meta :property "opinml:opinion" :content url]
-   [:meta :property "opinml:rooturl" :content rooturl]
-   [:meta :property "opinml:target" :content target]])
-
 (defn opinion-root [{:keys [rooturl focus]}]
   (let [opinion @(rf/subscribe [:opinion-store (last focus)])]
     [:div
@@ -39,7 +25,8 @@
      [disp/root-title
       :url rooturl
       :hide-reply true
-      :intro-text "Root Target: "]
+      :intro-text "Root Target: "
+      :display-depth 0]
      [disp/hilited-text
       :focus focus
       :root-target-url rooturl
