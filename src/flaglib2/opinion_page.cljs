@@ -18,7 +18,7 @@
    (misc/set-meta-property! "opinml:rooturl" (:rooturl opinion))
    (misc/set-meta-property! "opinml:target" (:target opinion))))
 
-(defn opinion-root [{:keys [rooturl focus]}]
+(defn opinion-root [& {:keys [rooturl focus]}]
   (let [opinion @(rf/subscribe [:opinion-store (last focus)])]
     [:div
      {:on-click (fn [ev] (set! (. js/window -location) (misc/make-target-url rooturl)))}
@@ -29,6 +29,7 @@
       :display-depth 0]
      [disp/hilited-text
       :focus focus
+      :text-key rooturl
       :root-target-url rooturl
       :tree-address '()]]))
 
@@ -48,9 +49,11 @@
         treead (:tree-address opinion)
         topmost (and opinion (= (count treead) (count focus)))]
     [disp/opinion-container
-     {}
-     :box-props {:style {:left (str (curve-locator (count treead) "em"))
-                         :border-color (if topmost "black" (random-gray))}
+     {:class "absolute"
+      :style {:top (str (+ 0 (* (count treead) 3)) "em")
+              :left (str (curve-locator (count treead) ) "em")}}
+     :box-props {:style {:border-color (if topmost "black" (random-gray))
+                         :background-color (if topmost "white" "#f5f5f5")}
                  :class "bg-white border-[3px]"
                  :on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      :iconid opid
@@ -90,8 +93,7 @@
          focus (get-in db [:server-parameters :focus])
          db (assoc db :root-element opinion-page)]
      {:db db
-      ;;Might need this...
-      :fx [ ;;[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
+      :fx [[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
            [:mount-registered db]]
       :set-opinion-meta {:rooturl rooturl :opinion (last focus)
