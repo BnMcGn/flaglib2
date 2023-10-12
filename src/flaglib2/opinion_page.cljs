@@ -42,7 +42,7 @@
 
 ;;Curve that swoops in to the left margin.
 (defn layers-curve [input]
-  (+ 5.0 (* 3 (Math.pow (- 1 input) 2))))
+  (+ 2.0 (* 3 (Math.pow (- 1 input) 2))))
 
 (defn opinion-layer [& {:keys [opid curve-locator focus excerpt offset]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
@@ -54,7 +54,7 @@
               :left (str (curve-locator (count treead) ) "em")}}
      :box-props {:style {:border-color (if topmost "black" (random-gray))
                          :background-color (if topmost "white" "#f5f5f5")}
-                 :class "bg-white border-[3px]"
+                 :class "bg-white border-[3px] ml-7"
                  :on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      :iconid opid
      :titlebar
@@ -81,7 +81,8 @@
         offset (r/atom nil)]
     (fn [& {:as args}]
       (into
-       [:div [opinion-root :rooturl rooturl :focus focus]]
+       [:div {:class "relative"}
+        [opinion-root :rooturl rooturl :focus focus]]
        (for [opid focus]
          [opinion-layer :opid opid :curve-locator curve-locator :focus focus
           :excerpt excerpt :offset offset])))))
