@@ -4,7 +4,8 @@
    [flaglib2.misc :as misc]
    [flaglib2.urlgrab :as urlgrab]
 
-   [clojure.walk :as walk]))
+   [clojure.walk :as walk]
+   [clojure.string :as string]))
 
 
 (rf/reg-sub

@@ -90,12 +90,16 @@
 (rf/reg-event-fx
  :opinion-page
  (fn [{:keys [db]} _]
+   ;;FIXME: Optimization: only load needed opinions from opinion tree.
+   ;; -Needs a little thinking to get working: can't load subtree without opinion, rooturl, treead
    (let [rooturl (get-in db [:server-parameters :rooturl])
          focus (get-in db [:server-parameters :focus])
-         db (assoc db :root-element opinion-page :focus-id (last focus))]
+         db (assoc db :root-element opinion-page ;;:focus-id (last focus)
+                   )]
      {:db db
-      :fx [[:dispatch [:load-opinions focus]]
+      :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
+           [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:mount-registered db]]
       :set-opinion-meta {:rooturl rooturl :opinion (last focus)
                          :target (if (= 1 (count focus))

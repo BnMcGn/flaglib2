@@ -131,8 +131,9 @@
  (fn [{:keys [db]} [_ key result]]
    (let [result (cljs.reader/read-string result)
          focus (:focus-id db)
+         db (assoc-in db [:opinion-tree-store key] result)
          loadables (if focus (misc/get-sub-tree db [nil focus]) result)]
-     {:db (assoc-in db [:opinion-tree-store key] result)
+     {:db db
       :fx [ [:dispatch [:load-opinions (flatten loadables)]]]})))
 
 (rf/reg-event-db
