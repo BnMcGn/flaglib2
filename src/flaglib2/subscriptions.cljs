@@ -100,19 +100,14 @@
     :references ref
     :refd refd}))
 
-(defn- get-sub-tree [db [_ key]]
-  (let [opinion (get-in db [:opinion-store key])
-        optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
-    (when (and opinion optree)
-      (misc/sub-tree (:tree-address opinion) optree))))
 
-(rf/reg-sub :sub-tree get-sub-tree)
+(rf/reg-sub :sub-tree misc/get-sub-tree)
 
 (rf/reg-sub
  :immediate-children
  (fn [db [_ key]]
    (let [subtree (if (misc/iid? key)
-                   (get-sub-tree db [nil key])
+                   (misc/get-sub-tree db [nil key])
                    (get-in db [:opinion-tree-store key]))]
      (map first subtree))))
 

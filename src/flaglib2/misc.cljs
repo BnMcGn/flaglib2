@@ -67,6 +67,12 @@
   (#{:negative-evidence :negative-disagree} (:flag opinion)))
 
 
+(defn get-sub-tree [db [_ key]]
+  (let [opinion (get-in db [:opinion-store key])
+        optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
+    (when (and opinion optree)
+      (sub-tree (:tree-address opinion) optree))))
+
 ;;; Time tools
 
 (def formatter (cljs-time.format/formatters :date-time-no-ms))

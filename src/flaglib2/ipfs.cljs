@@ -129,9 +129,11 @@
 (rf/reg-event-fx
  ::received-opinion-tree
  (fn [{:keys [db]} [_ key result]]
-   (let [result (cljs.reader/read-string result)]
+   (let [result (cljs.reader/read-string result)
+         focus (:focus-id db)
+         loadables (if focus (misc/get-sub-tree db [nil focus]) result)]
      {:db (assoc-in db [:opinion-tree-store key] result)
-      :fx [ [:dispatch [:load-opinions (flatten result)]]]})))
+      :fx [ [:dispatch [:load-opinions (flatten loadables)]]]})))
 
 (rf/reg-event-db
  ::failure

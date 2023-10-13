@@ -92,7 +92,7 @@
  (fn [{:keys [db]} _]
    (let [rooturl (get-in db [:server-parameters :rooturl])
          focus (get-in db [:server-parameters :focus])
-         db (assoc db :root-element opinion-page)]
+         db (assoc db :root-element opinion-page :focus-id (last focus))]
      {:db db
       :fx [[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
