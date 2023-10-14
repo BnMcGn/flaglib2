@@ -289,7 +289,8 @@
         :last-char-pos end]))))
 
 (defn hilited-text [& {:keys
-                       [text-key text tree-address focus root-target-url disable-popup? excerpt offset]}]
+                       [text-key text tree-address focus root-target-url disable-popup?
+                        excerpt offset grey?]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         id (str "hilited-text-" (gensym))
         opstore @(rf/subscribe [:opinion-store])
@@ -311,7 +312,7 @@
                 (reset! offset nil)))))]
     (if text
       (into [:div
-             {:class (if (misc/focus? focus tree-address) "hilited" "hilited-parent")
+             {:class (when grey? "bg-neutral-300")
               :id id
               :on-click #(.stopPropagation %)
               :on-mouse-up selection-change
@@ -486,14 +487,13 @@
 
 (defn excerptless-opinions [target-id]
   (let [opstore @(rf/subscribe [:opinion-store])
-        idlist @(rf/subscribe [:immediate-children target-id])]
+        idlist @(rf/subscribe [:immediate-children target-id])
+        idlist (remove #(excerpts/has-excerpt? (get opstore %1)) idlist)]
     (when-not (empty? idlist)
       [:div
        {:class "mt-4"}
        [:h3 "Replies:"]
-       (into [:div] (for [id idlist
-                          :when (not (excerpts/has-excerpt? (get opstore id)))]
-                      [thread-opinion :opid id]))])))
+       (into [:div] (map #(vector thread-opinion :opid %1) idlist))])))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])

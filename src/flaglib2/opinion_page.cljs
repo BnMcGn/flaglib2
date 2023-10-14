@@ -30,6 +30,7 @@
      [disp/hilited-text
       :focus focus
       :text-key rooturl
+      :grey? true
       :root-target-url rooturl
       :tree-address '()]]))
 
@@ -42,7 +43,7 @@
 
 ;;Curve that swoops in to the left margin.
 (defn layers-curve [input]
-  (+ 2.0 (* 3 (Math.pow (- 1 input) 2))))
+  (+ 0.75 (* 3 (Math.pow (- 1 input) 2))))
 
 (defn opinion-layer [& {:keys [opid curve-locator focus excerpt offset]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
@@ -50,7 +51,7 @@
         topmost (and opinion (= (count treead) (count focus)))]
     [disp/opinion-container
      {:class "absolute"
-      :style {:top (str (+ 0 (* (count treead) 3)) "em")
+      :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
               :left (str (curve-locator (count treead) ) "em")}}
      :box-props {:style {:border-color (if topmost "black" (random-gray))
                          :background-color (if topmost "white" "#f5f5f5")}
@@ -67,12 +68,18 @@
         [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset])]
      :body
      [:<>
-      (when-let [comment (:comment opinion)]
-        [disp/hilited-text
-         :text comment
-         :tree-address treead
-         :focus focus])
-      [disp/opinion-extras opid]]]))
+      [:div
+       {:class "m-4 mt-1"}
+       (when-let [comment (:comment opinion)]
+         [disp/hilited-text
+          :text comment
+          :tree-address treead
+          :focus focus
+          :excerpt excerpt
+          :offset offset])
+       [disp/opinion-extras opid]
+       (when topmost
+         [disp/excerptless-opinions opid])]]]))
 
 (defn opinion-page []
   (let [{:keys [focus rooturl]} @(rf/subscribe [:server-parameters])
