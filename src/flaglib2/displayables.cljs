@@ -227,6 +227,9 @@
         textspan
         [:span
          {:class (str class1 " " class2)
+          :style (if disable-popup?
+                   {}
+                   {:padding-top "0.14em" :padding-bottom "0.14em"})
           :on-click (when-not disable-popup? #(rf/dispatch [::toggle-active-popup id]))}
          [segment-count (count excerpt-opinions)]
          (excerpts/rebreak text)]]
@@ -235,6 +238,8 @@
       [rc/popover-anchor-wrapper
        :showing? popup-visible?
        :position :below-left
+       :style {:display "inline"}
+       :parts {:point-wrapper {:style {:display "inline"}}}
        :anchor
        textspan
        :popover
