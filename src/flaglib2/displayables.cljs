@@ -230,6 +230,7 @@
           :style (if disable-popup?
                    {}
                    {:padding-top "0.14em" :padding-bottom "0.14em"})
+          ;;FIXME: shouldn't trigger on select:
           :on-click (when-not disable-popup? #(rf/dispatch [::toggle-active-popup id]))}
          [segment-count (count excerpt-opinions)]
          (excerpts/rebreak text)]]

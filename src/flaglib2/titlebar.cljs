@@ -90,8 +90,10 @@
             '(:x-up :x-down :x-right :x-wrong)))]))
 
 (defn date-stamp [opinion]
-  (let [[quantity unit] (misc/ago (:created opinion))]
-    [:span (str quantity " " unit " ago")]))
+  (let [created (:created opinion)
+        [quantity unit] (misc/ago (:created opinion))]
+    (when created
+      [:span (str quantity " " unit " ago")])))
 
 (defn author-long [opinion]
   (let [auth (or (:authorname opinion) (:author opinion))]
