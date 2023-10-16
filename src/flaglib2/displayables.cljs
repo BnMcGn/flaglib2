@@ -219,19 +219,31 @@
  (fn [db [_ id]]
    (assoc db ::active-popup (if (= id (::active-popup db)) nil id))))
 
+(rf/reg-event-db
+ ::reset-active-popup
+ (fn [db _]
+   (assoc db ::active-popup nil)))
+
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup?]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? @(rf/subscribe [::popup-is-active? id])
         class1 "relative font-bold"
         class2 (mood/flavor+freshness warstats excerpt-opinions)
+        click-handler
+        (fn [ev]
+          ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So
+          ;; check for selection. But we want to get rid of active popup in any case of a click or
+          ;; drag.
+          (if (empty? (.. rangy (getSelection) (toString)))
+            (rf/dispatch [::toggle-active-popup id])
+            (rf/dispatch [::reset-active-popup])))
         textspan
         [:span
          {:class (str class1 " " class2)
           :style (if disable-popup?
                    {}
                    {:padding-top "0.14em" :padding-bottom "0.14em"})
-          ;;FIXME: shouldn't trigger on select:
-          :on-click (when-not disable-popup? #(rf/dispatch [::toggle-active-popup id]))}
+          :on-click (when-not disable-popup? click-handler)}
          [segment-count (count excerpt-opinions)]
          (excerpts/rebreak text)]]
     (if disable-popup?
