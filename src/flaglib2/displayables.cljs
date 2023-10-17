@@ -217,7 +217,25 @@
 (rf/reg-event-db
  ::toggle-active-popup
  (fn [db [_ id]]
-   (assoc db ::active-popup (if (= id (::active-popup db)) nil id))))
+   (let [active (::active-popup db)]
+     (assoc db ::active-popup
+            ;;Due to not figuring out the stopPropagation thing:
+            ;; click on hilite when popup active will cause a double cancel, resulting in
+            ;; popup not going away. So parent sends :parent-override, which we handle by wrapping
+            ;; existing id in a vector to deactivate.
+            (if (= id :parent-override)
+              (if (vector? active)
+                nil
+                (if active
+                  [active]
+                  nil))
+              (if (vector? active)
+                (if (= [id] active)
+                  nil
+                  id)
+                (if (= id active)
+                  nil
+                  id)))))))
 
 (rf/reg-event-db
  ::reset-active-popup
@@ -326,6 +344,7 @@
                 (reset! excerpt (:excerpt ex))
                 (reset! offset (:offset ex)))
               (do
+                (rf/dispatch [::toggle-active-popup :parent-override])
                 (reset! excerpt "")
                 (reset! offset nil)))))]
     (if text
