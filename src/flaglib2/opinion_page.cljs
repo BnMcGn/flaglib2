@@ -10,7 +10,7 @@
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]))
 
-
+;;FIXME: Should be done server side?
 (rf/reg-fx
  :set-opinion-meta
  (fn [opinion]

@@ -349,7 +349,8 @@
                 (reset! offset nil)))))]
     (if text
       (into [:div
-             {:class (when grey? "bg-neutral-300")
+             {:class "hilited" ;Don't remove. Needed for finding selection.
+              :style (when grey? {:background-color "#ccc"})
               :id id
               :on-click #(.stopPropagation %)
               :on-mouse-up selection-change
