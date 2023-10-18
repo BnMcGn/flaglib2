@@ -52,7 +52,8 @@
     [disp/opinion-container
      {:class "absolute"
       :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
-              :left (str (curve-locator (count treead) ) "em")}}
+              :left (str (curve-locator (count treead) ) "em")
+              :width "75%"}}
      :box-props {:style {:border-color (if topmost "black" (random-gray))
                          :background-color (if topmost "white" "#f5f5f5")}
                  :class "bg-white border-[3px] ml-7"
