@@ -10,6 +10,7 @@
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.hilited :as hi]
    [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
 
@@ -76,9 +77,6 @@
     :intro-text ""]
    (for [[k v] params]
      [k v])))
-
-(defn loading-indicator []
-  [:div "Loading..."])
 
 (declare reference)
 
@@ -189,177 +187,20 @@
              "Reply to the excerpt"]]]
           items)))
 
-(defn popup-side [])
-
-(defn- find-parent-hilited [element]
-  (when element
-    (if (= "hilited" (. element -className))
-      element
-      (recur (. element -parentElement)))))
-
-(defn is-selection-in-single-hilited-text? [selection]
-  (let [parent1 (find-parent-hilited (. selection -anchorNode))]
-    (and (not (. selection -isCollapsed))
-         parent1
-         (= parent1 (find-parent-hilited (. selection -focusNode))))))
-
-(defn segment-count [quantity]
-  (when (> quantity 1)
-    [:span
-     {:class "absolute left-0 right-0 text-black opacity-40 text-center text-4xl top-[-0.65rem]"}
-     quantity]))
-
-(rf/reg-sub
- ::popup-is-active?
- (fn [db [_ id]]
-   (if (= (::active-popup db) id) true false)))
-
-(rf/reg-event-db
- ::toggle-active-popup
- (fn [db [_ id]]
-   (let [active (::active-popup db)]
-     (assoc db ::active-popup
-            ;;Due to not figuring out the stopPropagation thing:
-            ;; click on hilite when popup active will cause a double cancel, resulting in
-            ;; popup not going away. So parent sends :parent-override, which we handle by wrapping
-            ;; existing id in a vector to deactivate.
-            (if (= id :parent-override)
-              (if (vector? active)
-                nil
-                (if active
-                  [active]
-                  nil))
-              (if (vector? active)
-                (if (= [id] active)
-                  nil
-                  id)
-                (if (= id active)
-                  nil
-                  id)))))))
-
-(rf/reg-event-db
- ::reset-active-popup
- (fn [db _]
-   (assoc db ::active-popup nil)))
-
-(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup?]}]
-  (let [warstats @(rf/subscribe [:warstats-store])
-        popup-visible? @(rf/subscribe [::popup-is-active? id])
-        class1 "relative font-bold"
-        class2 (mood/flavor+freshness warstats excerpt-opinions)
-        click-handler
-        (fn [ev]
-          ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So
-          ;; check for selection. But we want to get rid of active popup in any case of a click or
-          ;; drag.
-          (if (empty? (.. rangy (getSelection) (toString)))
-            (rf/dispatch [::toggle-active-popup id])
-            (rf/dispatch [::reset-active-popup])))
-        textspan
-        [:span
-         {:class (str class1 " " class2)
-          :style (if disable-popup?
-                   {}
-                   {:padding-top "0.14em" :padding-bottom "0.14em"})
-          :on-click (when-not disable-popup? click-handler)}
-         [segment-count (count excerpt-opinions)]
-         (excerpts/rebreak text)]]
-    (if disable-popup?
-      textspan
-      [rc/popover-anchor-wrapper
-       :showing? popup-visible?
-       :position :below-left
-       :style {:display "inline"}
-       :parts {:point-wrapper {:style {:display "inline"}}}
-       :anchor
-       textspan
-       :popover
-       [rc/popover-content-wrapper
-        :parts {:border
-                {:class "sm:w-[70rem]"
-                 :style {:background-color "rgba(255, 255, 255, 0.7)"
-                         :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
-                         :border-radius "3px"}}}
-        :arrow-renderer deco/wf-arrow
-        :arrow-length 21
-        :body [sub-opinion-list excerpt-opinions :excerpt text :target id-of-text]]])))
-
-(defn plain-segment [& {:keys [text]}]
-  [:span {:class "font-normal"} (excerpts/rebreak text)])
-
-;;FIXME: implement focus-parent stuff
-(defn parent-segment [& {:keys [text]}]
-  (let [focussed (misc/focus-parent?)
-        bg (if focussed "bg-white" "bg-neutral-400")]
-    [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
-
-(defn- make-segments [text
-                      opinion-store
-                      opids
-                      & {:keys [tree-address focus root-target-url disable-popup?]}]
-  (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
-        opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opids))
-        segpoints (excerpts/excerpt-segment-points opins (count text))
-        level (count tree-address)]
-    (into
-     []
-     (for [[start end] (partition 2 1 segpoints)
-           :let [id (str "lvl-" level "-pos-" end)
-                 excerpt-opinions
-                 (for [opin opins
-                       :let [[ostart oend] (:text-position opin)]
-                       :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
-                   (:iid opin))
-                 segtype (if (zero? (count excerpt-opinions))
-                           plain-segment
-                           (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
-       [segtype
-        :excerpt-opinions excerpt-opinions
-        :id id
-        :text (subs text start end)
-        :id-of-text current-id
-        :root-target-url root-target-url
-        :disable-popup? disable-popup?
-        :tree-address tree-address
-        :focus focus
-        :last-char-pos end]))))
-
 (defn hilited-text [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
                         excerpt offset grey?]}]
-  (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
-        id (str "hilited-text-" (gensym))
-        opstore @(rf/subscribe [:opinion-store])
-        opids @(rf/subscribe [:immediate-children (or root-target-url (last tree-address))])
-        selection-change
-        (fn [ev]
-          (when (and excerpt offset)
-            (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
-              (let [textel (. js/document (getElementById id))
-                    range (.. rangy (getSelection) (getRangeAt 0))
-                    loc (excerpts/text-location-from-dom-range textel range)
-                    ex (excerpts/get-location-excerpt
-                        (excerpts/create-textdata (string/trim text))
-                        (:start loc) (:end loc))]
-                (reset! excerpt (:excerpt ex))
-                (reset! offset (:offset ex)))
-              (do
-                (rf/dispatch [::toggle-active-popup :parent-override])
-                (reset! excerpt "")
-                (reset! offset nil)))))]
-    (if text
-      (into [:div
-             {:class "hilited" ;Don't remove. Needed for finding selection.
-              :style (when grey? {:background-color "#ccc"})
-              :id id
-              :on-click #(.stopPropagation %)
-              :on-mouse-up selection-change
-              :on-key-press selection-change}]
-            ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
-            (make-segments (string/trim text) opstore opids :tree-address tree-address :focus focus
-                           :root-target-url root-target-url :disable-popup? disable-popup?))
-      [loading-indicator])))
-
+  [hi/hilited-text-core
+   :text-key text-key
+   :text text
+   :tree-address tree-address
+   :focus focus
+   :root-target-url root-target-url
+   :disable-popup? disable-popup?
+   :excerpt excerpt
+   :offset offset
+   :grey? grey?
+   :sub-opin-component sub-opinion-list])
 
 (defn thread-excerpt-display
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]

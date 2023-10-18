@@ -274,3 +274,8 @@
       (. el (setAttribute "property" property))
       (. el (setAttribute "content" content))
       (add-meta-tag! el))))
+
+
+
+(defn loading-indicator []
+  [:div "Loading..."])
