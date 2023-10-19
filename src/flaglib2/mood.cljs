@@ -28,7 +28,13 @@
         true
         false))))
 
-(defn flavor-from-warstats [warstats-coll]
+(def badflags #{:negative-spam :negative-inflammatory :negative-language-warning :negative-disturbing
+                :negative-logical-fallacy :negative-out-of-bounds :custodial-redundant
+                :custodial-out-of-date :custodial-retraction :custodial-incorrect-flag
+                :custodial-flag-abuse :custodial-offtopic :custodial-arcane})
+(def goodflags #{:positive-interesting :positive-funny})
+
+(defn flavor-from-multiple [db ids]
   "Creates a flavor descriptor from a collation of all the warstats passed in. Needs to handle multiple warstats collections because it is used for excerpts which may represent multiple opinions."
         ;;; controv: The opinions are themselves contested
         ;;; positive: Relatively uncontested postive opinions
@@ -36,14 +42,18 @@
         ;;; We return contested if there are significant values in both positive and negative
         ;;; We return contested if controv is significant
         ;;; Neutral if none of the three are significant.
-  (defn warstat-direction [ws]
-    (cond
-      (significant (:controversy ws) (:effect ws)) :controv
-      (= "pro" (:direction ws)) :positive
-      (= "con" (:direction ws)) :negative
-      :else :none))
+  (defn warstat-direction [opid]
+    (let [opinion (get-in db [:opinion-store opid])
+          ws (get-in db [:warstats-store opid])]
+      (cond
+        (significant (:controversy ws) (:effect ws)) :controv
+        (= "pro" (:direction ws)) :positive
+        (= "con" (:direction ws)) :negative
+        (contains? badflags (:flag opinion)) :negative
+        (contains? goodflags (:flag opinion)) :positive
+        :else :none)))
   (let [{:keys [controv positive negative]}
-        (reduce #(update %1 %2 inc) (cons {} (map warstat-direction warstats-coll)))
+        (reduce #(update %1 %2 inc) (cons {} (map warstat-direction ids)))
         top (max controv positive negative)]
     (cond
       (> 0.5 top) :neutral
@@ -57,15 +67,10 @@
         :contested
         :negative))))
 
-(defn flavor+freshness [warstats ids]
-  (let [wcoll
-        (for [id ids
-              :let [ws (get warstats id)]
-              :when ws]
-          ws)]
-    ;;(str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))
-    ;; ignore freshness, use tailwind stuff
-    (get deco/flavor-background (flavor-from-warstats wcoll))))
+(defn flavor+freshness [db ids]
+  ;;(str (name (flavor-from-warstats wcoll)) "-" (freshness-from-warstats wcoll))
+  ;; ignore freshness, use tailwind stuff
+  (get deco/flavor-background (flavor-from-multiple db ids)))
 
 (defn flavor-from-own-warstats [warstats]
   (let [effect (:effect warstats)
@@ -75,11 +80,8 @@
         neg (+ (:x-wrong warstats) (:x-down warstats))
         ;; flags may eventually be put in own object, but for now...
         flags warstats
-        ;;FIXME: Need clearer indicators and more nuance for handling these. Not too bad because
+        ;;FIXME: Need clearer indicators and more nuance for handling other flags. Not too bad because
         ;; it just contributes to flavor. Will need visibility system to do this right.
-        badflags [:spam :inflammatory :language-warning :disturbing :logical-fallacy :out-of-bounds
-                  :redundant :out-of-date :retraction :incorrect-flag :flag-abuse :offtopic :arcane]
-        goodflags [:interesting :funny]
         badness (reduce + (map #(get flags % 0) badflags))
         goodness (reduce + (map #(get flags % 0) goodflags))
         diff (misc/relative-to-range 0 effect controv)]

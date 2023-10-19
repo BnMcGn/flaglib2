@@ -71,8 +71,9 @@
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup? sub-opin-component]}]
   (let [warstats @(rf/subscribe [:warstats-store])
         popup-visible? @(rf/subscribe [::popup-is-active? id])
+        db @(rf/subscribe [:core-db])
         class1 "relative font-bold"
-        class2 (mood/flavor+freshness warstats excerpt-opinions)
+        class2 (mood/flavor+freshness db excerpt-opinions)
         click-handler
         (fn [ev]
           ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So

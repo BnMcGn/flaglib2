@@ -235,7 +235,7 @@
               :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
-     :excerpt-class (mood/flavor+freshness @(rf/subscribe [:warstats-store nil]) [opid])]))
+     :excerpt-class (mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])]))
 
 
 (defn reference-root-display [reference & {:keys [minify]}]
