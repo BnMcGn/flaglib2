@@ -19,12 +19,17 @@
    (misc/set-meta-property! "opinml:target" (:target opinion))))
 
 (defn opinion-root [& {:keys [rooturl focus]}]
-  (let [opinion @(rf/subscribe [:opinion-store (last focus)])]
+  (let [opinion @(rf/subscribe [:opinion-store (last focus)])
+        size @(rf/subscribe [:window-size])
+        small (= size :xs)]
     [:div
      {:on-click (fn [ev] (set! (. js/window -location) (misc/make-target-url rooturl)))}
      [disp/root-title
       :url rooturl
       :hide-reply true
+      :hide-count small
+      :hide-external-link small
+      :hide-warstats small
       :intro-text "Root Target: "
       :display-depth 0]
      [disp/hilited-text
@@ -48,39 +53,56 @@
 (defn opinion-layer [& {:keys [opid curve-locator focus excerpt offset]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         treead (:tree-address opinion)
-        topmost (and opinion (= (count treead) (count focus)))]
-    [disp/opinion-container
-     {:class "absolute"
-      :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
-              :left (str (curve-locator (count treead) ) "em")
-              :width "75%"}}
-     :box-props {:style {:border-color (if topmost "black" (random-gray))
-                         :background-color (if topmost "white" "#f5f5f5")}
-                 :class "bg-white border-[3px] ml-7"
-                 :on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
-     :iconid opid
-     :titlebar
-     [:<>
-      [tb/flag-name opinion]
-      [tb/date-stamp opinion]
-      [tb/author-long opinion]
-      [tb/display-warstats :target-id opid]
-      (when topmost
-        [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset])]
-     :body
-     [:<>
-      [:div
-       {:class "m-4 mt-1"}
-       (when-let [comment (:comment opinion)]
-         [disp/hilited-text
-          :text comment
-          :tree-address treead
-          :focus focus
-          :excerpt excerpt
-          :offset offset])
-       [disp/opinion-extras opid]
-       (when topmost
-         [disp/excerptless-opinions opid])]]]))
+        topmost (and opinion (= (count treead) (count focus)))
+        small (= :xs @(rf/subscribe [:window-size]))
+        titlebar
+        [:<>
+         [tb/flag-name opinion]
+         [tb/date-stamp opinion]
+         [tb/author-long opinion]
+         [tb/display-warstats :target-id opid]
+         (when topmost
+           [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset])]
+        box-props
+        {:style {:border-color (if topmost "black" (random-gray))
+                 :background-color (if topmost "white" "#f5f5f5")}
+         :class "bg-white border-[3px] ml-7"
+         :on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
+        body
+        [:<>
+         [:div
+          {:class "m-4 mt-1"}
+          (when-let [comment (:comment opinion)]
+            [disp/hilited-text
+             :text comment
+             :tree-address treead
+             :focus focus
+             :excerpt excerpt
+             :offset offset])
+          [disp/opinion-extras opid]
+          (when topmost
+            [disp/excerptless-opinions opid])]]]
+    (if small
+      (let [hpos (- (curve-locator (count treead)) 0.75)]
+        [disp/opinion-container-mobile
+         {:class "absolute"
+          :style {:top (str (+ -1.3 (* (count treead) 2.5)) "em")
+                  :left (str hpos "em")
+                  :width (str "calc(100% - " hpos "em)")}}
+         :box-props box-props
+         :icon-style :icon
+         :opinion opinion
+         :titlebar titlebar
+         :body body])
+      [disp/opinion-container
+      {:class "absolute"
+       :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
+               :left (str (curve-locator (count treead)) "em")
+               :width "75%"}}
+      :box-props box-props
+      :iconid opid
+      :titlebar titlebar
+      :body body])))
 
 (defn opinion-page []
   (let [{:keys [focus rooturl]} @(rf/subscribe [:server-parameters])

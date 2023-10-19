@@ -90,16 +90,21 @@
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
     body]])
 
-(defn opinion-container-mobile [props & {:keys [opinion titlebar body box-props]}]
+(defn opinion-container-mobile [props & {:keys [opinion titlebar body box-props icon-style]
+                                         :or {icon-style :tree-address}}]
   [:div
    (or props {})
-   [tb/display-tree-address (:tree-address opinion)]
+   (case icon-style
+     :tree-address [tb/display-tree-address (:tree-address opinion)]
+     :icon [tb/opinion-icon (:iid opinion)]
+     nil)
    [:div
     (merge (or box-props {})
-           {:class "bg-white border-[3px] border-black"})
-    [:div {:class "flex flex-row gap-4 items-center"} titlebar]
+           {:class "bg-white border-[3px] border-black mt-1"})
+    [:div {:class "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5"} titlebar]
     body]])
 
+;;Displays right justified tree address beside or above body
 (defn tree-address-container [props & {:keys [tree-address body fold-at]
                                        :or {fold-at 7}}]
   (let [size @(rf/subscribe [:window-size])
