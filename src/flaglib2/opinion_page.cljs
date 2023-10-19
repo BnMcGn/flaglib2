@@ -81,11 +81,12 @@
              :offset offset])
           [disp/opinion-extras opid]
           (when topmost
-            [disp/excerptless-opinions opid])]]]
+            [disp/excerptless-opinions opid])]]
+        class  "absolute sm:break-normal break-all sm:break-words"]
     (if small
       (let [hpos (- (curve-locator (count treead)) 0.75)]
         [disp/opinion-container-mobile
-         {:class "absolute"
+         {:class class
           :style {:top (str (+ -1.3 (* (count treead) 2.5)) "em")
                   :left (str hpos "em")
                   :width (str "calc(100% - " hpos "em)")}}
@@ -95,7 +96,7 @@
          :titlebar titlebar
          :body body])
       [disp/opinion-container
-      {:class "absolute"
+      {:class class
        :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
                :left (str (curve-locator (count treead)) "em")
                :width "75%"}}
