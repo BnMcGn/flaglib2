@@ -136,6 +136,33 @@
      {:db db
       :fx [ [:dispatch [:load-opinions (flatten loadables)]]]})))
 
+(rf/reg-event-fx
+ ::request-grouped
+ (fn [{:keys [db]} _]
+   {:http-xhrio {:method :get
+                 :uri "/subjective/default/grouped.data"
+                 :timeout 18000
+                 :response-format (ajax/text-response-format)
+                 :on-success [::received-grouped]
+                 :on-failure [::failure "default" "grouped"]}}))
+
+(defn proc-grouped [data]
+  (let [{:keys [groups keywords]:as grouped} data
+        keywords (into {} keywords)
+        groups (map
+                (fn [group] (map #(into {}) group))
+                groups)]
+    (assoc grouped :keywords keywords :groups groups)))
+
+(rf/reg-event-fx
+ ::received-group
+ (fn [{:keys [db]} [_ result]]
+   (let [data (proc-grouped result)
+         {:keys [:group-opinions :group-rooturls]} data]
+     {:db (assoc db :grouped data)
+      :fx [ [:dispatch [:load-rooturls group-rooturls :no-text true :no-references true]]
+            [:dispatch [:load-opinions group-opinions]]]})))
+
 (rf/reg-event-db
  ::failure
  (fn [db [_ iid type spec]]
