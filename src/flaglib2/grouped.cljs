@@ -91,9 +91,16 @@
               :question display-item-question)]]
       x))])
 
+(rf/reg-sub :grouped :-> :grouped)
 
-
-(defn grouped-main [])
+(defn grouped-main []
+  (let [grouped @(rf/subscribe [:grouped])]
+    [:div
+     [:h2 "Discussions:"]
+     (when grouped
+       (into []
+             (for [g (:groups grouped)]
+               [display-group g (:keywords grouped)])))]))
 
 (rf/reg-event-fx
  :grouped

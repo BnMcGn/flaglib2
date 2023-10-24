@@ -10,6 +10,8 @@
    [flaglib2.fetchers :as fetchers]
    [cljs-time.core :as time]))
 
+(defn data-url [rest]
+  (str "/ipns/" window.IPNSHOST "/" rest))
 
 (defn opinion-data-url [iid itype]
   (str "/ipns/" window.IPNSHOST "/opinions/" iid "/" itype ".data"))
@@ -140,14 +142,14 @@
  ::request-grouped
  (fn [{:keys [db]} _]
    {:http-xhrio {:method :get
-                 :uri "/subjective/default/grouped.data"
+                 :uri (data-url "/subjective/default/grouped.data")
                  :timeout 18000
                  :response-format (ajax/text-response-format)
                  :on-success [::received-grouped]
                  :on-failure [::failure "default" "grouped"]}}))
 
 (defn proc-grouped [data]
-  (let [{:keys [groups keywords]:as grouped} data
+  (let [{:keys [groups keywords] :as grouped} (cljs.reader/read-string data)
         keywords (into {} keywords)
         groups (map
                 (fn [group] (map #(into {}) group))
@@ -155,7 +157,7 @@
     (assoc grouped :keywords keywords :groups groups)))
 
 (rf/reg-event-fx
- ::received-group
+ ::received-grouped
  (fn [{:keys [db]} [_ result]]
    (let [data (proc-grouped result)
          {:keys [:group-opinions :group-rooturls]} data]
