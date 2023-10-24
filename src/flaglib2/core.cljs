@@ -13,6 +13,7 @@
    [flaglib2.target]
    [flaglib2.opinion-page]
    [flaglib2.posters :as posters]
+   [flaglib2.grouped :as grouped]
    [flaglib2.mock-make :as mock]
    [cljs.reader]))
 
