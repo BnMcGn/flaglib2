@@ -20,7 +20,10 @@
 (rf/reg-fx
  :mount-registered
  (fn [db]
-   (mount-registered-elements db)))
+   ;;Sometimes the db update doesn't arrive in time. In that case, kick to back of queue.
+   (if (:root-element db)
+     (mount-registered-elements db)
+     (rf/dispatch [:remount-registered]))))
 
 (rf/reg-event-fx
  :remount-registered
