@@ -81,15 +81,17 @@
 
 (defn display-group [group keywords]
   [:div
-   (vec
-    (for [itm group
-          x [(when (= 0 (:display-depth itm))
-               [:div [hashtags (get keywords (:url itm))]])
-             ((:rowtype itm)
-              :rooturl display-item-rooturl
-              :reference display-item-reference
-              :question display-item-question)]]
-      x))])
+   (into [:<>]
+     (for [itm group
+           :when (:rowtype itm)
+           x [(when (= 0 (:display-depth itm))
+                [:div [hashtags (get keywords (:url itm))]])
+              [((:rowtype itm)
+                { :rooturl display-item-rooturl
+                 :reference display-item-reference
+                 :question display-item-question})
+               itm]]]
+       x))])
 
 (rf/reg-sub :grouped :-> :grouped)
 
@@ -98,7 +100,7 @@
     [:div
      [:h2 "Discussions:"]
      (when grouped
-       (into []
+       (into [:<>]
              (for [g (:groups grouped)]
                [display-group g (:keywords grouped)])))]))
 
@@ -106,4 +108,5 @@
  :grouped
  (fn [{:keys [db]} _]
    {:db (assoc db :root-element grouped-main)
-    :fx [ [:dispatch [:flaglib2.ipfs/request-grouped]]]}))
+    :fx [ [:dispatch [:flaglib2.ipfs/request-grouped]]
+          [:mount-registered db]]}))

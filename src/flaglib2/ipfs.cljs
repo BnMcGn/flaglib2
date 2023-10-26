@@ -150,7 +150,7 @@
 
 (defn proc-grouped [data]
   (let [{:keys [groups keywords] :as grouped} (cljs.reader/read-string data)
-        keywords (into {} keywords)
+        keywords (apply hash-map keywords)
         groups (map
                 (fn [group] (map #(into {}) group))
                 groups)]
