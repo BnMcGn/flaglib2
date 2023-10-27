@@ -22,7 +22,7 @@
   ;;FIXME: what if should be using rooturl warstat?
   (let [warstat @(rf/subscribe [:warstats-store iid])
         direction (when warstat (:direction-on-root warstat))
-        imgsrc (when direction (str "/static/img/direction-" direction ".svg"))
+        imgsrc (when direction (str "/static/img/direction-" (name direction) ".svg"))
         popup-visible? @(rf/subscribe [:flaglib2.hilited/popup-is-active? iid])]
     (when direction
       [rc/popover-anchor-wrapper
@@ -30,8 +30,8 @@
        :position :below-left
        :anchor
        [:img
-        :style {:width "18px" :height "45px"}
-        :src imgsrc]
+        {:style {:width "18px" :height "45px"}
+         :src imgsrc}]
        :popover
        [rc/popover-content-wrapper
         :parts {:border
@@ -51,6 +51,7 @@
      ;;FIXME: Need :warflagger-link?
      [disp/root-title
       :url (:url itm)
+      :display-depth 0
       :hide-reply true]]))
 
 (defn display-item-reference [itm]
@@ -86,10 +87,10 @@
            :when (:rowtype itm)
            x [(when (= 0 (:display-depth itm))
                 [:div [hashtags (get keywords (:url itm))]])
-              [((:rowtype itm)
-                { :rooturl display-item-rooturl
-                 :reference display-item-reference
-                 :question display-item-question})
+              [(get {:rooturl display-item-rooturl
+                     :reference display-item-reference
+                     :question display-item-question}
+                    (:rowtype itm))
                itm]]]
        x))])
 

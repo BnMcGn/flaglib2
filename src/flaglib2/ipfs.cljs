@@ -152,7 +152,7 @@
   (let [{:keys [groups keywords] :as grouped} (cljs.reader/read-string data)
         keywords (apply hash-map keywords)
         groups (map
-                (fn [group] (map #(into {}) group))
+                (fn [group] (map (partial apply hash-map) group))
                 groups)]
     (assoc grouped :keywords keywords :groups groups)))
 
