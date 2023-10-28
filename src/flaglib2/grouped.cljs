@@ -61,7 +61,8 @@
       :iid (:refopiniid itm)]
      ;;FIXME: Need :warflagger-link?
      [disp/reference
-      :url (:url itm)
+      (:reference itm)
+      :minify true
       :hide-reply true]]))
 
 (defn display-item-question [itm]
@@ -71,8 +72,8 @@
       :iid (:iid itm)]
      ;;FIXME: Need :warflagger-link?
      [disp/question
-      :url (:url itm)
-      :hide-reply true]]))
+      (:iid itm)
+      :minify true]]))
 
 (defn hashtags [keywords]
   (deco/casual-note-heading
