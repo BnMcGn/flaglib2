@@ -44,8 +44,10 @@
         :body [direction-arrow-popup direction iid]]])))
 
 (defn display-item-rooturl [itm]
-  (let [depth (:display-depth itm)] ;;FIXME: do something with...
+  (let [depth (:display-depth itm)
+        depth (if depth (nth deco/display-depths depth) "")]
     [:div
+     {:class (str "flex " depth)}
      [direction-arrow
       :iid (:refiid itm)]
      ;;FIXME: Need :warflagger-link?
@@ -55,8 +57,10 @@
       :hide-reply true]]))
 
 (defn display-item-reference [itm]
-  (let [depth (:display-depth itm)] ;;FIXME: do something with...
+  (let [depth (:display-depth itm)
+        depth (if depth (nth deco/display-depths depth) "")]
     [:div
+     {:class (str "flex " depth)}
      [direction-arrow
       :iid (:refopiniid itm)]
      ;;FIXME: Need :warflagger-link?
@@ -66,10 +70,10 @@
       :hide-reply true]]))
 
 (defn display-item-question [itm]
-  (let [depth (:display-depth itm)] ;;FIXME: do something with...
+  (let [depth (:display-depth itm)
+        depth (if depth (nth deco/display-depths depth) "")]
     [:div
-     [direction-arrow
-      :iid (:iid itm)]
+     {:class (str "flex " depth)}
      ;;FIXME: Need :warflagger-link?
      [disp/question
       (:iid itm)
