@@ -5,9 +5,10 @@
 
 ;; formerly aside
 
-(defn casual-note-heading [contents]
+(defn casual-note-heading [contents & {:keys [style]}]
   [:h4
-   {:class "m-0 bold italic font-[0.9rem] bg-gray-300 leading-4"}
+   {:class "m-0 bold italic font-[0.9rem] bg-gray-300 leading-4"
+    :style style}
    contents])
 
 (defn casual-heading [contents]

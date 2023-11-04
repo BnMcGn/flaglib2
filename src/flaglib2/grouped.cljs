@@ -30,7 +30,9 @@
        :position :below-left
        :anchor
        [:img
-        {:style {:width "18px" :height "45px"}
+        {:style {:width "18px"
+                 ;;:height "45px"
+                 :margin-right "0.5em"}
          :src imgsrc}]
        :popover
        [rc/popover-content-wrapper
@@ -47,7 +49,7 @@
   (let [depth (:display-depth itm)
         depth (if depth (nth deco/display-depths depth) "")]
     [:div
-     {:class (str "flex " depth)}
+     {:class (str "flex items-center child:h-8 " depth)}
      [direction-arrow
       :iid (:refiid itm)]
      ;;FIXME: Need :warflagger-link?
@@ -60,7 +62,7 @@
   (let [depth (:display-depth itm)
         depth (if depth (nth deco/display-depths depth) "")]
     [:div
-     {:class (str "flex " depth)}
+     {:class (str "flex items-center child:h-8 " depth)}
      [direction-arrow
       :iid (:refopiniid itm)]
      ;;FIXME: Need :warflagger-link?
@@ -73,7 +75,7 @@
   (let [depth (:display-depth itm)
         depth (if depth (nth deco/display-depths depth) "")]
     [:div
-     {:class (str "flex " depth)}
+     {:class (str "flex items-center child:h-8 " depth)}
      ;;FIXME: Need :warflagger-link?
      [disp/question
       (:iid itm)
@@ -83,10 +85,12 @@
   (deco/casual-note-heading
    (into [:<>]
          (for [k keywords]
-           [:span (str k " ")]))))
+           [:span (str k " ")]))
+   :style {:margin-top "2em"}))
 
 (defn display-group [group keywords]
   [:div
+   {:class "child:m-px"}
    (into [:<>]
      (for [itm group
            :when (:rowtype itm)
