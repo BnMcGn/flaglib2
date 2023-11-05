@@ -18,7 +18,7 @@
 
 (defn root-title-fullscreen [& {:keys [url title display-depth intro-text hide-warstats
                             warstats hide-reply hide-count reply-excerpt reply-offset
-                            hide-external-link warflagger-link children]}]
+                            hide-external-link warflagger-link children style]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
         class (str (nth deco/display-depths display-depth)
                    " "
@@ -26,6 +26,7 @@
                    ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
     [rc/h-box
      :class class
+     :style style
      :align :center
      :children
      [(when intro-text [:span {:class "font-bold"} intro-text])
@@ -42,14 +43,14 @@
 
 (defn root-title-mobile [& {:keys [url title display-depth intro-text hide-warstats
                             warstats hide-reply hide-count reply-excerpt reply-offset
-                            hide-external-link warflagger-link children]}]
+                            hide-external-link warflagger-link children style]}]
   (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
         class (str (nth deco/display-depths display-depth)
                    " grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2 "
                    ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
                    ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
     [:div
-     {:class class}
+     {:class class :style style}
      ;;intro-text
      [tb/headline :title title :rootid url :url true :class "col-span-2"]
      (when (and url (not hide-external-link))
@@ -251,9 +252,10 @@
 
 (defn reference-excerpt-display [])
 
-(defn reference [reference & {:keys [minify]}]
+(defn reference [reference & {:keys [minify style]}]
   [:div
-   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"}
+   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
+    :style style}
    [:img {:src "/static/img/white-reference.svg"
           :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
@@ -290,10 +292,10 @@
           :class (if minify "min-w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
-(defn question [opid & {:keys [minify]}]
+(defn question [opid & {:keys [minify style]}]
   (when-let [opinion @(rf/subscribe [:opinion-store opid])]
     [question-container
-     {}
+     {:style style}
      :minify minify
      :body
      [:<>

@@ -31,7 +31,7 @@
        :anchor
        [:img
         {:style {:width "18px"
-                 ;;:height "45px"
+                 ;:height "45px"
                  :margin-right "0.5em"}
          :src imgsrc}]
        :popover
@@ -54,6 +54,7 @@
       :iid (:refiid itm)]
      ;;FIXME: Need :warflagger-link?
      [disp/root-title
+      :style {:width "95%"}
       :url (:url itm)
       :display-depth 0
       :hide-reply true]]))
@@ -69,6 +70,7 @@
      [disp/reference
       (:reference itm)
       :minify true
+      :style {:width "95%"}
       :hide-reply true]]))
 
 (defn display-item-question [itm]
@@ -79,6 +81,7 @@
      ;;FIXME: Need :warflagger-link?
      [disp/question
       (:iid itm)
+      :style {:width "95%"}
       :minify true]]))
 
 (defn hashtags [keywords]
@@ -86,11 +89,12 @@
    (into [:<>]
          (for [k keywords]
            [:span (str k " ")]))
-   :style {:margin-top "2em"}))
+  ; :style {:margin-top "2em"}
+   ))
 
 (defn display-group [group keywords]
   [:div
-   {:class "child:m-px"}
+   {:class "child:m-[2px] mb-8"}
    (into [:<>]
      (for [itm group
            :when (:rowtype itm)
