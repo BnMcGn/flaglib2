@@ -114,6 +114,9 @@
 (defn grouped-main []
   (let [grouped @(rf/subscribe [:grouped])]
     [:div
+     ;;Rather odd stuff to match hilited
+     {:on-click #(.stopPropagation %)
+      :on-mouse-up #(rf/dispatch [:toggle-active-popup :parent-override])}
      [:h2 "Discussions:"]
      (when grouped
        (into [:<>]
