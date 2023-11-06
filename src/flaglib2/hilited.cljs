@@ -36,12 +36,12 @@
      quantity]))
 
 (rf/reg-sub
- ::popup-is-active?
+ :popup-is-active?
  (fn [db [_ id]]
    (if (= (::active-popup db) id) true false)))
 
 (rf/reg-event-db
- ::toggle-active-popup
+ :toggle-active-popup
  (fn [db [_ id]]
    (let [active (::active-popup db)]
      (assoc db ::active-popup
@@ -64,13 +64,13 @@
                   id)))))))
 
 (rf/reg-event-db
- ::reset-active-popup
+ :reset-active-popup
  (fn [db _]
    (assoc db ::active-popup nil)))
 
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup? sub-opin-component]}]
   (let [warstats @(rf/subscribe [:warstats-store])
-        popup-visible? @(rf/subscribe [::popup-is-active? id])
+        popup-visible? @(rf/subscribe [:popup-is-active? id])
         db @(rf/subscribe [:core-db])
         class1 "relative font-bold"
         class2 (mood/flavor+freshness db excerpt-opinions)
@@ -80,8 +80,8 @@
           ;; check for selection. But we want to get rid of active popup in any case of a click or
           ;; drag.
           (if (empty? (.. rangy (getSelection) (toString)))
-            (rf/dispatch [::toggle-active-popup id])
-            (rf/dispatch [::reset-active-popup])))
+            (rf/dispatch [:toggle-active-popup id])
+            (rf/dispatch [:reset-active-popup])))
         textspan
         [:span
          {:class (str class1 " " class2)
@@ -172,7 +172,7 @@
                 (reset! excerpt (:excerpt ex))
                 (reset! offset (:offset ex)))
               (do
-                (rf/dispatch [::toggle-active-popup :parent-override])
+                (rf/dispatch [:toggle-active-popup :parent-override])
                 (reset! excerpt "")
                 (reset! offset nil)))))]
     (if text
