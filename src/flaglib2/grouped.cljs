@@ -23,7 +23,7 @@
   (let [warstat @(rf/subscribe [:warstats-store iid])
         direction (when warstat (:direction-on-root warstat))
         imgsrc (when direction (str "/static/img/direction-" (name direction) ".svg"))
-        popup-visible? @(rf/subscribe [:flaglib2.hilited/popup-is-active? iid])]
+        popup-visible? @(rf/subscribe [:popup-is-active? iid])]
     (when direction
       [rc/popover-anchor-wrapper
        :showing? popup-visible?
@@ -33,7 +33,9 @@
         {:style {:width "18px"
                  ;:height "45px"
                  :margin-right "0.5em"}
-         :src imgsrc}]
+         :src imgsrc
+         ;;FIXME: Might cause problem to use iid? duplications?
+         :on-click #(rf/dispatch [:toggle-active-popup iid])}]
        :popover
        [rc/popover-content-wrapper
         :parts {:border
