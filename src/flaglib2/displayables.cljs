@@ -148,7 +148,7 @@
         ;;FIXME: should be clean comment?
         [:div (excerpts/rebreak (:comment opinion))])
       (when (:reference opinion)
-        [reference :reference (:reference opinion)])]]))
+        [reference (:reference opinion)])]]))
 
 ;;; Opinion-summary is used to display opinions in one line situations. It may be displayed with
 ;;; tree address icons.
