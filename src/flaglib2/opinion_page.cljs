@@ -20,8 +20,7 @@
 
 (defn opinion-root [& {:keys [rooturl focus]}]
   (let [opinion @(rf/subscribe [:opinion-store (last focus)])
-        size @(rf/subscribe [:window-size])
-        small (= size :xs)]
+        small @(rf/subscribe [:window-small?])]
     [:div
      {:on-click (fn [ev] (set! (. js/window -location) (misc/make-target-url rooturl)))}
      [disp/root-title
@@ -54,7 +53,7 @@
   (let [opinion @(rf/subscribe [:opinion-store opid])
         treead (:tree-address opinion)
         topmost (and opinion (= (count treead) (count focus)))
-        small (= :xs @(rf/subscribe [:window-size]))
+        small @(rf/subscribe [:window-small?])
         titlebar
         [:<>
          [tb/flag-name opinion]

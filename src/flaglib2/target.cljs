@@ -50,8 +50,8 @@
         current (r/atom (if-let [tmode (:tmode params)]
                           (keyword tmode)
                           :article))
-        size @(rf/subscribe [:window-size])]
-    [:<> [(if (= :xs size) rc/vertical-bar-tabs rc/horizontal-tabs)
+        small @(rf/subscribe [:window-small?])]
+    [:<> [(if small rc/vertical-bar-tabs rc/horizontal-tabs)
           :model current
           :tabs [{:id :article :label "Article View"}
                  {:id :comment :label "Comment View"}

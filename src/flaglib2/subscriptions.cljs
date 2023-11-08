@@ -138,3 +138,9 @@
  target-decision-core)
 
 (rf/reg-sub :window-size :-> :window-size)
+
+(rf/reg-sub
+ :window-small?
+ :<- [:window-size]
+ (fn [[ws] _]
+   (if (= :xs ws) true false)))

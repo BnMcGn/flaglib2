@@ -64,8 +64,8 @@
        [tb/reply-count :warstats warstats])]))
 
 (defn root-title [& {:as args}]
-  (let [size @(rf/subscribe [:window-size])
-        rt (if (= size :xs) root-title-mobile root-title-fullscreen)]
+  (let [small @(rf/subscribe [:window-small?])
+        rt (if small root-title-mobile root-title-fullscreen)]
     (reduce into [rt] (seq args))))
 
 (defn root-title-short [& {:as params}]
@@ -108,8 +108,8 @@
 ;;Displays right justified tree address beside or above body
 (defn tree-address-container [props & {:keys [tree-address body fold-at]
                                        :or {fold-at 7}}]
-  (let [size @(rf/subscribe [:window-size])
-        fold (or (= size :xs) (>= (count tree-address) fold-at))]
+  (let [small @(rf/subscribe [:window-small?])
+        fold (or small (>= (count tree-address) fold-at))]
     (if fold
       [:div
        props
@@ -130,12 +130,12 @@
 (defn opinion-info [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
-        size @(rf/subscribe [:window-size])]
+        small @(rf/subscribe [:window-small?])]
     [opinion-container
      {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
      :iconid opid
      :titlebar
-     (if (= size :xs)
+     (if small
        [tb/author-long opinion]
        [:<>
         [tb/flag-name opinion]
@@ -156,13 +156,13 @@
 (defn opinion-summary [opid & {:keys [hide-tree-address hide-icon hide-reply]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
-        size @(rf/subscribe [:window-size])]
+        small @(rf/subscribe [:window-small?])]
     [:div
      {:class "flex flex-row gap-4 items-center"}
      (if hide-tree-address
        (when-not hide-icon [tb/opinion-icon opid])
        [tb/display-tree-address (:tree-address opinion)])
-     (if (= size :xs)
+     (if small
        [tb/author-long opinion]
        [:<>
         [tb/flag-name opinion]
@@ -328,7 +328,7 @@
                 text (if parent
                        (or (:comment parent) "")
                        text)
-                small  (= :xs @(rf/subscribe [:window-size]))
+                small  @(rf/subscribe [:window-small?])
                 tbar (if small
                        [:<>
                         [tb/author-long opinion]
