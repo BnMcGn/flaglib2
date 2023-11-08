@@ -16,68 +16,35 @@
 
 (def rangy js/rangy)
 
-(defn root-title-fullscreen [& {:keys [url title display-depth intro-text hide-warstats
-                            warstats hide-reply hide-count reply-excerpt reply-offset
-                            hide-external-link warflagger-link children style]}]
-  (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
-        class (str (nth deco/display-depths display-depth)
-                   " "
-                   ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
-                   ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
-    [rc/h-box
-     :class class
-     :style style
-     :align :center
-     :children
-     [(when intro-text [:span {:class "font-bold"} intro-text])
-      [tb/headline :title title :rootid url :url true]
-      (when (and url (not hide-external-link))
-        [tb/display-external-link :url url])
-      (when-not hide-warstats
-        [tb/display-warstats :warstats warstats])
-      children
-      (when-not hide-reply
-        [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
-      (when-not hide-count
-        [tb/reply-count :warstats warstats])]]))
+(defn root-title-display [props & {:keys [url title intro-text hide-warstats
+                                          warstats hide-reply hide-count reply-excerpt reply-offset
+                                          hide-external-link warflagger-link children reorder]}]
+  (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
+        head [tb/headline :title title :rootid url :url true]
+        link (when (and url (not hide-external-link))
+               [tb/display-external-link :url url])
+        ws (when-not hide-warstats
+             [tb/display-warstats :warstats warstats])
+        rep (when-not hide-reply
+              [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+        ct (when-not hide-count
+             [tb/reply-count :warstats warstats])]
+    (into [:div props]
+          (if reorder
+            [intro head link rep ws children count]
+            [intro head link ws children rep count]))))
 
-(defn root-title-mobile [& {:keys [url title display-depth intro-text hide-warstats
-                            warstats hide-reply hide-count reply-excerpt reply-offset
-                            hide-external-link warflagger-link children style]}]
-  (let [warstats (or warstats @(rf/subscribe [:warstats-store url]))
-        class (str (nth deco/display-depths display-depth)
-                   " grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2 "
-                   ;;FIXME: do we add <a> text decoration stuff here? See target-title in css
-                   ((mood/flavor-from-own-warstats warstats) deco/flavor-background))]
-    [:div
-     {:class class :style style}
-     ;;intro-text
-     [tb/headline :title title :rootid url :url true :class "col-span-2"]
-     (when (and url (not hide-external-link))
-       [tb/display-external-link :url url])
-     (when-not hide-reply
-       [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
-     (when-not hide-warstats
-       [tb/display-warstats :warstats warstats])
-     children
-     (when-not hide-count
-       [tb/reply-count :warstats warstats])]))
-
-(defn root-title [& {:as args}]
+(defn root-title [& {:keys [style url] :as args}]
   (let [small @(rf/subscribe [:window-small?])
-        rt (if small root-title-mobile root-title-fullscreen)]
-    (reduce into [rt] (seq args))))
-
-(defn root-title-short [& {:as params}]
-  (reduce into
-   [root-title
-    :show-count false
-    :hide-warstats true
-    :hide-reply true
-    :hide-external-link true
-    :intro-text ""]
-   (for [[k v] params]
-     [k v])))
+        dd (nth deco/display-depths (or display-depth 0))
+        warstats (or warstats @(rf/subscribe [:warstats-store url]))
+        flavor ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
+        box (if small
+              "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2"
+              "flex flex-row items-center")
+        class (string/join " " [dd flavor box])
+        props {:class class :style style}]
+    (into [root-title-display props :reorder small] args)))
 
 (declare reference)
 
