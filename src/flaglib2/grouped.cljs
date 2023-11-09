@@ -49,17 +49,27 @@
 
 (defn display-item-rooturl [itm]
   (let [depth (:display-depth itm)
-        depth (if depth (nth deco/display-depths depth) "")]
+        depth (if depth (nth deco/display-depths depth) "")
+        small @(rf/subscribe [:window-small?])]
     [:div
      {:class (str "flex items-center child:h-8 " depth)}
      [direction-arrow
       :iid (:refiid itm)]
      ;;FIXME: Need :warflagger-link?
-     [disp/root-title
-      :style {:width "95%"}
-      :url (:url itm)
-      :display-depth 0
-      :hide-reply true]]))
+     (if small
+       [disp/root-title
+        :display-depth 0
+        :show-count false
+        :url (:url itm)
+        :hide-warstats true
+        :hide-reply true
+        :hide-external-link true
+        :intro-text ""]
+       [disp/root-title
+        :style {:width "95%"}
+        :url (:url itm)
+        :display-depth 0
+        :hide-reply true])]))
 
 (defn display-item-reference [itm]
   (let [depth (:display-depth itm)

@@ -19,6 +19,7 @@
 (defn root-title-display [props & {:keys [url title intro-text hide-warstats
                                           warstats hide-reply hide-count reply-excerpt reply-offset
                                           hide-external-link warflagger-link children reorder]}]
+
   (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
         head [tb/headline :title title :rootid url :url true]
         link (when (and url (not hide-external-link))
@@ -34,7 +35,7 @@
             [intro head link rep ws children count]
             [intro head link ws children rep count]))))
 
-(defn root-title [& {:keys [style url] :as args}]
+(defn root-title [& {:keys [style url display-depth warstats] :as args}]
   (let [small @(rf/subscribe [:window-small?])
         dd (nth deco/display-depths (or display-depth 0))
         warstats (or warstats @(rf/subscribe [:warstats-store url]))
@@ -44,7 +45,7 @@
               "flex flex-row items-center")
         class (string/join " " [dd flavor box])
         props {:class class :style style}]
-    (into [root-title-display props :reorder small] args)))
+    (reduce into [root-title-display props :reorder small] (assoc args :warstats warstats))))
 
 (declare reference)
 

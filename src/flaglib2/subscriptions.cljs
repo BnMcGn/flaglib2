@@ -142,5 +142,5 @@
 (rf/reg-sub
  :window-small?
  :<- [:window-size]
- (fn [[ws] _]
+ (fn [ws _]
    (if (= :xs ws) true false)))
