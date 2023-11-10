@@ -63,6 +63,7 @@
         :url (:url itm)
         :hide-warstats true
         :hide-reply true
+        :no-grid true
         :hide-external-link true
         :intro-text ""]
        [disp/root-title

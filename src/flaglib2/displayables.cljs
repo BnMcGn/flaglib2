@@ -35,14 +35,16 @@
             [intro head link rep ws children count]
             [intro head link ws children rep count]))))
 
-(defn root-title [& {:keys [style url display-depth warstats] :as args}]
+(defn root-title [& {:keys [style url display-depth warstats no-grid] :as args}]
   (let [small @(rf/subscribe [:window-small?])
         dd (nth deco/display-depths (or display-depth 0))
         warstats (or warstats @(rf/subscribe [:warstats-store url]))
         flavor ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
-        box (if small
-              "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2"
-              "flex flex-row items-center")
+        box (if no-grid
+              ""
+              (if small
+                "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2"
+                "flex flex-row items-center"))
         class (string/join " " [dd flavor box])
         props {:class class :style style}]
     (reduce into [root-title-display props :reorder small] (assoc args :warstats warstats))))
