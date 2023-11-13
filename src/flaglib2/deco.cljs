@@ -1,6 +1,6 @@
 (ns flaglib2.deco
   (:require
-   [clojure.string :as str]))
+   [clojure.string :as string]))
 
 
 ;; formerly aside
@@ -42,6 +42,9 @@
                      "ml-[10.45em]"
                      "ml-[10.6em]"
                      "ml-[10.75em]"])
+
+(def display-depths-raw
+  ["0em" "2em" "4em" "6em" "8em" "10em" "10.3em" "10.45em" "10.6em" "10.75em"])
 
 
 (def flavor-background {:contested "bg-[#ffc380]"

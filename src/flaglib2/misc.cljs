@@ -7,7 +7,8 @@
    [re-frame.registrar]
    [re-frame.core :as rf]
    [re-frame.db]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [goog.string :as gstring]))
 
 ;; Opinion url recognizer
 
@@ -126,6 +127,9 @@
 
 (defn class-string [& colls]
   (string/join " " (flatten colls)))
+
+(defn entities [itm]
+  (gstring/unescapeEntities itm))
 
 ;;Debugging tools
 

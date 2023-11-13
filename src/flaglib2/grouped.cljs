@@ -3,6 +3,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [re-com-tailwind.core :as rc]
+   [clojure.string :as string]
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
@@ -28,6 +29,7 @@
       [rc/popover-anchor-wrapper
        :showing? popup-visible?
        :position :below-left
+       :parts {:point-wrapper {:style {:flex-flow "inherit"}}}
        :anchor
        [:img
         {:style {:width "18px"
@@ -47,27 +49,41 @@
         :arrow-length 21
         :body [direction-arrow-popup direction iid]]])))
 
-(defn display-item-rooturl [itm]
-  (let [depth (:display-depth itm)
-        depth (if depth (nth deco/display-depths depth) "")
-        small @(rf/subscribe [:window-small?])]
+(defn display-item-container [arrow-iid depth body]
+  (let [small @(rf/subscribe [:window-small?])
+        classes (if small "leading-8" "child:h-8")
+        depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
     [:div
-     {:class (str "flex items-center child:h-8 " depth)}
-     [direction-arrow
-      :iid (:refiid itm)]
-     ;;FIXME: Need :warflagger-link?
+     {:class (string/join " " ["flex items-center relative" classes])}
+     [:div {:class "flex justify-end self-start"
+            :style {:min-width depth-v
+                    :position "absolute"
+                    :background-color "white"
+                    :height "2.0em"} }
+      (when arrow-iid [direction-arrow :iid arrow-iid])]
+     body]))
+
+(defn display-item-rooturl [itm]
+  (let [small @(rf/subscribe [:window-small?])
+        depth (or (:display-depth itm) 0)
+        indent (nth deco/display-depths-raw depth)]
+    [display-item-container
+     (:refiid itm)
+     (:display-depth itm)
      (if small
        [disp/root-title
         :display-depth 0
+        :style {:text-indent indent}
+        :class "first-line:leading-[1.8em]"
+        :intro-text (misc/entities "&nbsp;")
         :show-count false
         :url (:url itm)
         :hide-warstats true
         :hide-reply true
         :no-grid true
-        :hide-external-link true
-        :intro-text ""]
+        :hide-external-link true]
        [disp/root-title
-        :style {:width "95%"}
+        :style {:width "95%" :text-indent indent}
         :url (:url itm)
         :display-depth 0
         :hide-reply true])]))

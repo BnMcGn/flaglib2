@@ -132,7 +132,7 @@
           :style {:min-width "22px"}
           :alt "Original article" :title "Original article"}]])
 
-(defn headline [& {:keys [title url domain rootid opinionid class]}]
+(defn headline [& {:keys [title url domain rootid opinionid class style]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
@@ -148,8 +148,8 @@
                                                 :else "")
                                           false false])
         domain (when domain (str "(" domain ")"))
-        class ["mx-3"
-               class
+        class [class
+               "mx-3"
                (if available? "text-lg" "italic font-thin truncate")
                (when (and (not domain) patch?) deco/patch)]
         core (if domain
@@ -164,8 +164,8 @@
                                 :else false)
               :else false)]
     (if url
-      [:span {:class class} (into [:a {:href url}] core)]
-      (into [:span {:class class}] core))))
+      [:span {:class class :style style} (into [:a {:href url}] core)]
+      (into [:span {:class class :style style}] core))))
 
 ;;FIXME: read from text-store?
 (defn comment-summary [& {:keys [comment opinion truncate]}]
