@@ -210,27 +210,28 @@
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])]))
 
 
-(defn reference-root-display [reference & {:keys [minify]}]
+(defn reference-root-display [reference & {:keys [minify hide-warstats hide-external-links]}]
   (let [warstats @(rf/subscribe [:warstats-store reference])]
     [:<>
      [tb/headline
       :domain (misc/url-domain reference)
       :rootid reference
       :url true]
-     (when-not minify
+     (when-not hide-external-links
        [tb/display-external-link :url reference :black true])
-     [tb/display-warstats :warstats warstats :black true]]))
+     (when-not hide-warstats
+       [tb/display-warstats :warstats warstats :black true])]))
 
 (defn reference-excerpt-display [])
 
-(defn reference [reference & {:keys [minify style]}]
+(defn reference [reference & {:keys [minify style hide-warstats hide-external-links]}]
   [:div
    {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
     :style style}
    [:img {:src "/static/img/white-reference.svg"
           :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
-    reference]])
+    reference :minify minify :hide-warstats hide-warstats :hide-external-links hide-external-links]])
 
 ;;Various ways to describe incoming references. Viewing the root article. Need to cover refs to root,
 ;; refs to excerpt of root, and refs to opinions in discussion of root.
@@ -263,7 +264,7 @@
           :class (if minify "min-w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
-(defn question [opid & {:keys [minify style]}]
+(defn question [opid & {:keys [minify style hide-warstats]}]
   (when-let [opinion @(rf/subscribe [:opinion-store opid])]
     [question-container
      {:style style}
@@ -273,7 +274,8 @@
       [:a {:href (misc/make-opinion-url opinion)}
        ;;FIXME: Should manually truncate?
        [tb/comment-summary :opinion opinion :truncate minify]]
-      [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])]]]))
+      (when-not hide-warstats
+        [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])])]]))
 
 (defn opinion-extras [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])

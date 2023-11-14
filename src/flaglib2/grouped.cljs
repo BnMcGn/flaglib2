@@ -49,7 +49,7 @@
         :arrow-length 21
         :body [direction-arrow-popup direction iid]]])))
 
-(defn display-item-container [arrow-iid depth body]
+(defn display-item-container [arrow-iid depth body & {:keys [fold]}]
   (let [small @(rf/subscribe [:window-small?])
         classes (if small "leading-8" "child:h-8")
         depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
@@ -57,7 +57,7 @@
      {:class (string/join " " ["flex items-center relative" classes])}
      [:div {:class "flex justify-end self-start"
             :style {:min-width depth-v
-                    :position "absolute"
+                    :position (if fold "absolute" "relative")
                     :background-color "white"
                     :height "2.0em"} }
       (when arrow-iid [direction-arrow :iid arrow-iid])]
@@ -86,32 +86,31 @@
         :style {:width "95%" :text-indent indent}
         :url (:url itm)
         :display-depth 0
-        :hide-reply true])]))
+        :hide-reply true])
+     :fold true]))
 
 (defn display-item-reference [itm]
-  (let [depth (:display-depth itm)
-        depth (if depth (nth deco/display-depths depth) "")]
-    [:div
-     {:class (str "flex items-center child:h-8 " depth)}
-     [direction-arrow
-      :iid (:refopiniid itm)]
-     ;;FIXME: Need :warflagger-link?
+  (let [small @(rf/subscribe [:window-small?])]
+    [display-item-container
+     (:refopiniid itm)
+     (:display-depth itm)
      [disp/reference
       (:reference itm)
       :minify true
-      :style {:width "95%"}
-      :hide-reply true]]))
+      :hide-warstats small]]))
 
 (defn display-item-question [itm]
-  (let [depth (:display-depth itm)
-        depth (if depth (nth deco/display-depths depth) "")]
-    [:div
-     {:class (str "flex items-center child:h-8 " depth)}
-     ;;FIXME: Need :warflagger-link?
+  (let [small @(rf/subscribe [:window-small?])]
+    [display-item-container
+     nil
+     (:display-depth itm)
      [disp/question
       (:iid itm)
       :style {:width "95%"}
-      :minify true]]))
+      :hide-warstats small
+      :truncate (not small)
+      :minify true]
+     :fold true]))
 
 (defn hashtags [keywords]
   (deco/casual-note-heading
