@@ -173,4 +173,46 @@
     [:span {:class (if truncate "truncate" "")} comment]))
 
 
+;;; Unified titlebar info system
+
+
+(defn root-title-info [url db & {:keys [reply-excerpt reply-offset warstats]}]
+  (let [warstats (or warstats (get (:warstats-store db) url))]
+    {:external-link [display-external-link :url url]
+     :warstats [display-warstats :warstats warstats]
+     :reply-link [reply-link :url url :excerpt reply-excerpt :offset reply-offset]
+     :count [reply-count :warstats warstats]
+     :bg-color ((mood/flavor-from-own-warstats warstats) deco/flavor-background)}))
+
+(defn opinion-title-info [iid db & {:keys [reply-excerpt reply-offset warstats]}]
+  (let [warstats (or warstats (get (:warstats-store db) iid))
+        opinion (get-in db [:warstats-store iid])]
+    {:tree-address [display-tree-address opinion]
+     :icon (flag-icon (:flag opinion))
+     :flag-name [flag-name opinion]
+     :date-stamp [date-stamp opinion]
+     :author-long [author-long opinion]
+     :warstats [display-warstats :warstats warstats]
+     :count [reply-count :warstats warstats]
+     :bg-color ""
+     :reply-link [reply-link (:url opinion) :excerpt reply-excerpt :offset reply-offset]}))
+
+(defn question-title-info [iid db & {:keys [warstats]}]
+  (let [warstats (or warstats (get-in db [:warstats-store iid]))]
+    {:icon "/static/img/black-wf-question.svg"
+     :icon-size "max-w-[42px] h-[45px]"
+     :icon-size-mini "min-w-[21] h-[23]"
+     :bg-color "bg-[#f5eb72]"
+     :warstats [display-warstats :warstats warstats]}))
+
+(defn reference-title-info [reference db & {:keys [warstats]}]
+  (let [warstats (or warstats (get-in db [:warstats-store reference]))]
+    {:icon "/static/img/white-reference.svg"
+     :icon-size "min-w-[42px] h-[45px]"
+     :icon-size-mini "min-w-[21] h-[23]"
+     :bg-color "bg-black"
+     :warstats [display-warstats :warstats :black true]
+     :external-link [display-external-link :url reference :black true]}))
+
+
 
