@@ -264,16 +264,19 @@
           :class (if minify "min-w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
-(defn question [opid & {:keys [minify style hide-warstats]}]
+(defn question [opid & {:keys [minify style hide-warstats truncate]
+                        :or {truncate :follow-minify}}]
   (when-let [opinion @(rf/subscribe [:opinion-store opid])]
     [question-container
      {:style style}
      :minify minify
      :body
      [:<>
-      [:a {:href (misc/make-opinion-url opinion)}
-       ;;FIXME: Should manually truncate?
-       [tb/comment-summary :opinion opinion :truncate minify]]
+      ;;FIXME: Should manually truncate?
+      [tb/headline :opinionid opid :url true :class (when (if (= :follow-minify truncate)
+                                                            minify
+                                                            truncate)
+                                                      "truncate")]
       (when-not hide-warstats
         [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])])]]))
 

@@ -167,24 +167,20 @@
       [:span {:class class :style style} (into [:a {:href url}] core)]
       (into [:span {:class class :style style}] core))))
 
-;;FIXME: read from text-store?
-(defn comment-summary [& {:keys [comment opinion truncate]}]
-  (let [comment (or comment (:comment opinion) "")]
-    [:span {:class (if truncate "truncate" "")} comment]))
-
 
 ;;; Unified titlebar info system
 
 
-(defn root-title-info [url db & {:keys [reply-excerpt reply-offset warstats]}]
+(defn root-tb-stuff [url db & {:keys [reply-excerpt reply-offset warstats]}]
   (let [warstats (or warstats (get (:warstats-store db) url))]
     {:external-link [display-external-link :url url]
      :warstats [display-warstats :warstats warstats]
      :reply-link [reply-link :url url :excerpt reply-excerpt :offset reply-offset]
      :count [reply-count :warstats warstats]
-     :bg-color ((mood/flavor-from-own-warstats warstats) deco/flavor-background)}))
+     :bg-color ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
+     :headline [headline :rootid url :url true]}))
 
-(defn opinion-title-info [iid db & {:keys [reply-excerpt reply-offset warstats]}]
+(defn opinion-tb-stuff [iid db & {:keys [reply-excerpt reply-offset warstats]}]
   (let [warstats (or warstats (get (:warstats-store db) iid))
         opinion (get-in db [:warstats-store iid])]
     {:tree-address [display-tree-address opinion]
@@ -195,24 +191,27 @@
      :warstats [display-warstats :warstats warstats]
      :count [reply-count :warstats warstats]
      :bg-color ""
-     :reply-link [reply-link (:url opinion) :excerpt reply-excerpt :offset reply-offset]}))
+     :reply-link [reply-link (:url opinion) :excerpt reply-excerpt :offset reply-offset]
+     :headline [headline :opinionid iid :url true]}))
 
-(defn question-title-info [iid db & {:keys [warstats]}]
+(defn question-tb-stuff [iid db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store iid]))]
     {:icon "/static/img/black-wf-question.svg"
      :icon-size "max-w-[42px] h-[45px]"
      :icon-size-mini "min-w-[21] h-[23]"
      :bg-color "bg-[#f5eb72]"
-     :warstats [display-warstats :warstats warstats]}))
+     :warstats [display-warstats :warstats warstats]
+     :headline [headline :opinionid iid :url true]}))
 
-(defn reference-title-info [reference db & {:keys [warstats]}]
+(defn reference-tb-stuff [reference db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store reference]))]
     {:icon "/static/img/white-reference.svg"
      :icon-size "min-w-[42px] h-[45px]"
      :icon-size-mini "min-w-[21] h-[23]"
      :bg-color "bg-black"
      :warstats [display-warstats :warstats :black true]
-     :external-link [display-external-link :url reference :black true]}))
+     :external-link [display-external-link :url reference :black true]
+     :headline [:rootid reference :url true]}))
 
 
 
