@@ -211,7 +211,9 @@
      :bg-color "bg-black"
      :warstats [display-warstats :warstats :black true]
      :external-link [display-external-link :url reference :black true]
-     :headline [:rootid reference :url true]}))
+     :headline [headline :rootid reference :url true]}))
 
+(defn assemble-bar-parts [stuff reqlist]
+  (map #(%1 stuff) reqlist))
 
 

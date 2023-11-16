@@ -8,7 +8,8 @@
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
    [flaglib2.deco :as deco]
-   [flaglib2.displayables :as disp]))
+   [flaglib2.displayables :as disp]
+   [flaglib2.titlebar :as tb]))
 
 (defn direction-arrow-popup [direction iid]
   [:div
@@ -63,6 +64,20 @@
       (when arrow-iid [direction-arrow :iid arrow-iid])]
      body]))
 
+(defn display-item-container2 [arrow-iid depth tbstuff & {:keys [extras]}]
+  (let [small @(rf/subscribe [:window-small?])
+        classes (misc/class-string "relative" (if small "leading-8" "child:h-8"))
+        depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
+    (into
+     [:div
+      {:class classes}
+      (when arrow-iid [direction-arrow :iid arrow-iid])
+      (when-let [isize (:icon-size-mini tbstuff)]
+        [:img {:src (:icon tbstuff)
+               :class (misc/class-string isize (:bg-color tbstuff))}])
+      (:headline tbstuff)]
+     extras)))
+
 (defn display-item-rooturl [itm]
   (let [small @(rf/subscribe [:window-small?])
         depth (or (:display-depth itm) 0)
@@ -100,17 +115,16 @@
       :hide-warstats small]]))
 
 (defn display-item-question [itm]
-  (let [small @(rf/subscribe [:window-small?])]
-    [display-item-container
+  (let [small @(rf/subscribe [:window-small?])
+        depth (or (:display-depth itm) 0)
+        db @(rf/subscribe [:core-db])
+        indent (nth deco/display-depths-raw depth)
+        stuff (tb/question-tb-stuff (:iid itm) db)]
+    [display-item-container2
      nil
      (:display-depth itm)
-     [disp/question
-      (:iid itm)
-      :style {:width "95%"}
-      :hide-warstats small
-      :truncate (not small)
-      :minify true]
-     :fold true]))
+     stuff
+     :extras (tb/assemble-bar-parts stuff (if small '() [:warstats]))]))
 
 (defn hashtags [keywords]
   (deco/casual-note-heading
