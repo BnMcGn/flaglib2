@@ -20,13 +20,20 @@
       :neutral "Link has undetermined effect on parent article")]
    [disp/opinion-info iid]])
 
+(defn blank-arrow []
+  [:img
+   {:style {:width "18px"
+            :display "inline"
+            :margin-right "0.5em"}
+    :src "/static/img/blank.svg"}])
+
 (defn direction-arrow [& {:keys [iid]}]
   ;;FIXME: what if should be using rooturl warstat?
   (let [warstat @(rf/subscribe [:warstats-store iid])
         direction (when warstat (:direction-on-root warstat))
         imgsrc (when direction (str "/static/img/direction-" (name direction) ".svg"))
         popup-visible? @(rf/subscribe [:popup-is-active? iid])]
-    (when direction
+    (if direction
       [rc/popover-anchor-wrapper
        :showing? popup-visible?
        :position :below-left
@@ -34,8 +41,10 @@
        :anchor
        [:img
         {:style {:width "18px"
+                 :display "inline"
                  ;:height "45px"
-                 :margin-right "0.5em"}
+                 ;:margin-right "0.5em"
+                 }
          :src imgsrc
          ;;FIXME: Might cause problem to use iid? duplications?
          :on-click #(rf/dispatch [:toggle-active-popup iid])}]
@@ -48,7 +57,8 @@
                          :border-radius "3px"}}}
         :arrow-renderer deco/wf-arrow
         :arrow-length 21
-        :body [direction-arrow-popup direction iid]]])))
+        :body [direction-arrow-popup direction iid]]]
+      [blank-arrow])))
 
 (defn display-item-container [arrow-iid depth body & {:keys [fold]}]
   (let [small @(rf/subscribe [:window-small?])
@@ -60,23 +70,37 @@
             :style {:min-width depth-v
                     :position (if fold "absolute" "relative")
                     :background-color "white"
-                    :height "2.0em"} }
+                    :vertical-align "top"
+                    :display "inline-block"
+                    :height "1.8em"} }
       (when arrow-iid [direction-arrow :iid arrow-iid])]
      body]))
 
 (defn display-item-container2 [arrow-iid depth tbstuff & {:keys [extras]}]
   (let [small @(rf/subscribe [:window-small?])
-        classes (misc/class-string "relative" (if small "leading-8" "child:h-8"))
+        classes (misc/class-string "relative" (if small "leading-8" "child:h-8") (:bg-color tbstuff))
         depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
-    (into
-     [:div
-      {:class classes}
-      (when arrow-iid [direction-arrow :iid arrow-iid])
-      (when-let [isize (:icon-size-mini tbstuff)]
-        [:img {:src (:icon tbstuff)
-               :class (misc/class-string isize (:bg-color tbstuff))}])
-      (:headline tbstuff)]
-     extras)))
+    [:div
+     {:class classes}
+     [:span
+      {:class "inline-grid justify-end"
+       :style {:min-width depth-v
+               :background-color "white"
+               :height "1.8em"
+               :vertical-align "top"
+               }}
+      " "
+      (if arrow-iid
+        [direction-arrow :iid arrow-iid]
+        [blank-arrow])]
+     (into
+      [:span
+       {:class (:bg-color tbstuff)}
+       (when-let [isize (:icon-size-mini tbstuff)]
+         [:img {:src (:icon tbstuff)
+                :class (misc/class-string isize "inline" "align-middle" "pl-4")}])
+       (:headline tbstuff)]
+      extras)]))
 
 (defn display-item-rooturl [itm]
   (let [small @(rf/subscribe [:window-small?])
@@ -104,7 +128,7 @@
         :hide-reply true])
      :fold true]))
 
-(defn display-item-reference [itm]
+(defn display-item-referencex [itm]
   (let [small @(rf/subscribe [:window-small?])]
     [display-item-container
      (:refopiniid itm)
@@ -113,6 +137,18 @@
       (:reference itm)
       :minify true
       :hide-warstats small]]))
+
+(defn display-item-reference [itm]
+  (let [small @(rf/subscribe [:window-small?])
+        depth (or (:display-depth itm) 0)
+        db @(rf/subscribe [:core-db])
+        indent (nth deco/display-depths-raw depth)
+        stuff (tb/reference-tb-stuff (:reference itm) db)]
+    [display-item-container2
+     (:refopiniid itm)
+     (:display-depth itm)
+     stuff
+     :extras (tb/assemble-bar-parts stuff (if small [:external-link] [:external-link :warstats]))]))
 
 (defn display-item-question [itm]
   (let [small @(rf/subscribe [:window-small?])

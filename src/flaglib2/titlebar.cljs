@@ -143,10 +143,13 @@
                                    (if (misc/alternate-title? tinfo)
                                      [(:title tinfo) true true]
                                      [(:title tinfo) true false])
-                                   :else [(cond rootid rootid
-                                                opinionid ""
-                                                :else "")
-                                          false false])
+                                   opinionid
+                                   (let [opinion @(rf/subscribe [:opinion-store opinionid])
+                                         cmt (and opinion (:clean-comment opinion))]
+                                     (if cmt
+                                       [cmt true false]
+                                       ["" false false]))
+                                   :else [(or rootid "") false false])
         domain (when domain (str "(" domain ")"))
         class [class
                "mx-3"
@@ -198,7 +201,7 @@
   (let [warstats (or warstats (get-in db [:warstats-store iid]))]
     {:icon "/static/img/black-wf-question.svg"
      :icon-size "max-w-[42px] h-[45px]"
-     :icon-size-mini "min-w-[21] h-[23]"
+     :icon-size-mini "min-w-[21px] h-[23px]"
      :bg-color "bg-[#f5eb72]"
      :warstats [display-warstats :warstats warstats]
      :headline [headline :opinionid iid :url true]}))
@@ -207,13 +210,12 @@
   (let [warstats (or warstats (get-in db [:warstats-store reference]))]
     {:icon "/static/img/white-reference.svg"
      :icon-size "min-w-[42px] h-[45px]"
-     :icon-size-mini "min-w-[21] h-[23]"
+     :icon-size-mini "min-w-[21px] h-[23px]"
      :bg-color "bg-black"
      :warstats [display-warstats :warstats :black true]
      :external-link [display-external-link :url reference :black true]
-     :headline [headline :rootid reference :url true]}))
+     :headline [headline :rootid reference :url true :class "text-white"]}))
 
 (defn assemble-bar-parts [stuff reqlist]
   (map #(%1 stuff) reqlist))
-
 
