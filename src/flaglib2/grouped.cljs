@@ -76,9 +76,8 @@
       (when arrow-iid [direction-arrow :iid arrow-iid])]
      body]))
 
-(defn display-item-container2 [arrow-iid depth tbstuff & {:keys [extras]}]
-  (let [small @(rf/subscribe [:window-small?])
-        classes (misc/class-string "relative" (if small "leading-8" "child:h-8") (:bg-color tbstuff))
+(defn display-item-multiline [arrow-iid depth tbstuff & {:keys [extras]}]
+  (let [classes (misc/class-string "relative" "leading-8" (:bg-color tbstuff))
         depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
     [:div
      {:class classes}
@@ -104,63 +103,71 @@
 
 (defn display-item-rooturl [itm]
   (let [small @(rf/subscribe [:window-small?])
-        depth (or (:display-depth itm) 0)
-        indent (nth deco/display-depths-raw depth)]
-    [display-item-container
-     (:refiid itm)
-     (:display-depth itm)
-     (if small
+        [_ have-title _] @(rf/subscribe [:title-summary (:url itm)])
+        depth (or (:display-depth itm) 0)]
+    (if small
+      (if have-title
+        (let [db @(rf/subscribe [:core-db])
+              stuff (tb/root-tb-stuff (:url itm) db)]
+          [display-item-multiline
+           (:refiid itm)
+           depth
+           stuff])
+        [display-item-container
+         (:refiid itm)
+         (:display-depth itm)
+         [disp/root-title
+          :display-depth 0
+          :intro-text (misc/entities "&nbsp;")
+          :show-count false
+          :url (:url itm)
+          :hide-warstats true
+          :hide-reply true
+          :no-grid true
+          :hide-external-link true]])
+      [display-item-container
+       (:refiid itm)
+       (:display-depth itm)
        [disp/root-title
-        :display-depth 0
-        :style {:text-indent indent}
-        :class "first-line:leading-[1.8em]"
-        :intro-text (misc/entities "&nbsp;")
-        :show-count false
-        :url (:url itm)
-        :hide-warstats true
-        :hide-reply true
-        :no-grid true
-        :hide-external-link true]
-       [disp/root-title
-        :style {:width "95%" :text-indent indent}
         :url (:url itm)
         :display-depth 0
-        :hide-reply true])
-     :fold true]))
-
-(defn display-item-referencex [itm]
-  (let [small @(rf/subscribe [:window-small?])]
-    [display-item-container
-     (:refopiniid itm)
-     (:display-depth itm)
-     [disp/reference
-      (:reference itm)
-      :minify true
-      :hide-warstats small]]))
+        :hide-reply true]])))
 
 (defn display-item-reference [itm]
   (let [small @(rf/subscribe [:window-small?])
-        depth (or (:display-depth itm) 0)
-        db @(rf/subscribe [:core-db])
-        indent (nth deco/display-depths-raw depth)
-        stuff (tb/reference-tb-stuff (:reference itm) db)]
-    [display-item-container2
-     (:refopiniid itm)
-     (:display-depth itm)
-     stuff
-     :extras (tb/assemble-bar-parts stuff (if small [:external-link] [:external-link :warstats]))]))
+        [_ have-title _] @(rf/subscribe [:title-summary (:reference itm)])
+        depth (or (:display-depth itm) 0)]
+    (if (and small have-title)
+      (let [db @(rf/subscribe [:core-db])
+            stuff (tb/reference-tb-stuff (:reference itm) db)]
+        [display-item-multiline
+         (:refopiniid itm)
+         depth
+         stuff]
+      [display-item-container
+       (:refopiniid itm)
+       depth
+       [disp/reference
+        (:reference itm)
+        :minify true
+        :hide-warstats small]]))))
 
 (defn display-item-question [itm]
   (let [small @(rf/subscribe [:window-small?])
-        depth (or (:display-depth itm) 0)
-        db @(rf/subscribe [:core-db])
-        indent (nth deco/display-depths-raw depth)
-        stuff (tb/question-tb-stuff (:iid itm) db)]
-    [display-item-container2
-     nil
-     (:display-depth itm)
-     stuff
-     :extras (tb/assemble-bar-parts stuff (if small '() [:warstats]))]))
+        depth (or (:display-depth itm) 0)]
+    (if small
+      (let [db @(rf/subscribe [:core-db])
+            stuff (tb/question-tb-stuff (:iid itm) db)]
+        [display-item-multiline
+         nil
+         depth
+         stuff])
+      [display-item-container
+       nil
+       depth
+       [disp/question
+        (:iid itm)
+        :truncate true]])))
 
 (defn hashtags [keywords]
   (deco/casual-note-heading

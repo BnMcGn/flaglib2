@@ -132,24 +132,16 @@
           :style {:min-width "22px"}
           :alt "Original article" :title "Original article"}]])
 
+
 (defn headline [& {:keys [title url domain rootid opinionid class style]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
         tinfo (when id @(rf/subscribe [:title-store id]))
-        [titl available? patch?] (cond
-                                   title [title true false]
-                                   (misc/has-title? tinfo)
-                                   (if (misc/alternate-title? tinfo)
-                                     [(:title tinfo) true true]
-                                     [(:title tinfo) true false])
-                                   opinionid
-                                   (let [opinion @(rf/subscribe [:opinion-store opinionid])
-                                         cmt (and opinion (:clean-comment opinion))]
-                                     (if cmt
-                                       [cmt true false]
-                                       ["" false false]))
-                                   :else [(or rootid "") false false])
+        [titl available? patch?]
+        (if title
+          [title true false]
+          @(rf/subscribe [:title-summary id]))
         domain (when domain (str "(" domain ")"))
         class [class
                "mx-3"

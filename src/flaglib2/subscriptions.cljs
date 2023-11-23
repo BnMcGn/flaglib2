@@ -144,3 +144,22 @@
  :<- [:window-size]
  (fn [ws _]
    (if (= :xs ws) true false)))
+
+;;Returns a working summary of the title status: a vector containing:
+;;  [best-guess-at-title was-title-found is-title-edited]
+(rf/reg-sub
+ :title-summary
+ (fn [db [_ key]]
+   (let [tinfo (get-in db [:title-store key])
+         opinion (and (not tinfo) (misc/iid? key)
+                      (get-in db [:opinion-store key]))]
+     (cond
+       (misc/has-title? tinfo)
+       (if (misc/alternate-title? tinfo)
+         [(:title tinfo) true true]
+         [(:title tinfo) true false])
+       opinion
+       (if-let [cmt (:clean-comment opinion)]
+         [cmt true false]
+         ["" false false])
+       :else (or key "") false false))))
