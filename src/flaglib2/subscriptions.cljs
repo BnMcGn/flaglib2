@@ -151,15 +151,15 @@
  :title-summary
  (fn [db [_ key]]
    (let [tinfo (get-in db [:title-store key])
-         opinion (and (not tinfo) (misc/iid? key)
-                      (get-in db [:opinion-store key]))]
+         iid (misc/iid? key)
+         opinion (and iid (get-in db [:opinion-store key]))]
      (cond
        (misc/has-title? tinfo)
        (if (misc/alternate-title? tinfo)
          [(:title tinfo) true true]
          [(:title tinfo) true false])
-       opinion
-       (if-let [cmt (:clean-comment opinion)]
+       iid
+       (if-let [cmt (and opinion (:clean-comment opinion))]
          [cmt true false]
          ["" false false])
-       :else (or key "") false false))))
+       :else [(or key "") false false]))))

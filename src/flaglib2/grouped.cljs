@@ -66,12 +66,11 @@
         depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
     [:div
      {:class (string/join " " ["flex items-center relative" classes])}
-     [:div {:class "flex justify-end self-start"
+     [:div {:class "inline-grid justify-end self-start"
             :style {:min-width depth-v
                     :position (if fold "absolute" "relative")
                     :background-color "white"
                     :vertical-align "top"
-                    :display "inline-block"
                     :height "1.8em"} }
       (when arrow-iid [direction-arrow :iid arrow-iid])]
      body]))
@@ -143,14 +142,14 @@
         [display-item-multiline
          (:refopiniid itm)
          depth
-         stuff]
+         stuff])
       [display-item-container
        (:refopiniid itm)
        depth
        [disp/reference
         (:reference itm)
         :minify true
-        :hide-warstats small]]))))
+        :hide-warstats small]])))
 
 (defn display-item-question [itm]
   (let [small @(rf/subscribe [:window-small?])
@@ -167,6 +166,7 @@
        depth
        [disp/question
         (:iid itm)
+        :minify true
         :truncate true]])))
 
 (defn hashtags [keywords]
