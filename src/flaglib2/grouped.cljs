@@ -43,7 +43,7 @@
         {:style {:width "18px"
                  :display "inline"
                  ;:height "45px"
-                 ;:margin-right "0.5em"
+                 :margin-right "0.5em"
                  }
          :src imgsrc
          ;;FIXME: Might cause problem to use iid? duplications?
@@ -80,17 +80,18 @@
         depth-v (if depth (nth deco/display-depths-raw depth) "0em")]
     [:div
      {:class classes}
-     [:span
-      {:class "inline-grid justify-end"
-       :style {:min-width depth-v
-               :background-color "white"
-               :height "1.8em"
-               :vertical-align "top"
-               }}
-      " "
-      (if arrow-iid
-        [direction-arrow :iid arrow-iid]
-        [blank-arrow])]
+     (when (and depth (not (zero? depth)))
+       [:span
+        {:class "inline-grid justify-end"
+         :style {:min-width depth-v
+                 :background-color "white"
+                 :height "1.8em"
+                 :vertical-align "top"
+                 }}
+        " "
+        (if arrow-iid
+          [direction-arrow :iid arrow-iid]
+          [blank-arrow])])
      (into
       [:span
        {:class (:bg-color tbstuff)}
@@ -128,6 +129,7 @@
        (:refiid itm)
        (:display-depth itm)
        [disp/root-title
+        :style {:width "95%"}
         :url (:url itm)
         :display-depth 0
         :hide-reply true]])))
@@ -148,8 +150,10 @@
        depth
        [disp/reference
         (:reference itm)
+        :style {:width "95%"}
         :minify true
-        :hide-warstats small]])))
+        :hide-warstats small
+        :hide-external-link small]])))
 
 (defn display-item-question [itm]
   (let [small @(rf/subscribe [:window-small?])
@@ -166,6 +170,7 @@
        depth
        [disp/question
         (:iid itm)
+        :style {:width "95%"}
         :minify true
         :truncate true]])))
 

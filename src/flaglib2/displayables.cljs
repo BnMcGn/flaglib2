@@ -16,6 +16,7 @@
 
 (def rangy js/rangy)
 
+;;FIXME: refactor -> *-tb-stuff
 (defn root-title-display [props & {:keys [url title intro-text hide-warstats
                                           warstats hide-reply hide-count reply-excerpt reply-offset
                                           hide-external-link warflagger-link children reorder
@@ -76,6 +77,7 @@
     [:div {:class "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5"} titlebar]
     body]])
 
+;;FIXME: refactor -> *-tb-stuff ??
 ;;Displays right justified tree address beside or above body
 (defn tree-address-container [props & {:keys [tree-address body fold-at]
                                        :or {fold-at 7}}]
@@ -210,28 +212,29 @@
      :excerpt-class (mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])]))
 
 
-(defn reference-root-display [reference & {:keys [minify hide-warstats hide-external-links]}]
+(defn reference-root-display [reference & {:keys [minify hide-warstats hide-external-link]}]
   (let [warstats @(rf/subscribe [:warstats-store reference])]
     [:<>
      [tb/headline
       :domain (misc/url-domain reference)
       :rootid reference
       :url true]
-     (when-not hide-external-links
+     (when-not hide-external-link
        [tb/display-external-link :url reference :black true])
      (when-not hide-warstats
        [tb/display-warstats :warstats warstats :black true])]))
 
 (defn reference-excerpt-display [])
 
-(defn reference [reference & {:keys [minify style hide-warstats hide-external-links]}]
+;;FIXME: refactor -> *-tb-stuff
+(defn reference [reference & {:keys [minify style hide-warstats hide-external-link]}]
   [:div
    {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
     :style style}
    [:img {:src "/static/img/white-reference.svg"
           :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
    [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
-    reference :minify minify :hide-warstats hide-warstats :hide-external-links hide-external-links]])
+    reference :minify minify :hide-warstats hide-warstats :hide-external-link hide-external-link]])
 
 ;;Various ways to describe incoming references. Viewing the root article. Need to cover refs to root,
 ;; refs to excerpt of root, and refs to opinions in discussion of root.
@@ -257,6 +260,7 @@
        :else
        (str "From " from-domain))]))
 
+;;FIXME: refactor -> *-tb-stuff
 (defn question-container [props & {:keys [body minify]}]
   [:div
    (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5 gap-4"} props)
