@@ -10,8 +10,8 @@
 
 (rf/reg-sub
  :server-parameters
- (fn [db _]
-   (:server-parameters db)))
+ (fn [db [_ key]]
+   (get-in db [:server-parameters (or key :default)])))
 
 (rf/reg-sub
  :root-element

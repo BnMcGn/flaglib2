@@ -122,8 +122,8 @@
  (fn [{:keys [db]} _]
    ;;FIXME: Optimization: only load needed opinions from opinion tree.
    ;; -Needs a little thinking to get working: can't load subtree without opinion, rooturl, treead
-   (let [rooturl (get-in db [:server-parameters :rooturl])
-         focus (get-in db [:server-parameters :focus])
+   (let [rooturl (get-in db [:server-parameters :default :rooturl])
+         focus (get-in db [:server-parameters :default :focus])
          db (assoc db :root-element opinion-page ;;:focus-id (last focus)
                    )]
      {:db db

@@ -342,7 +342,7 @@
 (defn what-opin-form? [db]
   (if (get-in db [:local :advanced])
     steps-advanced
-    (case (get-in db [:server-parameters :flag])
+    (case (get-in db [:server-parameters :default :flag])
       (:positive-like :negative-dislike) steps-vote
       :custodial-blank steps-simple
       nil steps-advanced
@@ -351,7 +351,7 @@
 (rf/reg-event-fx
  :make-opinion
  (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :target])
+   (let [target (get-in db [:server-parameters :default :target])
          db (assoc db :root-element make-opinion)]
      {:db db
       :fx [ [:dispatch

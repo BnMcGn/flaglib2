@@ -174,14 +174,12 @@ the Internet.
    :target-return extra-db
    :post-success (merge extra-db server-success)
    :post-fail (merge extra-db server-fail)
-   :simple-vote (assoc targetted-db
-                       :local {:advanced false}
-                       :server-parameters (assoc (:server-parameters targetted-db)
-                                                 :flag :negative-dislike))
-   :simple-comment (assoc targetted-db
-                          :local {:advanced false}
-                          :server-parameters (assoc (:server-parameters targetted-db)
-                                                    :flag :custodial-blank))})
+   :simple-vote (-> targetted-db
+                    (assoc-in [:server-parameters :default :flag] :negative-dislike)
+                    (assoc :local {:advanced false}))
+   :simple-comment (-> targetted-db
+                       (assoc-in [:server-parameters :default :flag] :custodial-blank)
+                       (assoc :local {:advanced false}))})
 
 (def section-step {:opine :opine
                    :decision-reviewed :target-decision
@@ -213,15 +211,15 @@ the Internet.
 (rf/reg-event-fx
  :mock-make
  (fn [{:keys [db]} _]
-   (let [params (:server-parameters db)
+   (let [params (-> db :server-parameters :default)
          section-name (keyword (:section params))
          section (get sections section-name)
-         params (merge params (:server-parameters section))
+         params (merge params (-> section :server-parameters :default))
          db (merge
              db
              section
              {:root-element mock-make
-              :server-parameters params})
+              :server-parameters {:default params}})
          summaries (for [step (get summary-settings section-name)]
                      [:dispatch [:flaglib2.stepper/set-summary step]])]
      (when-not section (throw (js/Error. "Mockable not found")))
