@@ -15,6 +15,7 @@
    [flaglib2.posters :as posters]
    [flaglib2.grouped :as grouped]
    [flaglib2.mock-make :as mock]
+   [flaglib2.things :as things]
    [cljs.reader]))
 
 

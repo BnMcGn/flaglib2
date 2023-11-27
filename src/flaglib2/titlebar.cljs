@@ -133,7 +133,7 @@
           :alt "Original article" :title "Original article"}]])
 
 
-(defn headline [& {:keys [title url domain rootid opinionid class style]}]
+(defn headline [& {:keys [title url domain rootid opinionid class style truncate]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
@@ -145,7 +145,9 @@
         domain (when domain (str "(" domain ")"))
         class [class
                "mx-3"
-               (if available? "text-lg" "italic font-thin truncate")
+               (if available?
+                 (str "text-lg" (if truncate " truncate" ""))
+                 "italic font-thin truncate")
                (when (and (not domain) patch?) deco/patch)]
         core (if domain
                (if patch?
@@ -185,6 +187,7 @@
      :author-long [author-long opinion]
      :warstats [display-warstats :warstats warstats]
      :count [reply-count :warstats warstats]
+     :comment? (not (empty? (:clean-comment opinion)))
      :bg-color ""
      :reply-link [reply-link (:url opinion) :excerpt reply-excerpt :offset reply-offset]
      :headline [headline :opinionid iid :url true]}))
@@ -208,6 +211,10 @@
      :external-link [display-external-link :url reference :black true]
      :headline [headline :rootid reference :url true :class "text-white"]}))
 
+(defn author-tb-stuff [author db]
+  ;;Use fake opinion
+  {:author-long [author-long {:author author}]})
+
 (defn assemble-bar-parts [stuff reqlist]
-  (map #(%1 stuff) reqlist))
+  (filter identity (map #(%1 stuff) reqlist)))
 
