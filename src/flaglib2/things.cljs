@@ -48,3 +48,21 @@
                (tb/author-tb-stuff id db)
                :truncate short
                :fields [:author-long]])))))
+
+(defn thing-lister [key]
+  (let [spec @(rf/subscribe [:server-parameters key])]
+    [thing-displayer (:things2 spec) :trim (:trim spec)]))
+
+(defn process-things [things]
+  ;;FIXME: what is needed?
+  (println things)
+  things)
+
+(rf/reg-event-fx
+ :thing-lister
+ (fn [{:keys [db]} [_ key]]
+   (let [spec (get-in db [:server-parameters key])
+         things (process-things (:things spec))]
+     {:db (update-in db [:server-parameters key] assoc
+                     :side-element thing-lister
+                     :things2 things)})))

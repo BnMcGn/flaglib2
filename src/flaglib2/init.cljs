@@ -13,7 +13,7 @@
 (defn mount-registered-element [db key]
   (when-let [spec (get-in db [:server-parameters key])]
     (when-let [mp (gdom/getElement (:mount-point spec))]
-      (rdom/render [(or (:side-element spec) (:root-element db))] mp))))
+      (rdom/render [(or (:side-element spec) (:root-element db)) key] mp))))
 
 (rf/reg-fx
  :mount-registered
@@ -39,7 +39,7 @@
 (defn server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
-    (rf/dispatch [(keyword (:entry-point config))])))
+    (rf/dispatch [(keyword (:entry-point config)) key])))
 
 
 

@@ -68,8 +68,8 @@
 (rf/reg-event-fx
  :target
  (fn [{:keys [db]} _]
-   (let [target (get-in db [:server-parameters :rooturl])
-         tmode (get-in db [:server-parameters :tmode])
+   (let [target (get-in db [:server-parameters :default :rooturl])
+         tmode (get-in db [:server-parameters :default :tmode])
          db (assoc db :root-element target-root)]
      {:db db
       :fx [ [:dispatch [:flaglib2.ipfs/request-rooturl-item target "opinion-tree"]]
