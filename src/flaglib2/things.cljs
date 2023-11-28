@@ -58,11 +58,27 @@
   (println things)
   things)
 
+(defn thing-loaders [things]
+  (into []
+        (for [{:keys [type id]} things
+              :when (#{:rooturl :opinion} type)]
+          (case type
+            :rooturl
+            [:dispatch [:load-rooturl id :no-text true :no-references true]]
+            :opinion
+            [:dispatch [:load-opinion id]]
+            :author
+            nil ;May need later
+            ))))
+
 (rf/reg-event-fx
  :thing-lister
  (fn [{:keys [db]} [_ key]]
    (let [spec (get-in db [:server-parameters key])
-         things (process-things (:things spec))]
+         things (process-things (:things spec))
+         loaders (thing-loaders things)]
      {:db (update-in db [:server-parameters key] assoc
                      :side-element thing-lister
-                     :things2 things)})))
+                     :things2 things)
+      :fx (into loaders
+                [:mount-registered db ])})))
