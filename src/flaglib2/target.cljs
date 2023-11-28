@@ -74,4 +74,4 @@
      {:db db
       :fx [ [:dispatch [:flaglib2.ipfs/request-rooturl-item target "opinion-tree"]]
             [:dispatch [:load-rooturl target]]
-            [:mount-registered db]]})))
+            [:mount-registered]]})))

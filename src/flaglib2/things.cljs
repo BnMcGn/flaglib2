@@ -81,4 +81,4 @@
                      :side-element thing-lister
                      :things2 things)
       :fx (into loaders
-                [:mount-registered db ])})))
+                [:mount-registered key])})))

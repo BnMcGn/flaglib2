@@ -31,10 +31,10 @@
  :remount-registered
  (fn [{:keys [db & key]} _]
    (if key
-     {:fx [ [:mount-registered db key] ]}
+     {:fx [ [:mount-registered key] ]}
      {:fx (into []
                 (for [k (keys (:server-parameters db))]
-                  [:mount-registered db k]))})))
+                  [:mount-registered k]))})))
 
 (defn server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]

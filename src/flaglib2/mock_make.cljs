@@ -230,7 +230,7 @@ the Internet.
             [:dispatch [:flaglib2.stepper/initialize (forms/what-opin-form? db)]]
             (when-let [step (get section-step section-name)]
               [:dispatch [:flaglib2.stepper/goto step]])
-            [:mount-registered db]]
+            [:mount-registered]]
            summaries)})))
 
 
