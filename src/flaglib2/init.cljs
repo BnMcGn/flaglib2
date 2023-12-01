@@ -3,44 +3,45 @@
    [goog.dom :as gdom]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
-   [flaglib2.subscriptions]))
+   [flaglib2.subscriptions]
+   [flaglib2.misc :as misc]))
 
 (rf/reg-event-fx
  ::store-server-parameters
  (fn [{:keys [db]} [_ key params]]
    {:db (assoc-in db [:server-parameters (or key :default)] params)}))
 
-(defn mount-registered-element [db key]
-  (when-let [spec (get-in db [:server-parameters key])]
-    (when-let [mp (gdom/getElement (:mount-point spec))]
-      (rdom/render [(or (:side-element spec) (:root-element db)) key] mp))))
-
 (rf/reg-fx
+ :do-mount
+ (fn [{:keys [mount-point element key]}]
+   (when-let [mp (gdom/getElement mount-point)]
+     (rdom/render [element key] mp))))
+
+(rf/reg-event-fx
  :mount-registered
- (fn [db & key]
-   ;;Sometimes the db update doesn't arrive in time. In that case, kick to back of queue.
-   (if (and key (not (= key :default)))
-     (if (get-in db [:server-parameters key :side-element])
-       (mount-registered-element db key)
-       (rf/dispatch [:remount-registered key]))
-     (if (:root-element db)
-      (mount-registered-element db :default)
-      (rf/dispatch [:remount-registered])))))
+ (fn [{:keys [db]} [_ key]]
+   (let [sp (:server-parameters db)
+         key (or key :default)
+         spec (and sp (get sp key))
+         mp (:mount-point spec)
+         elt (or (:side-element spec) (:root-element db))]
+     (if (and mp elt)
+       {:do-mount {:mount-point mp :element elt :key key}}
+       {}))))
 
 (rf/reg-event-fx
  :remount-registered
- (fn [{:keys [db & key]} _]
+ (fn [{:keys [db]} [_ key]]
    (if key
-     {:fx [ [:mount-registered key] ]}
+     {:fx [ [:dispatch [:mount-registered key]] ]}
      {:fx (into []
                 (for [k (keys (:server-parameters db))]
-                  [:mount-registered k]))})))
+                  [:dispatch [:mount-registered {:db db :key (or k :default)}]]))})))
 
 (defn server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
     (rf/dispatch [(keyword (:entry-point config)) key])))
-
 
 
 (def local-store-keys ["advanced"])

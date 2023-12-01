@@ -216,4 +216,4 @@
  (fn [{:keys [db]} _]
    {:db (assoc db :root-element grouped-main)
     :fx [ [:dispatch [:flaglib2.ipfs/request-grouped]]
-          [:mount-registered]]}))
+         [:dispatch [:mount-registered]]]}))

@@ -130,7 +130,7 @@
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
-           [:mount-registered db]]
+           [:dispatch [:mount-registered]]]
       :set-opinion-meta {:rooturl rooturl :opinion (last focus)
                          :target (if (= 1 (count focus))
                                    rooturl

@@ -361,4 +361,4 @@
            [:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize (what-opin-form? db)]]
            ;;FIXME: is this the right place?
-           [:mount-registered]]})))
+           [:dispatch [:mount-registered]]]})))
