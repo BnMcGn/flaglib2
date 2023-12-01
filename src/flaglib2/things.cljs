@@ -9,7 +9,7 @@
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]))
 
-(defn display-thing [tbstuff {:keys [fields truncate]}]
+(defn display-thing [tbstuff & {:keys [fields truncate]}]
   (let [tbstuff (if truncate
                   (update tbstuff :headline into [:truncate true])
                   tbstuff)]
@@ -54,9 +54,7 @@
     [thing-displayer (:things2 spec) :trim (:trim spec)]))
 
 (defn process-things [things]
-  ;;FIXME: what is needed?
-  (println things)
-  things)
+  (map #(update %1 :type keyword) things))
 
 (defn thing-loaders [things]
   (into []
@@ -81,4 +79,4 @@
                      :side-element thing-lister
                      :things2 things)
       :fx (into loaders
-                [:dispatch [:mount-registered key]])})))
+                [[:dispatch [:mount-registered key]]])})))
