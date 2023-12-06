@@ -11,7 +11,7 @@
 
 (defn display-thing [tbstuff & {:keys [fields truncate]}]
   (let [tbstuff (if truncate
-                  (update tbstuff :headline into [:truncate true])
+                  (update tbstuff :headline into [:truncate true :no-fontsize true])
                   tbstuff)]
     (into [:div] (tb/assemble-bar-parts tbstuff fields))))
 

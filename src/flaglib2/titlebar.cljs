@@ -133,7 +133,7 @@
           :alt "Original article" :title "Original article"}]])
 
 
-(defn headline [& {:keys [title url domain rootid opinionid class style truncate]}]
+(defn headline [& {:keys [title url domain rootid opinionid class style truncate no-fontsize]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
@@ -142,13 +142,13 @@
         (if title
           [title true false]
           @(rf/subscribe [:title-summary id]))
+        fontsize (if no-fontsize "" (if available? "text-lg" "font-thin"))
+        truncate (or truncate (if available? false true))
+        truncate (when truncate "truncate")
+        italic (when-not available? "italic")
+        patch (when (and (not domain) patch?) deco/patch)
         domain (when domain (str "(" domain ")"))
-        class [class
-               "mx-3"
-               (if available?
-                 (str "text-lg" (if truncate " truncate" ""))
-                 "italic font-thin truncate")
-               (when (and (not domain) patch?) deco/patch)]
+        class [class (misc/class-string "mx-3" fontsize italic truncate patch)]
         core (if domain
                (if patch?
                  [[:span {:class deco/patch} titl] (str " " domain)]
