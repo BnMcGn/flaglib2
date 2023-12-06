@@ -40,7 +40,7 @@
                 [display-thing
                  tbstuff
                  :truncate short
-                 :fields (into [:icon] (if short
+                 :fields (into [:opinion-icon] (if short
                                          (if hide-author [:headline] [:author-long])
                                          [:flag-name :date-stamp :author-long :headline]))])
               :author

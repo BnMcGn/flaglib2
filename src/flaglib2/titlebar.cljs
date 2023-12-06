@@ -183,6 +183,7 @@
     {:tree-address [display-tree-address opinion]
      :icon (flag-icon (:flag opinion))
      :flag-name [flag-name opinion]
+     :opinion-icon [opinion-icon iid]
      :date-stamp [date-stamp opinion]
      :author-long [author-long opinion]
      :warstats [display-warstats :warstats warstats]
