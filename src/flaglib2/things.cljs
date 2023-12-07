@@ -9,44 +9,43 @@
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]))
 
-(defn display-thing [tbstuff & {:keys [fields truncate]}]
-  (let [tbstuff (if truncate
-                  (update tbstuff :headline into [:truncate true :no-fontsize true])
-                  tbstuff)]
-    (into [:div] (tb/assemble-bar-parts tbstuff fields))))
+(defn display-thing [tbstuff & {:keys [fields]}]
+  (into [:div {:class (:bg-color tbstuff)}] (tb/assemble-bar-parts tbstuff fields)))
+
+(defn display-thing-short [tbstuff & {:keys [fields]}]
+  (let [tbstuff (update tbstuff :headline into [:no-fontsize true])]
+    (into [:div {:class (misc/class-string (:bg-color tbstuff) "grid")}]
+          (tb/assemble-bar-parts tbstuff fields))))
 
 (defn thing-displayer [things & {:keys [trim]}]
   (let [db @(rf/subscribe [:core-db])
-        short (< trim 20)]
+        short (< trim 20)
+        thing-element (if short display-thing-short display-thing)]
     (into [:<>]
           (for [{:keys [id type hide-author as-reference]} things]
             (case type
               :rooturl
               (if as-reference
-                [display-thing
+                [thing-element
                  (tb/reference-tb-stuff id db)
-                 :truncate short
                  :fields (if short
                            [:headline]
                            [:headline :warstats])]
-                [display-thing
+                [thing-element
                  (tb/root-tb-stuff id db)
-                 :truncate short
                  :fields (if short
                            [:headline]
                            [:headline :warstats :reply-count])])
               :opinion
               (let [tbstuff (tb/opinion-tb-stuff id db)]
-                [display-thing
+                [thing-element
                  tbstuff
-                 :truncate short
                  :fields (into [:opinion-icon] (if short
                                          (if hide-author [:headline] [:author-long])
                                          [:flag-name :date-stamp :author-long :headline]))])
               :author
-              [display-thing
+              [thing-element
                (tb/author-tb-stuff id db)
-               :truncate short
                :fields [:author-long]])))))
 
 (defn thing-lister [key]
