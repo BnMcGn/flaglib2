@@ -17,6 +17,14 @@
     (into [:div {:class (misc/class-string (:bg-color tbstuff) "grid")}]
           (tb/assemble-bar-parts tbstuff fields))))
 
+(defn display-thing-opinion [tbstuff & {:keys [fields]}]
+  (into [:div {:class (:bg-color tbstuff)}] (tb/assemble-bar-parts tbstuff fields)))
+
+(defn display-thing-opinion-short [tbstuff & {:keys [fields]}]
+  (let [tbstuff (update tbstuff :headline into [:no-fontsize true])]
+    [:div (into [:span {:class (misc/class-string (:bg-color tbstuff))}]
+           (tb/assemble-bar-parts tbstuff fields))]))
+
 (defn thing-displayer [things & {:keys [trim]}]
   (let [db @(rf/subscribe [:core-db])
         short (< trim 20)
@@ -38,7 +46,7 @@
                            [:headline :warstats :reply-count])])
               :opinion
               (let [tbstuff (tb/opinion-tb-stuff id db)]
-                [thing-element
+                [(if short display-thing-opinion-short display-thing-opinion)
                  tbstuff
                  :fields (into [:opinion-icon] (if short
                                          (if hide-author [:headline] [:author-long])
