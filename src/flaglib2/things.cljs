@@ -10,11 +10,12 @@
    [flaglib2.titlebar :as tb]))
 
 (defn display-thing [tbstuff & {:keys [fields]}]
-  (into [:div {:class (:bg-color tbstuff)}] (tb/assemble-bar-parts tbstuff fields)))
+  (into [:div {:class (misc/class-string (:bg-color tbstuff) "flex flex-row items-center my-1")}]
+        (tb/assemble-bar-parts tbstuff fields)))
 
 (defn display-thing-short [tbstuff & {:keys [fields]}]
   (let [tbstuff (update tbstuff :headline into [:no-fontsize true])]
-    (into [:div {:class (misc/class-string (:bg-color tbstuff) "grid")}]
+    (into [:div {:class (misc/class-string (:bg-color tbstuff) "grid my-1")}]
           (tb/assemble-bar-parts tbstuff fields))))
 
 (defn display-thing-opinion [tbstuff & {:keys [fields]}]
@@ -30,20 +31,20 @@
         short (< trim 20)
         thing-element (if short display-thing-short display-thing)]
     (into [:<>]
-          (for [{:keys [id type hide-author as-reference]} things]
+          (for [{:keys [id type hide-author]} things]
             (case type
               :rooturl
-              (if as-reference
-                [thing-element
-                 (tb/reference-tb-stuff id db)
-                 :fields (if short
-                           [:headline]
-                           [:headline :warstats])]
-                [thing-element
-                 (tb/root-tb-stuff id db)
-                 :fields (if short
-                           [:headline]
-                           [:headline :warstats :reply-count])])
+              [thing-element
+               (tb/root-tb-stuff id db)
+               :fields (if short
+                         [:headline]
+                         [:headline :warstats :reply-count])]
+              :reference
+              [thing-element
+               (tb/reference-tb-stuff id db)
+               :fields (if short
+                         [:headline]
+                         [:headline :warstats])]
               :opinion
               (let [tbstuff (tb/opinion-tb-stuff id db)]
                 [(if short display-thing-opinion-short display-thing-opinion)

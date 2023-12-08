@@ -208,7 +208,7 @@
      :icon-size "min-w-[42px] h-[45px]"
      :icon-size-mini "min-w-[21px] h-[23px]"
      :bg-color "bg-black"
-     :warstats [display-warstats :warstats :black true]
+     :warstats [display-warstats :warstats warstats :black true]
      :external-link [display-external-link :url reference :black true]
      :headline [headline :rootid reference :url true :class "text-white"]}))
 
