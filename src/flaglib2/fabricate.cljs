@@ -4,7 +4,8 @@
 
    [flaglib2.fetchers :as fetchers]
    [flaglib2.misc :as misc]
-   [flaglib2.urlgrab :as ug]))
+   [flaglib2.urlgrab :as ug]
+   [flaglib2.excerpts :as exc]))
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
@@ -32,6 +33,12 @@
  (fn [[supplied existing] _]
    (or supplied existing)))
 
+(rf/reg-sub
+ ::active-tdat
+ :<- [::active-text]
+ (fn [[text] _]
+   (exc/create-textdata text)))
+
 (rf/reg-sub ::flag :-> ::flag)
 (rf/reg-sub
  ::flag-or-default
@@ -50,6 +57,13 @@
 
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
 (rf/reg-sub ::excerpt-search :-> ::excerpt-search)
+
+(rf/reg-sub
+ ::excerpt-found?
+ :<- [::excerpt-or-default]
+ :<- [::active-tdat]
+ (fn [[[excerpt offset] tdat] _]
+   (exc/find-excerpt-position tdat excerpt :offset offset)))
 
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
