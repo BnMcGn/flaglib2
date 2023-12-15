@@ -181,17 +181,19 @@
    :grey? grey?
    :sub-opin-component sub-opinion-list])
 
+(defn quote-icon [& {:keys [found style]}]
+  [:img {:style style
+         :src (if found
+                "/static/img/black-wf-quote.svg"
+                "/static/img/red-wf-quote.svg")
+         :title (when-not found "Excerpt Not Found")}])
+
 (defn thread-excerpt-display
   [& {:keys [leading-context trailing-context excerpt excerpt-class]}]
   (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em" :margin-right "1em"}]
     [:div
      {:class "thread-excerpt italic text-sm mt-2 mb-4 sm:mr-40 mr-6 min-h-[3em] ml-6 sm:break-normal break-all sm:break-words"}
-     [:img
-      (if (or leading-context trailing-context)
-        {:src "/static/img/black-wf-quote.svg" :style icon-style}
-        {:src "/static/img/red-wf-quote.svg"
-         :style icon-style
-         :title "Excerpt Not Found"})]
+     [quote-icon :found (or leading-context trailing-context) :style icon-style]
      [:span {:style {:background-color "#eee"}}
       [:span (excerpts/rebreak leading-context)]
       [:span {:class excerpt-class} (excerpts/rebreak excerpt)]

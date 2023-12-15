@@ -170,7 +170,8 @@ the Internet.
                        :warstats-store warstats-store-unreviewed)
    :opine-deluxe extra-db
    :opine-bad-excerpt (assoc extra-db
-                             :flaglib2.fabricate/excerpt ["nonexist" 0])
+                             :flaglib2.fabricate/excerpt ["nonexist" 0]
+                             :flaglib2.excerpt-search/raw-excerpt-search "nonexist")
    :target-return extra-db
    :post-success (merge extra-db server-success)
    :post-fail (merge extra-db server-fail)

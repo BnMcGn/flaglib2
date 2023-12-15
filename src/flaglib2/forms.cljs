@@ -216,13 +216,20 @@
       :on-change :flaglib2.fabricate/set-excerpt]
      [xsearch/excerpt-search-context]]))
 
-;;FIXME: should be a visual indication for missing excerpt
 (defn excerpt-summary []
   (let [[excerpt _] @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default])
+        found @(rf/subscribe [:flaglib2.fabricate/excerpt-found?])
         text (if (empty? excerpt)
                "Choose an Excerpt"
                excerpt)]
-    [step/summary-button :excerpt text]))
+    [:div {:class "flex flex-row"}
+     [step/summary-button :excerpt text]
+     (when-not (or (zero? (count excerpt)) found)
+       [rc/md-circle-icon-button
+        :md-icon-name "zmdi-alert-triangle"
+        :size :smaller
+        :tooltip "Excerpt Not Found"
+        :class (misc/class-string (tw-btn-danger))])]))
 
 (defn specify-reference []
   [ug/url-search [::specify-reference]

@@ -210,11 +210,13 @@
      (excerpts/start-end->excerpt-offset tdat start end)
      [nil nil])))
 
+;;FIXME: might not be accurate when bad excerpt comes from server parameters
 (defn excerpt-search-context []
   (let [status @(rf/subscribe [::excerpt-search-status])
         tdat @(rf/subscribe [::tdat])
-        [excerpt offset] (or @(rf/subscribe [::active-excerpt]) [nil nil])]
-    (when excerpt
+        [excerpt offset] (or @(rf/subscribe [::active-excerpt]) [nil nil])
+        raw @(rf/subscribe [::raw-excerpt-search])]
+    (if excerpt
       (case status
        :empty
        ""
@@ -225,4 +227,6 @@
          [disps/thread-excerpt-display
           :excerpt excerpt
           :leading-context leading
-          :trailing-context trailing])))))
+          :trailing-context trailing]))
+      (when-not (empty? raw)
+        [disps/thread-excerpt-display :excerpt raw]))))

@@ -58,6 +58,7 @@
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
 (rf/reg-sub ::excerpt-search :-> ::excerpt-search)
 
+;;FIXME: do we need to factor in current entry of excerpt-search?
 (rf/reg-sub
  ::excerpt-found?
  :<- [::excerpt-or-default]
