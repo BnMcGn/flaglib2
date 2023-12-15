@@ -100,7 +100,9 @@
 
 (defn excerpt-context2 [tdat excerpt offset]
   (let [[p1 p2] (find-excerpt-position tdat excerpt :offset offset)]
-    (excerpt-context (:text tdat) p1 (inc p2))))
+    (if p1
+      (excerpt-context (:text tdat) p1 (inc p2))
+      (throw (js/Error. "No excerpt found")))))
 
 (defn rebreak [text]
   (into

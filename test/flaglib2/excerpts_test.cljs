@@ -1,6 +1,9 @@
 (ns flaglib2.excerpts-test
     (:require
      [cljs.test :refer-macros [deftest is testing]]
+
+     [clojure.string :as string]
+
      [flaglib2.excerpts :as excerpts]
      ))
 
@@ -22,6 +25,18 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 (deftest find-excerpt-position-bad-offset
   (let [result (excerpts/find-excerpt-position tdat1 "the beginning" :offset 2)]
     (is (not result))))
+
+(deftest excerpt-context
+  (let [{:keys [leading trailing excerpt]} (excerpts/excerpt-context text1 96 13)]
+    (is (= "the beginning" excerpt))
+    (is (string/starts-with? trailing " with God"))
+    (is (string/ends-with? leading "was in ")))
+  (let [{:keys [leading trailing excerpt]} (excerpts/excerpt-context2 tdat1 "the beginning" 1)]
+    (is (= "the beginning" excerpt))
+    (is (string/starts-with? trailing " with God"))
+    (is (string/ends-with? leading "was in ")))
+  (is (thrown? js/Error
+              (excerpts/excerpt-context2 tdat1 "man" 0))))
 
 (deftest short-search
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "the")]
