@@ -61,7 +61,7 @@
          [tb/author-long opinion]
          [tb/display-warstats :target-id opid]
          (when topmost
-           [tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset])]
+           [tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset])]
         box-props
         {:style {:border-color (if topmost "black" (random-gray))
                  :background-color (if topmost "white" "#f5f5f5")}

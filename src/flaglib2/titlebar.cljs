@@ -100,13 +100,13 @@
     [:a {:style {:color "black"}
          :href (misc/make-author-url auth)} auth]))
 
-(defn reply-link [& {:keys [url excerpt offset]}]
+(defn reply-link [& {:keys [target excerpt offset]}]
   [:form
    {:class "inline-block relative text-sm mr-3"
     ;;FIXME: Why doesn't form vertically center like other elements?
     :style {:top "0.5em"}
     :action "/opinion/" :method "GET"}
-   [:input {:type "hidden" :name "target" :value (or url "")}]
+   [:input {:type "hidden" :name "target" :value (or target "")}]
    (when-not (empty? excerpt)
      [:input {:type "hidden" :name "excerpt" :value (js/encodeURIComponent excerpt)}])
    (when offset
@@ -172,7 +172,7 @@
   (let [warstats (or warstats (get (:warstats-store db) url))]
     {:external-link [display-external-link :url url]
      :warstats [display-warstats :warstats warstats]
-     :reply-link [reply-link :url url :excerpt reply-excerpt :offset reply-offset]
+     :reply-link [reply-link :target url :excerpt reply-excerpt :offset reply-offset]
      :count [reply-count :warstats warstats]
      :bg-color ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
      :headline [headline :rootid url :url true]}))
@@ -190,7 +190,7 @@
      :count [reply-count :warstats warstats]
      :comment? (not (empty? (:clean-comment opinion)))
      :bg-color ""
-     :reply-link [reply-link (:url opinion) :excerpt reply-excerpt :offset reply-offset]
+     :reply-link [reply-link :target iid :excerpt reply-excerpt :offset reply-offset]
      :headline [headline :opinionid iid :url true]}))
 
 (defn question-tb-stuff [iid db & {:keys [warstats]}]

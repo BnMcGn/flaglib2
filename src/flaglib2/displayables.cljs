@@ -29,7 +29,7 @@
         ws (when-not hide-warstats
              [tb/display-warstats :warstats warstats])
         rep (when-not hide-reply
-              [tb/reply-link :url url :excerpt reply-excerpt :offset reply-offset])
+              [tb/reply-link :target url :excerpt reply-excerpt :offset reply-offset])
         ct (when-not hide-count
              [tb/reply-count :warstats warstats])]
     (into [:div props]
@@ -142,7 +142,7 @@
         [tb/date-stamp opinion]
         [tb/author-long opinion]
         [tb/display-warstats :warstats warstats]
-        (when-not hide-reply [tb/reply-link (:url opinion)])])]))
+        (when-not hide-reply [tb/reply-link :target (:iid opinion)])])]))
 
 (defn sub-opinion-list [excerpt-opinions
                         & {:keys [excerpt tree-address root-target-url]}]
@@ -321,7 +321,7 @@
                         [tb/author-long opinion]
                         [tb/display-warstats :warstats warstats]
                         ;;FIXME: should handle excerpts, could use iid instead of url?
-                        #_[tb/reply-link :url (:url opinion) :excerpt @excerpt :offset @offset]])
+                        #_[tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset]])
                 main-style
                 (if
                   small
