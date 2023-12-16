@@ -94,8 +94,8 @@
              [:li [suggest-button location (:url itm)]])))))
 
 (rf/reg-event-db
- ::initialize-url-search
- (fn [db [_ location on-select]]
+ :initialize-url-search
+ (fn [db [_ location & {:keys [on-select]}]]
    (assoc-in db location {:on-select on-select :suppress-search-results false})))
 
 (rf/reg-event-db
@@ -103,23 +103,19 @@
  (fn [db [_ location]]
    (update-in db location assoc ::search "" ::selection "")))
 
-(defn url-search [location & {:keys [on-select]}]
-  (let [loc location
-        onsel on-select]
-    (rf/dispatch-sync [::initialize-url-search loc onsel]))
-  (fn [location & {:keys [placeholder]}]
-    (let [search @(rf/subscribe [::search location])
-          search-res @(rf/subscribe [:url-search-results location])
-          suppress @(rf/subscribe [::suppress-search-results location])]
-      [:div
-       [rc/input-text
-        :placeholder placeholder
-        :width "100%"
-        :model search
-        :on-change (fn [ev] (rf/dispatch [::enter-search location ev]))]
-       (if (and (not suppress) search-res)
-         [display-searched-urls location]
-         [display-urls-in-categories location])])))
+(defn url-search [location & {:keys [placeholder]}]
+  (let [search @(rf/subscribe [::search location])
+        search-res @(rf/subscribe [:url-search-results location])
+        suppress @(rf/subscribe [::suppress-search-results location])]
+    [:div
+     [rc/input-text
+      :placeholder placeholder
+      :width "100%"
+      :model search
+      :on-change (fn [ev] (rf/dispatch [::enter-search location ev]))]
+     (if (and (not suppress) search-res)
+       [display-searched-urls location]
+       [display-urls-in-categories location])]))
 
 ;;Unused...
 (defn clear-button [location]

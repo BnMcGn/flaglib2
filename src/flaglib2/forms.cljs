@@ -289,7 +289,8 @@
                                db
                                (ug/selected-url-from-db [:flaglib2.fabricate/specify-target] db))))
               :opine
-              :target-decision))}
+              :target-decision))
+    :once [:initialize-url-search [:flaglib2.fabricate/specify-target]]}
    {:id :target-decision
     :page [target-decision]
     :buttons [target-decision-buttons]
@@ -320,7 +321,8 @@
     :page [specify-reference]
     :grouped true
     :buttons [reference-buttons]
-    :label [specify-reference-summary]}
+    :label [specify-reference-summary]
+    :once [:initialize-url-search [::specify-reference]]}
    {:id :opine
     :label [opine]
     :grouped true
@@ -363,7 +365,7 @@
      {:db db
       :fx [ [:dispatch
              (if target
-               [:flaglib2.urlgrab/enter-search target]
+               [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
                [:flaglib2.fetchers/load-author-urls])]
            [:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize (what-opin-form? db)]]
