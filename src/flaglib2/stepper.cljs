@@ -188,17 +188,25 @@
      (when previous
        {:dispatch [::goto previous]}))))
 
+(defn set-step-state [{:keys [id] :as step} active summarize]
+  (assoc step
+         :status
+         (cond (= id active) :active
+               (summarize id) :summary ;;Summarize should be a set
+               :else :hidden)))
+
 (rf/reg-event-db
  ::initialize
- (fn [db [_ params]]
-   (let [steplist (map :id params)
-         active (first steplist)]
+ (fn [db [_ steps {:keys [active summarize]}]]
+   (let [steplist (map :id steps)
+         summarize (or summarize #{})
+         active (or active (first steplist))]
      (assoc
       db
       ::steps
       (into {}
-            (for [step (map #(assoc % :status (if (= (:id %) active) :active :hidden)) params)]
-              [(:id step) step]))
+            (for [step steps]
+              [(:id step) (set-step-state step active summarize)]))
       ::steplist steplist))))
 
 (rf/reg-event-db

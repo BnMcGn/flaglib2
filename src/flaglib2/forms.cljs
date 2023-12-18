@@ -349,25 +349,37 @@
     [step/wf-stepper]))
 
 (defn what-opin-form? [db]
-  (if (get-in db [:local :advanced])
-    steps-advanced
-    (case (get-in db [:server-parameters :default :flag])
-      (:positive-like :negative-dislike) steps-vote
-      :custodial-blank steps-simple
-      nil steps-advanced
-      :else steps-advanced)))
+  (let [params (get-in db [:server-parameters :default])
+        form (if (get-in db [:local :advanced])
+               steps-advanced
+               (case (:flag params)
+                 (:positive-like :negative-dislike) steps-vote
+                 :custodial-blank steps-simple
+                 nil steps-advanced
+                 :else steps-advanced))
+        presets (if (= form steps-advanced)
+                  (if (:target params)
+                    {:active :opine :summarize #{:specify-target}}
+                    {})
+                  {})]
+    [form presets]))
 
 (rf/reg-event-fx
  :make-opinion
  (fn [{:keys [db]} _]
    (let [target (get-in db [:server-parameters :default :target])
-         db (assoc db :root-element make-opinion)]
+         db (assoc db :root-element make-opinion)
+         [form presets] (what-opin-form? db)]
      {:db db
       :fx [ [:dispatch
              (if target
                [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
                [:flaglib2.fetchers/load-author-urls])]
+           (when target
+             [:dispatch (if (misc/iid? target)
+                          [:load-opinion target]
+                          [:load-rooturl target :no-references true])])
            [:dispatch [:add-hooks fabricate-hooks]]
-           [:dispatch [:flaglib2.stepper/initialize (what-opin-form? db)]]
+           [:dispatch [:flaglib2.stepper/initialize form presets]]
            ;;FIXME: is this the right place?
            [:dispatch [:mount-registered]]]})))
