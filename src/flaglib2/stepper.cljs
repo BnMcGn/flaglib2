@@ -138,8 +138,6 @@
                            (not (= :hidden (:status step))))]
             [step-display step]))))
 
-
-
 (rf/reg-event-fx
  ::goto
  (fn [{:keys [db]} [_ target]]
@@ -155,7 +153,17 @@
                       step)]
      {:db (assoc db ::steps steps)
       :fx [ (when (:every step) [:dispatch (:every step)])
-            (when once [:dispatch once])]})))
+           (when once [:dispatch once])]})))
+
+(rf/reg-event-fx
+ ::visit
+ (fn [{:keys [db]} [_ targets]]
+   (let [steps (map #(get-in db [::steps %]) targets)]
+     {:fx (into []
+                (for [s steps
+                      item [(:every s) (:once s)]
+                      :when item]
+                  [:dispatch item]))})))
 
 (defn get-next-step-in-order [db]
   (let [stepid (find-active-step (::steps db))
@@ -195,19 +203,21 @@
                (summarize id) :summary ;;Summarize should be a set
                :else :hidden)))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::initialize
- (fn [db [_ steps {:keys [active summarize]}]]
+ (fn [{:keys [db]} [_ steps {:keys [active summarize]}]]
    (let [steplist (map :id steps)
          summarize (or summarize #{})
          active (or active (first steplist))]
-     (assoc
-      db
-      ::steps
-      (into {}
-            (for [step steps]
-              [(:id step) (set-step-state step active summarize)]))
-      ::steplist steplist))))
+     {:db (assoc
+           db
+           ::steps
+           (into {}
+                 (for [step steps]
+                   [(:id step) (set-step-state step active summarize)]))
+           ::steplist steplist)
+      :fx [[:dispatch [::visit summarize]]
+           [:dispatch [::goto active]]]})))
 
 (rf/reg-event-db
  ::set-summary

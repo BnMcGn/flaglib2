@@ -37,7 +37,7 @@
  ::active-tdat
  :<- [::active-text]
  (fn [[text] _]
-   (exc/create-textdata text)))
+   (when text (exc/create-textdata text))))
 
 (rf/reg-sub ::flag :-> ::flag)
 (rf/reg-sub
@@ -64,7 +64,7 @@
  :<- [::excerpt-or-default]
  :<- [::active-tdat]
  (fn [[[excerpt offset] tdat] _]
-   (exc/find-excerpt-position tdat excerpt :offset offset)))
+   (and tdat (exc/find-excerpt-position tdat excerpt :offset offset))))
 
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
