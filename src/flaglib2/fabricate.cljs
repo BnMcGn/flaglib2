@@ -66,6 +66,7 @@
  (fn [[[excerpt offset] tdat] _]
    (and tdat (exc/find-excerpt-position tdat excerpt :offset offset))))
 
+;;FIXME: also should be handling recommended opinions
 (rf/reg-event-fx
  ::get-stuff-for-author-urls
  ;;We assume that author-urls are already in ipfs. No check.

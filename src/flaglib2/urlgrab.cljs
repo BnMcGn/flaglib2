@@ -43,7 +43,7 @@
 (rf/reg-event-fx
  ::enter-search
  (fn [{:keys [db]} [_ location search & {:keys [is-click?]}]]
-   (let [selection (when (misc/url? search) search)
+   (let [selection (when (or (misc/iid? search) (misc/url? search)) search)
          ndb (update-in
               db location
               (fn [state]
@@ -52,7 +52,10 @@
                   (if selection
                     (assoc nstate ::selection selection)
                     nstate))))
-         disp (when selection [:load-rooturls [selection] :no-references true])
+         disp (when selection
+                (if (misc/iid? selection)
+                  [:load-opinion selection]
+                  [:load-rooturls [selection] :no-references true]))
          onsel (:on-select (get-in ndb location))]
      (into {}
            [[:db ndb]
@@ -96,7 +99,8 @@
 (rf/reg-event-db
  :initialize-url-search
  (fn [db [_ location & {:keys [on-select]}]]
-   (assoc-in db location {:on-select on-select :suppress-search-results false})))
+   ;;WARNING: changed to not overwriting fields already present. Might not be correct.
+   (update-in db location assoc :on-select on-select :suppress-search-results false)))
 
 (rf/reg-event-db
  ::clear-url-search

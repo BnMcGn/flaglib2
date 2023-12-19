@@ -371,7 +371,9 @@
          db (assoc db :root-element make-opinion)
          [form presets] (what-opin-form? db)]
      {:db db
-      :fx [ [:dispatch
+      :fx [[:dispatch [:add-hooks fabricate-hooks]]
+           [:dispatch [:flaglib2.stepper/initialize form presets]]
+           [:dispatch
              (if target
                [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
                [:flaglib2.fetchers/load-author-urls])]
@@ -379,7 +381,4 @@
              [:dispatch (if (misc/iid? target)
                           [:load-opinion target]
                           [:load-rooturl target :no-references true])])
-           [:dispatch [:add-hooks fabricate-hooks]]
-           [:dispatch [:flaglib2.stepper/initialize form presets]]
-           ;;FIXME: is this the right place?
            [:dispatch [:mount-registered]]]})))
