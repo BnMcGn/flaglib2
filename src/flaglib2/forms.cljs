@@ -32,8 +32,10 @@
 
 (defn specify-target-summary []
   (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
-    [step/summary-button :specify-target (str "Target: " selection)]))
-
+    (if (misc/iid? selection)
+      [step/summary-button
+       :specify-target (str "Target: Opinion: " @(rf/subscribe [:proper-title selection]))]
+      [step/summary-button :specify-target (str "Target: " selection)])))
 
 (defn specify-target-buttons []
   (let [url @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
@@ -284,12 +286,15 @@
     :page [specify-target]
     :buttons [specify-target-buttons]
     :next (fn [db]
-            (if (= :reviewed (:status
+            (let [target (ug/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
+              (cond
+                (misc/iid? target) :opine
+                (= :reviewed (:status
                               (subs/target-decision
                                db
                                (ug/selected-url-from-db [:flaglib2.fabricate/specify-target] db))))
-              :opine
-              :target-decision))
+                :opine
+                :else :target-decision)))
     :once [:initialize-url-search [:flaglib2.fabricate/specify-target]]}
    {:id :target-decision
     :page [target-decision]

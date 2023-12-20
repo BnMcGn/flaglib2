@@ -221,7 +221,7 @@
        :empty
        ""
        :failed
-       [disps/thread-excerpt-display :excerpt excerpt]
+       [disps/thread-excerpt-display :excerpt excerpt :excerpt-class "bg-orange-400"]
        (:started :unstarted :complete)
        (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
          [disps/thread-excerpt-display

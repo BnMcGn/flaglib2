@@ -4,6 +4,7 @@
 
    [flaglib2.fetchers :as fetchers]
    [flaglib2.misc :as misc]
+   [flaglib2.subscriptions :as subs]
    [flaglib2.urlgrab :as ug]
    [flaglib2.excerpts :as exc]))
 
@@ -17,13 +18,13 @@
  ::existing-text
  (fn [db _]
    (when-let [target (ug/selected-url-from-db [::specify-target] db)]
-     (get-in db [:text-store target :text]))))
+     (subs/proper-text db target))))
 
 (rf/reg-sub
  ::existing-title
  (fn [db _]
    (when-let [target (ug/selected-url-from-db [::specify-target] db)]
-     (get-in db [:title-store target :title]))))
+     (subs/proper-title db target))))
 
 (rf/reg-sub
  ::active-text
@@ -64,7 +65,7 @@
  :<- [::excerpt-or-default]
  :<- [::active-tdat]
  (fn [[[excerpt offset] tdat] _]
-   (and tdat (exc/find-excerpt-position tdat excerpt :offset offset))))
+   (and tdat (not (empty? excerpt)) (exc/find-excerpt-position tdat excerpt :offset offset))))
 
 ;;FIXME: also should be handling recommended opinions
 (rf/reg-event-fx
