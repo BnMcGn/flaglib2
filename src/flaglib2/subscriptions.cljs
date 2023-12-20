@@ -76,12 +76,25 @@
      (get-in db [:references key])
      (:references db))))
 
+(defn proper-text [db key]
+  (or (if (misc/iid? key)
+        (get-in db [:opinion-store key :clean-comment])
+        (get-in db [:text-store key :text]))
+      ""))
+
 (rf/reg-sub
- :refd
- (fn [db [_ key]]
-   (if key
-     (get-in db [:refd key])
-     (:refd db))))
+ :proper-text
+ (fn [db [_ key]] (proper-text db key)))
+
+(defn proper-title [db key]
+  (let [attempt (get-in db [:title-store key :text])]
+    (or (when (and (misc/iid? key) (not attempt))
+          (get-in db [:opinion-store key :clean-comment]))
+        "")))
+
+(rf/reg-sub
+ :proper-title
+ (fn [db [_ key]] (proper-title db key)))
 
 (rf/reg-sub
  :core-db
