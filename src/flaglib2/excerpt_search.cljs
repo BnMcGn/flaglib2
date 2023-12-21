@@ -227,6 +227,7 @@
          [disps/thread-excerpt-display
           :excerpt excerpt
           :leading-context leading
-          :trailing-context trailing]))
+          :trailing-context trailing
+          :excerpt-class "bg-orange-400"]))
       (when-not (empty? raw)
         [disps/thread-excerpt-display :excerpt raw]))))

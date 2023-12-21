@@ -226,7 +226,7 @@
                excerpt)]
     [:div {:class "flex flex-row"}
      [step/summary-button :excerpt text]
-     (when-not (or (zero? (count excerpt)) found)
+     (when (and (not (zero? (count excerpt))) (not found))
        [rc/md-circle-icon-button
         :md-icon-name "zmdi-alert-triangle"
         :size :smaller

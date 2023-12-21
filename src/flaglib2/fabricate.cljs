@@ -37,7 +37,7 @@
 (rf/reg-sub
  ::active-tdat
  :<- [::active-text]
- (fn [[text] _]
+ (fn [text _]
    (when text (exc/create-textdata text))))
 
 (rf/reg-sub ::flag :-> ::flag)
