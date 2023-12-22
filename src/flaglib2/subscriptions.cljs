@@ -76,6 +76,13 @@
      (get-in db [:references key])
      (:references db))))
 
+(rf/reg-sub
+ :refd
+ (fn [db [_ key]]
+   (if key
+     (get-in db [:refd key])
+     (:refd db))))
+
 (defn proper-text [db key]
   (or (if (misc/iid? key)
         (get-in db [:opinion-store key :clean-comment])

@@ -320,8 +320,7 @@
     :page [excerpt-page]
     :label [excerpt-summary]
     :grouped true
-    :buttons [xsearch/excerpt-search-buttons]
-    }
+    :buttons [xsearch/excerpt-search-buttons]}
    {:id :reference
     :page [specify-reference]
     :grouped true

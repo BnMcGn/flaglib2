@@ -181,7 +181,7 @@
                   (::tdat db) (::excerpt-start db) (::excerpt-end db))
                  :else
                  [nil nil]))
-    :fx [ [:dispatch [:flaglib2.stepper/set-summary :excerpt]]]}))
+    :fx [ [:dispatch [:flaglib2.stepper/goto :opine]]]}))
 
 (defn excerpt-search-buttons []
   (let [status @(rf/subscribe [::excerpt-search-status])]
