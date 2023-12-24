@@ -55,7 +55,7 @@
      (let [[excerpt offset] @result
            status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])
            [ex2 off2] @(rf/subscribe [:flaglib2.excerpt-search/active-excerpt])]
-       (is (= :complete status)) 
+       (is (= :complete status))
        (is (string? excerpt))
        (is (= 0 offset))
        (is (= 221 (count excerpt)))
@@ -106,3 +106,20 @@
        (is (= 0 (:remaining start)))
        (is (= 229 (:start-index start)))
        (is (= 234 (:end-index start)))))))
+
+
+(deftest missing-excerpt
+  (rf-test/run-test-sync
+         (let [tdat (excerpt/create-textdata text)
+               el (js/document.createElement "div")
+               location [:flaglib2.excerpt-search/excerpt-suggester]]
+           (rdom/render
+            [es/excerpt-search
+             :text text]
+            el)
+
+           (rf/dispatch [:flaglib2.excerpt-search/do-search "quick brown fox" tdat])
+           (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
+
+           (let [status @(rf/subscribe [:flaglib2.excerpt-search-status])]
+             (is (= :failed status))))))
