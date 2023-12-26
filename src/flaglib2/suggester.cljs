@@ -78,8 +78,11 @@
    (let [state (get-in db location)
          endpoint (:on-select state)]
      (if endpoint
-       {:call-something [endpoint
-               (nth (:suggestions state) (or selection (:suggestion-active-index state)))]}
+       {:call-something
+        [endpoint
+         (if (empty? (:suggestions state))
+           nil
+           (nth (:suggestions state) (or selection (:suggestion-active-index state) 0)))]}
        {}))))
 
 (rf/reg-event-fx

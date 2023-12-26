@@ -33,7 +33,7 @@
          (cond
            (and start (not (excerpts/excerpt-start-valid? tdat search start)))
            [nil []]
-           (zero? (count search))
+           (empty? search)
            [nil []]
            start
            [start (get (excerpts/excerpt-possibilities tdat search start) 1)]
@@ -118,12 +118,14 @@
 (rf/reg-event-fx
  ::set-excerpt-start-or-end
  (fn [{:keys [db]} [_ & {:keys [item endpoint location]}]]
-   (if-let [start? (::excerpt-start db)]
-     {:db (assoc db ::excerpt-end item)
-      :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]
-      :fx [[:dispatch [:flaglib2.suggester/reset location]]]}
-     {:db (assoc db ::excerpt-end nil)
-      :fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})))
+   (if item
+     (if-let [start? (::excerpt-start db)]
+       {:db (assoc db ::excerpt-end item)
+        :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]
+        :fx [[:dispatch [:flaglib2.suggester/reset location]]]}
+       {:db (assoc db ::excerpt-end nil)
+        :fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})
+     {:call-something [endpoint nil]})))
 
 (rf/reg-event-db
  ::init-excerpt-offset
