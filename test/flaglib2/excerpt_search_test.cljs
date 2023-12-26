@@ -121,5 +121,35 @@
            (rf/dispatch [:flaglib2.excerpt-search/do-search "quick brown fox" tdat])
            (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
 
-           (let [status @(rf/subscribe [:flaglib2.excerpt-search-status])]
+           (let [status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
              (is (= :failed status))))))
+
+(deftest re-enter-excerpt
+  (rf-test/run-test-sync
+   (let [result (atom nil)
+         tdat (excerpt/create-textdata text)
+         el (js/document.createElement "div")
+         location [:flaglib2.excerpt-search/excerpt-suggester]]
+     (rdom/render
+      [es/excerpt-search
+       :text text
+       :on-change (fn [res] (reset! result res))]
+      el)
+
+     ;;Set up initial
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
+     (when (= 2 (count suggests))
+       (rf/dispatch [:flaglib2.suggester/select location 0]))
+     (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
+
+     ;;Reset
+     (rdom/render
+      [es/excerpt-search
+       :text text
+       :on-change (fn [res] (reset! result res))]
+      el)
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it too" tdat])
+     (is (= "see it too" result))
+
+     (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
+     (is (= "see it too" (nth @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default]) 0))))))
