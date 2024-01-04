@@ -254,7 +254,10 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 
 (defn remaining-portion-of-search [search res]
   (let [slen (count search)
-        rindex (- slen (:remaining res))]
+        ;;Some results don't have a :start-index, others don't have a reliable :remaining
+        rindex (if (:start-index res)
+                 (+ 1 (- (:end-index res) (:start-index res)))
+                 (- slen (:remaining res)))]
     (when (pos? rindex)
       (subs search rindex))))
 

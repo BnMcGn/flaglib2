@@ -5,7 +5,7 @@
    [reagent.core :as reagent]
 
    [re-com-tailwind.functions :refer [tw-btn-primary]]
-   
+
    [flaglib2.misc :as misc]
    [flaglib2.suggester :as suggester]
    [flaglib2.excerpts :as excerpts]
