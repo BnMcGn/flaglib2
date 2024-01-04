@@ -138,8 +138,7 @@
 
      ;;Set up initial
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
-     (when (= 2 (count suggests))
-       (rf/dispatch [:flaglib2.suggester/select location 0]))
+     (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
      (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
 
      ;;Reset
@@ -148,8 +147,10 @@
        :text text
        :on-change (fn [res] (reset! result res))]
       el)
-     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it too" tdat])
-     (is (= "see it too" result))
 
+     (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
      (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
-     (is (= "see it too" (nth @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default]) 0))))))
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it too" tdat])
+     (is (= "see it too" @result))
+
+     (is (= "see it too" (nth @(rf/subscribe [:flaglib2.fabricate/excerpt]) 0))))))

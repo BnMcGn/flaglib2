@@ -112,6 +112,15 @@ And the light shineth in darkness; and the darkness comprehended it not.")
     (is (thrown? js/Error
                  (excerpts/excerpt-possibilities tdat1 "light  the" start)))))
 
+(deftest simple-match-with-short-start
+  (let [start {:remaining 0 :start-index 241 :end-index 243}
+        [starts ends] (excerpts/excerpt-possibilities tdat1 "light of men" start)
+        res (nth starts 0)]
+    (is (= 1 (count starts)))
+    (is (empty? ends))
+    (is (= 0 (:remaining res)))
+    (is (= 241 (:start-index res)))
+    (is (= 252 (:end-index res)))))
 
 (deftest single-match
   (let [[starts ends] (excerpts/excerpt-possibilities tdat1 "prehenot")]
