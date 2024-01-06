@@ -1,6 +1,7 @@
 (ns flaglib2.excerpts
   (:require
    [clojure.string :as string]
+   [clojure.set :as set]
    [flaglib2.misc :as misc]))
 
 
@@ -331,6 +332,11 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
         match (some-excerpt-here? tdat search i)]
     (when match
       (>= (:end-index match) (:end-index start)))))
+
+(defn search-tail-is-whitespace? [search start]
+  (let [tail (remaining-portion-of-search search start)]
+    (when-not (empty? tail)
+      (set/subset? (set tail) (set misc/whitespace-characters)))))
 
 (defn start-end->excerpt-offset [tdat start end]
   (let [end-index (if end (:end-index end) (:end-index start))

@@ -36,12 +36,14 @@
            (empty? search)
            [nil []]
            start
-           [start (get (excerpts/excerpt-possibilities tdat search start) 1)]
+           (let [[starts ends] (excerpts/excerpt-possibilities tdat search start)]
+             [(first starts) ends])
            :else
            (let [[starts ends] (excerpts/excerpt-possibilities tdat search)]
              (if (= 1 (count starts))
                [(nth starts 0) ends]
                [nil starts])))]
+
      (assoc-in
       (assoc db ::raw-excerpt-search search ::excerpt-start xstart)
       [::excerpt-suggester :suggestions] suggests))))
@@ -75,7 +77,9 @@
          (empty? suggestions)
          (if (= 0 (:remaining start))
            :complete
-           :failed)
+           (if (excerpts/search-tail-is-whitespace? raw-search start)
+             :started
+             :failed))
          (= 1 (count suggestions))
          :complete
          :else
@@ -133,7 +137,7 @@
    (let [newdb (assoc db ::tdat tdat)]
      (if (not-empty excerpt)
        (assoc newdb ::excerpt-start (excerpts/excerpt-offset->start tdat excerpt offset))
-       newdb))))
+       (assoc newdb ::excerpt-start nil)))))
 
 
 ;;FIXME: Don't have a way to input offset in case of unmatched excerpt
