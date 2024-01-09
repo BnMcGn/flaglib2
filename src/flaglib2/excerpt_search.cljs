@@ -43,7 +43,6 @@
              (if (= 1 (count starts))
                [(nth starts 0) ends]
                [nil starts])))]
-
      (assoc-in
       (assoc db ::raw-excerpt-search search ::excerpt-start xstart)
       [::excerpt-suggester :suggestions] suggests))))
@@ -67,9 +66,10 @@
  ::excerpt-search-status
  :<- [::raw-excerpt-search]
  :<- [::excerpt-start]
+ :<- [::excerpt-end]
  :<- [::suggestions]
  :<- [::debouncing]
- (fn [[raw-search start suggestions debouncing] _]
+ (fn [[raw-search start end suggestions debouncing] _]
    (if (empty? raw-search)
      :empty
      (if start
@@ -77,15 +77,14 @@
          (empty? suggestions)
          (if (= 0 (:remaining start))
            :complete
-           (if (excerpts/search-tail-is-whitespace? raw-search start)
-             :started
-             :failed))
+           (if end
+             :complete
+             (if (excerpts/search-tail-is-whitespace? raw-search start)
+               :started
+               :failed)))
          (= 1 (count suggestions))
          :complete
          :else
-         ;;FIXME: Excerpt-search module does not track selection of end, only calling the
-         ;; externally supplied callback. So might be :complete instead of :started but
-         ;; we can't tell from here. May need to rework if this turns out to be a problem.
          :started)
        (cond
          (empty? suggestions)
