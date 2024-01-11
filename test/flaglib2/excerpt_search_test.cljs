@@ -5,6 +5,7 @@
      [flaglib2.excerpt-search :as es]
      [flaglib2.excerpts :as excerpt]
      [flaglib2.suggester :as suggest]
+     [flaglib2.fabricate]
      [goog.events.KeyCodes]
 
      [reagent.dom :as rdom]
@@ -42,11 +43,11 @@
        (is (= 7 (:start-index start)))
        (is (= 12 (:end-index start))))
 
+     ;;Search for/select an end for the excerpt...
      (rf/dispatch [:flaglib2.excerpt-search/do-search "see ityou can" tdat])
      (let [state @(rf/subscribe [:flaglib2.suggester/suggester location])
            suggests (:suggestions state)
            status @(rf/subscribe [:flaglib2.excerpt-search/excerpt-search-status])]
-
        (is (= :started status))
        (is (= 2 (count suggests)))
        (when (= 2 (count suggests))
@@ -137,20 +138,21 @@
       el)
 
      ;;Set up initial
-     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it" tdat])
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "Co-workers" tdat])
      (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
      (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
 
-     ;;Reset
+     ;;Reset - might not be needed?
      (rdom/render
       [es/excerpt-search
        :text text
        :on-change (fn [res] (reset! result res))]
       el)
 
+     (rf/dispatch [:flaglib2.excerpt-search/do-search "Co-workers have" tdat])
      (suggest/suggester-keydown-handler! location (fake-key-event keycodes.ENTER))
      (rf/dispatch [:flaglib2.excerpt-search/accept-entry])
-     (rf/dispatch [:flaglib2.excerpt-search/do-search "see it too" tdat])
-     (is (= "see it too" @result))
 
-     (is (= "see it too" (nth @(rf/subscribe [:flaglib2.fabricate/excerpt]) 0))))))
+     (is (= nil @result))
+
+     (is (= "Co-workers have" (nth @(rf/subscribe [:flaglib2.fabricate/excerpt]) 0))))))

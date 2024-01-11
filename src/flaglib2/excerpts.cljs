@@ -339,7 +339,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
       (set/subset? (set tail) (set misc/whitespace-characters)))))
 
 (defn start-end->excerpt-offset [tdat start end]
-  (let [end-index (if end (:end-index end) (:end-index start))
+  (let [end-index (if end (max (:end-index end) (:end-index start)) (:end-index start))
         excerpt (subs (:text tdat) (:start-index start) (inc end-index))]
     [(clean-string-for-excerpt excerpt)
      (calculate-offset tdat excerpt (:start-index start))]))
