@@ -174,7 +174,7 @@
 ;;FIXME: Next few items might do better in a higher level file. Refers to stepper
 (rf/reg-event-fx
  ::accept-entry
- (fn [{:keys [db]} _ status]
+ (fn [{:keys [db]} [_ status]]
    {:db (assoc db :flaglib2.fabricate/excerpt
                (cond
                  (= status :failed)
@@ -198,7 +198,8 @@
         [[rc/button :label "Accept" :class (tw-btn-primary)
           :on-click #(rf/dispatch [::accept-entry :empty])]]
         :complete
-        [[rc/button :label "Accept" :class (tw-btn-primary) :on-click #(rf/dispatch [::accept-entry])]]
+        [[rc/button :label "Accept" :class (tw-btn-primary)
+          :on-click #(rf/dispatch [::accept-entry :complete])]]
         (:started :unstarted :failed)
         [[rc/button
           :label "Accept as Entered"
