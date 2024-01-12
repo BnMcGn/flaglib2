@@ -6,6 +6,7 @@
    [ajax.core :as ajax]
    [clojure.string :as string]
    [clojure.walk :as walk]
+   [camel-snake-kebab.core :as csk]
 
    [re-com-tailwind.functions :refer [tw-btn-primary tw-btn-default-disabled]]
 
@@ -36,6 +37,11 @@
               :when v]
           [k v])))
 
+(defn kebabikey
+  [m]
+  (let [f (fn [[k v]] (if (string? k) [(csk/->kebab-case-keyword k) v] [k v]))]
+    (walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
 (rf/reg-event-fx
  :post-opinion-to-server
  (fn [_ [_ opinion opincat]]
@@ -53,14 +59,14 @@
 (rf/reg-event-db
  ::posted-opinion-to-server
  (fn [db [_ opincat response]]
-   (assoc-in db opincat {:response (walk/keywordize-keys response) :failure nil})))
+   (assoc-in db opincat {:response (kebabikey response) :failure nil})))
 
 (rf/reg-event-db
  ::opinion-post-failed
  ;;Response is an object that contains :success or :errors object, indexed with results from the
  ;;submission.
  (fn [db [_ opincat response]]
-   (assoc-in db opincat {:response nil :failure (walk/keywordize-keys response)})))
+   (assoc-in db opincat {:response nil :failure (kebabikey response)})))
 
 ;;Text/Title utilities
 

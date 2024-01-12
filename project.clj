@@ -17,6 +17,7 @@
                  [cljsjs/fuse "6.0.0-0"]
                  [cljsjs/rangy-textrange "1.3.0-1"]
                  [rgm/tailwind-hiccup "0.2.0"]
+                 [camel-snake-kebab "0.4.3"]
                  [org.clojars.bnmcgn/re-com-tailwind "2.13.2.1"]]
 
   :plugins [[lein-tailwind "0.1.2"]]

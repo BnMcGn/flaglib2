@@ -143,12 +143,12 @@ the Internet.
    :flaglib2.posters/alternate-status {:response {:success true}}
    :flaglib2.posters/alt-title-status {:response {:success true}}})
 
-;;FIXME: Unsure how failure structure will actually look on arrival from server
 (def server-fail
   {:flaglib2.posters/opinion-status {:failure {:status-text "Didn't make it"}}
    :flaglib2.posters/alternate-status {:response {:success true}}
-   :flaglib2.posters/alt-title-status {:response {:errors {"comment" "Too wrong"
-                                                           "target" "Don't look there!"}}}})
+   :flaglib2.posters/alt-title-status {:response {:errors {:comment "Too wrong"
+                                                           :target "Don't look there!"}
+                                                  :failure nil}}})
 
 (def sections
   {:initial plain-db
@@ -232,6 +232,7 @@ the Internet.
             [:dispatch [:flaglib2.stepper/initialize steps]]
             (when-let [step (get section-step section-name)]
               [:dispatch [:flaglib2.stepper/goto step]])
+
             [:dispatch [:mount-registered]]]
            summaries)})))
 
