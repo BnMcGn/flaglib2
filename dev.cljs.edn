@@ -1,7 +1,7 @@
 ^{:watch-dirs ["test" "src"]
   :css-dirs ["resources/public/css"]
   :auto-testing true
-  :open-url "https://127.0.0.1/target2/1"
+  :open-url "https://127.0.0.1/target/1"
    }
 {:main flaglib2.core
  :asset-path "/static/cljs-out/dev"

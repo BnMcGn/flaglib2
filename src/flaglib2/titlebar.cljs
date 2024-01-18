@@ -108,7 +108,7 @@
     :action "/opinion/" :method "GET"}
    [:input {:type "hidden" :name "target" :value (or target "")}]
    (when-not (empty? excerpt)
-     [:input {:type "hidden" :name "excerpt" :value (js/encodeURIComponent excerpt)}])
+     [:input {:type "hidden" :name "excerpt" :value excerpt}])
    (when offset
      [:input {:type "hidden" :name "offset" :value (or offset "")}])
    (if (and excerpt (not (empty? excerpt)))
