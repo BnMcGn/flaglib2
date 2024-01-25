@@ -13,4 +13,9 @@ pom.xml
 .rebel_readline_history
 resources/public/cljs-out/
 .clj-kondo/.cache
-
+.lsp/
+.lein-failures
+node_modules/
+package-lock.json
+warflagger-web
+checkouts/
