@@ -26,7 +26,7 @@
 
   :aliases {"fig"       ["trampoline" "run" "-m" "figwheel.main"]
             "fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
-            "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]
+            "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "min"]
             "fig:test"  ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "flaglib2.test-runner"]}
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.16"]
@@ -39,8 +39,8 @@
                    :clean-targets ^{:protect false} ["target"]}}
 
   :tailwind {:tailwind-dir "."
-            :output-dir   "resources/public/css"
-            :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value
-            :styles [{:src "style.src.css"
-                      :dst "main.css"}]})
+             :output-dir   "resources/public/css"
+             :tailwind-config  "tailwind.config.js" ;; tailwind.config.js is the default value
+             :styles [{:src "style.src.css"
+                       :dst "main.css"}]})
 
