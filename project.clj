@@ -6,8 +6,9 @@
 
   :min-lein-version "2.7.1"
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [org.clojure/clojurescript "1.10.773"]
+  :dependencies [[org.clojure/clojure "1.11.1"]
+                 [org.clojure/clojurescript "1.11.132"]
+                 [org.clojure/data.json "2.5.0"]
                  [cljsjs/react "17.0.2-0"]
                  [cljsjs/react-dom "17.0.2-0"]
                  [reagent "1.1.1"]
@@ -30,8 +31,12 @@
             "fig:test"  ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "flaglib2.test-runner"]}
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.16"]
-                                  [com.bhauman/rebel-readline-cljs "0.1.4"]
-                                  [day8.re-frame/re-frame-10x "1.2.2"]
+                                  [org.slf4j/slf4j-nop "1.7.30"]
+                                  [com.bhauman/rebel-readline-cljs "0.1.4"
+                                   :exclusions [rewrite-cljs/rewrite-cljs]]
+                                  [day8.re-frame/tracing      "0.6.2"]
+                                  [day8.re-frame/re-frame-10x "1.9.6"
+                                   :exclusions [org.clojure/tools.reader binaryage/devtools]]
                                   [day8.re-frame/test "0.1.5"]
                                   [com.bhauman/cljs-test-display "0.1.1"]]
                    :resource-paths ["target"]
