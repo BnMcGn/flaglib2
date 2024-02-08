@@ -1,4 +1,4 @@
-(ns flaglib2.init
+(ns ^:export flaglib2.init
   (:require
    [goog.dom :as gdom]
    [reagent.dom :as rdom]
@@ -38,11 +38,10 @@
                 (for [k (keys (:server-parameters db))]
                   [:dispatch [:mount-registered {:db db :key (or k :default)}]]))})))
 
-(defn server-side-setup [key config]
+(defn ^:export server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
     (rf/dispatch [(keyword (:entry-point config)) key])))
-
 
 (def local-store-keys ["advanced"])
 
