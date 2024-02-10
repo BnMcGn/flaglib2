@@ -1,23 +1,29 @@
 (ns flaglib2.ipfs
   (:require
    [goog.dom :as gdom]
+   [goog.object :as go]
    [re-frame.core :as rf]
    [day8.re-frame.http-fx]
    [ajax.core :as ajax]
    [clojure.string :as string]
-   [clojure.edn :as edn]
+   [clojure.set]
+   [cljs.reader]
+
    [flaglib2.misc :as misc]
    [flaglib2.fetchers :as fetchers]
    [cljs-time.core :as time]))
 
+(defn ipns-host []
+  (go/get js/window "IPNSHOST"))
+
 (defn data-url [rest]
-  (str "/ipns/" window.IPNSHOST "/" rest))
+  (str "/ipns/" (ipns-host) "/" rest))
 
 (defn opinion-data-url [iid itype]
-  (str "/ipns/" window.IPNSHOST "/opinions/" iid "/" itype ".data"))
+  (str "/ipns/" (ipns-host) "/opinions/" iid "/" itype ".data"))
 
 (defn rooturl-data-url [rooturl rtype]
-  (str "/ipns/" window.IPNSHOST "/rooturls/"
+  (str "/ipns/" (ipns-host) "/rooturls/"
        (.replaceAll (misc/encode-uri-component2 rooturl) "%" "*")
        "/" rtype ".data"))
 
