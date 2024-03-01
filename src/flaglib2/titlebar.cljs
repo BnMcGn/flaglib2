@@ -86,7 +86,8 @@
                                                         indicator-names-black
                                                         indicator-names) axis) ".svg")
                         :style {:width "12px" :height "12px"}
-                        :title (get warstat-text axis)}]]))
+                        :title (when (and stat (not (zero? stat)))
+                                 (get warstat-text axis))}]]))
             '(:x-up :x-down :x-right :x-wrong)))]))
 
 (defn date-stamp [opinion]

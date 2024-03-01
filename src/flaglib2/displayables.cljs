@@ -19,7 +19,7 @@
 ;;FIXME: refactor -> *-tb-stuff
 (defn root-title-display [props & {:keys [url title intro-text hide-warstats
                                           warstats hide-reply hide-count reply-excerpt reply-offset
-                                          hide-external-link warflagger-link children reorder
+                                          hide-external-link children reorder
                                           headline-style headline-class]}]
 
   (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
