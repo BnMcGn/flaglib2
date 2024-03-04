@@ -4,6 +4,7 @@
    [reagent.core :as r]
 ;   [clojure.walk :as walk]
    [goog.string :as string]
+   [goog.uri.utils :as uri]
 
    [re-com-tailwind.functions :refer [tw-btn-default tw-btn]]
 
@@ -13,7 +14,8 @@
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
 
-   [re-com-tailwind.core :as rc]))
+   [re-com-tailwind.core :as rc]
+   [flaglib2.excerpts :as excerpt]))
 
 (def indicator-names
   {:x-up "thumbs_up_sign"
@@ -101,7 +103,69 @@
     [:a {:style {:color "black"}
          :href (misc/make-author-url auth)} auth]))
 
-(defn reply-link [& {:keys [target excerpt offset]}]
+(defn reply-link-menu [excerpt body]
+  (let [menu? (r/atom nil)
+        tooltip? (r/atom nil)]
+    [rc/popover-anchor-wrapper
+     :showing? tooltip?
+     :popover [rc/popover-content-wrapper
+               :body (str "Reply to the excerpt: \"" excerpt "\"")]
+     :anchor
+     [rc/popover-anchor-wrapper
+      :showing? menu?
+      :position :right-below
+      :anchor   [rc/button
+                 :class (tw-btn (tw-btn-default))
+                 :label (if (seq excerpt) "Reply to Excerpt" "Reply")
+                 :on-mouse-over #(do (reset! tooltip? true) nil)
+                 :on-mouse-out  #(do (reset! tooltip? false) nil)
+                 :on-click #(swap! menu? not)]
+      :popover  [rc/popover-content-wrapper
+                 :arrow-width 0
+                 :arrow-height 0
+                 :close-button? false
+                 :title false
+                 :body body]]]))
+
+(defn target-link-url [& {:keys [target excerpt offset flag title-or-text suggest]}]
+  (let [base "/opinion/"
+        alt-key (when title-or-text
+                  (if suggest
+                    (case title-or-text
+                      :title :suggest-target-title
+                      :text :suggest-target-text)
+                    (case title-or-text
+                      :title :target-title
+                      :text :target-text)))
+        params (cond-> {:target target}
+                 alt-key (assoc alt-key "true")
+                 excerpt (assoc :excerpt excerpt)
+                 offset (assoc :offset offset)
+                 flag (assoc :flag flag))]
+    (uri/appendParamsFromMap base (clj->js params))))
+
+(defn reply-link [& {:keys [target excerpt offset flag]}]
+  [reply-link-menu
+   excerpt
+   [:div
+    [:a
+     {:href (target-link-url
+             :target target :excerpt excerpt :offset offset
+             :flag :positive-like)}
+     "Upvote"]
+    [:a
+     {:href (target-link-url
+             :target target :excerpt excerpt :offset offset
+             :flag :negative-dislike)}
+     "Downvote"]
+    [:a
+     {:href (target-link-url
+             :target target :excerpt excerpt :offset offset
+             :flag :custodial-blank)}
+     "Comment"]]])
+
+;;Old, simple version that might still be useful...
+(defn reply-link-x [& {:keys [target excerpt offset]}]
   [:form
    {:class "inline-block relative text-sm mr-3"
     ;;FIXME: Why doesn't form vertically center like other elements?
