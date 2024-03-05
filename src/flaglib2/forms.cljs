@@ -374,13 +374,14 @@
    (let [target (get-in db [:server-parameters :default :target])
          db (assoc db :root-element make-opinion)
          [form presets] (what-opin-form? db)]
-     {:db db
+     {:db (update-in db [:server-parameters :default :flag]
+                     #(some (partial misc/string= %1) (keys flags/flags)))
       :fx [[:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize form presets]]
            [:dispatch
-             (if target
-               [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
-               [:flaglib2.fetchers/load-author-urls])]
+            (if target
+              [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
+              [:flaglib2.fetchers/load-author-urls])]
            (when target
              [:dispatch (if (misc/iid? target)
                           [:load-opinion target]

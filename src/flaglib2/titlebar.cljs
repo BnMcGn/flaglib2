@@ -107,24 +107,24 @@
   (let [menu? (r/atom nil)
         tooltip? (r/atom nil)]
     [rc/popover-anchor-wrapper
-     :showing? tooltip?
+     :showing? (and (seq excerpt) tooltip? (not menu?))
+     :position :below-right
      :popover [rc/popover-content-wrapper
                :body (str "Reply to the excerpt: \"" excerpt "\"")]
      :anchor
      [rc/popover-anchor-wrapper
       :showing? menu?
-      :position :right-below
+      :position :below-right
       :anchor   [rc/button
                  :class (tw-btn (tw-btn-default))
                  :label (if (seq excerpt) "Reply to Excerpt" "Reply")
-                 :on-mouse-over #(do (reset! tooltip? true) nil)
-                 :on-mouse-out  #(do (reset! tooltip? false) nil)
+                 :attr {:on-mouse-over #(do (reset! tooltip? true) nil)
+                        :on-mouse-out  #(do (reset! tooltip? false) nil)}
                  :on-click #(swap! menu? not)]
       :popover  [rc/popover-content-wrapper
                  :arrow-width 0
-                 :arrow-height 0
+                 :arrow-length 0
                  :close-button? false
-                 :title false
                  :body body]]]))
 
 (defn target-link-url [& {:keys [target excerpt offset flag title-or-text suggest]}]
@@ -144,25 +144,25 @@
                  flag (assoc :flag flag))]
     (uri/appendParamsFromMap base (clj->js params))))
 
-(defn reply-link [& {:keys [target excerpt offset flag]}]
+(defn reply-link [& {:keys [target excerpt offset]}]
   [reply-link-menu
    excerpt
    [:div
-    [:a
-     {:href (target-link-url
-             :target target :excerpt excerpt :offset offset
-             :flag :positive-like)}
-     "Upvote"]
-    [:a
-     {:href (target-link-url
-             :target target :excerpt excerpt :offset offset
-             :flag :negative-dislike)}
-     "Downvote"]
-    [:a
-     {:href (target-link-url
-             :target target :excerpt excerpt :offset offset
-             :flag :custodial-blank)}
-     "Comment"]]])
+    [:div [:a
+           {:href (target-link-url
+                   :target target :excerpt excerpt :offset offset
+                   :flag :positive-like)}
+           "Upvote"]]
+    [:div [:a
+           {:href (target-link-url
+                   :target target :excerpt excerpt :offset offset
+                   :flag :negative-dislike)}
+           "Downvote"]]
+    [:div [:a
+           {:href (target-link-url
+                   :target target :excerpt excerpt :offset offset
+                   :flag :custodial-blank)}
+           "Comment"]]]])
 
 ;;Old, simple version that might still be useful...
 (defn reply-link-x [& {:keys [target excerpt offset]}]

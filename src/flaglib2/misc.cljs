@@ -122,6 +122,11 @@
       (subs domain 4)
       domain)))
 
+(defn string= [a b]
+  (or
+   (= a b)
+   (= (name a) (name b))))
+
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
