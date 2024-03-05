@@ -149,20 +149,32 @@
    excerpt
    [:div
     [:div [:a
-           {:href (target-link-url
+           {:class "text-black"
+            :style {:color "black"}
+            :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :positive-like)}
            "Upvote"]]
     [:div [:a
-           {:href (target-link-url
+           {:class "text-black"
+            :style {:color "black"}
+            :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :negative-dislike)}
            "Downvote"]]
     [:div [:a
-           {:href (target-link-url
+           {:class "text-black"
+            :style {:color "black"}
+            :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :custodial-blank)}
-           "Comment"]]]])
+           "Comment"]]
+    [:div [:a
+           {:class "text-black"
+            :style {:color "black"}
+            :href (target-link-url
+                   :target target :excerpt excerpt :offset offset)}
+           "Other..."]]]])
 
 ;;Old, simple version that might still be useful...
 (defn reply-link-x [& {:keys [target excerpt offset]}]

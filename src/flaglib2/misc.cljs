@@ -125,7 +125,7 @@
 (defn string= [a b]
   (or
    (= a b)
-   (= (name a) (name b))))
+   (= (name (or a "")) (name (or b "")))))
 
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
