@@ -47,7 +47,7 @@
 
 ;;Curve that swoops in to the left margin.
 (defn layers-curve [input]
-  (+ 0.75 (* 3 (Math.pow (- 1 input) 2))))
+  (+ 0.75 (* 3 (js/Math.pow (- 1 input) 2))))
 
 (defn opinion-layer [& {:keys [opid curve-locator focus excerpt offset]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])

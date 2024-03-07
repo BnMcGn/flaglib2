@@ -120,7 +120,7 @@
                  :label (if (seq excerpt) "Reply to Excerpt" "Reply")
                  :attr {:on-mouse-over #(do (reset! tooltip? true) nil)
                         :on-mouse-out  #(do (reset! tooltip? false) nil)}
-                 :on-click #(swap! menu? not)]
+                 :on-click #(do (swap! menu? not) false)]
       :popover  [rc/popover-content-wrapper
                  :arrow-width 0
                  :arrow-length 0
