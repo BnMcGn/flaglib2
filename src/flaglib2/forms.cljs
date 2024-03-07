@@ -360,7 +360,7 @@
                  (:positive-like :negative-dislike) steps-vote
                  :custodial-blank steps-simple
                  nil steps-advanced
-                 :else steps-advanced))
+                 steps-advanced))
         presets (if (= form steps-advanced)
                   (if (:target params)
                     {:active :opine :summarize #{:specify-target}}
@@ -373,9 +373,10 @@
  (fn [{:keys [db]} _]
    (let [target (get-in db [:server-parameters :default :target])
          db (assoc db :root-element make-opinion)
+         db (update-in db [:server-parameters :default :flag]
+                       #(first (filter (partial misc/string= %1) (keys flags/flags))))
          [form presets] (what-opin-form? db)]
-     {:db (update-in db [:server-parameters :default :flag]
-                     #(some (partial misc/string= %1) (keys flags/flags)))
+     {:db db
       :fx [[:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize form presets]]
            [:dispatch
