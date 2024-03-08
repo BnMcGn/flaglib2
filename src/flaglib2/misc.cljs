@@ -67,12 +67,26 @@
 (defn answer? [opinion]
   (#{:negative-evidence :negative-disagree} (:flag opinion)))
 
+(defn opinion-has-dirc? [opinion dirc]
+  (some #(= (first %1) dirc) (:directives opinion)))
+
+(defn opinion-targets-text? [opinion]
+  (some (partial opinion-has-dirc? opinion) [:target-text :suggest-target-text]))
+
+(defn opinion-targets-title? [opinion]
+  (some (partial opinion-has-dirc? opinion) [:target-title :suggest-target-title]))
+
+(defn opinion-not-tt? [opinion]
+  (not (some (partial opinion-has-dirc? opinion)
+             [:target-text :suggest-target-text :target-title :suggest-target-title])))
 
 (defn get-sub-tree [db [_ key]]
-  (let [opinion (get-in db [:opinion-store key])
-        optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
-    (when (and opinion optree)
-      (sub-tree (:tree-address opinion) optree))))
+  (if (iid? key)
+    (let [opinion (get-in db [:opinion-store key])
+         optree (when opinion (get-in db [:opinion-tree-store (:rooturl opinion)]))]
+     (when (and opinion optree)
+       (sub-tree (:tree-address opinion) optree)))
+    (get-in db [:opinion-tree-store key])))
 
 ;;; Time tools
 

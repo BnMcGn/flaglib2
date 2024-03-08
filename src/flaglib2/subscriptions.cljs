@@ -127,10 +127,29 @@
 (rf/reg-sub
  :immediate-children
  (fn [db [_ key]]
-   (let [subtree (if (misc/iid? key)
-                   (misc/get-sub-tree db [nil key])
-                   (get-in db [:opinion-tree-store key]))]
-     (map first subtree))))
+   (map first (misc/get-sub-tree db [nil key]))))
+
+(rf/reg-sub
+ :text-tree
+ :<- [:core-db]
+ (fn [db [_ key]]
+   (let [subtree (misc/get-sub-tree db [nil key])]
+     (filter #(misc/opinion-targets-text? (get-in db [:opinion-store (first %1)])) subtree))))
+
+(rf/reg-sub
+ :title-tree
+ :<- [:core-db]
+ (fn [db [_ key]]
+   (let [subtree (misc/get-sub-tree db [nil key])]
+     (filter #(misc/opinion-targets-title? (get-in db [:opinion-store (first %1)])) subtree))))
+
+(rf/reg-sub
+ :normal-tree
+ :<- [:core-db]
+ (fn [db [_ key]]
+   (let [subtree (misc/get-sub-tree db [nil key])]
+     (filter #(misc/opinion-not-tt? (get-in db [:opinion-store (first %1)])) subtree))))
+
 
 (defn target-decision-core [[warstat text status] _]
   (let [have-text (and text (:text text))
