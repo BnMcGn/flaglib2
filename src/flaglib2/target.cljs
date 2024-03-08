@@ -36,7 +36,7 @@
       [disp/excerptless-opinions rooturl]])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
-  (let [optree @(rf/subscribe [:opinion-tree-store rooturl])]
+  (let [optree @(rf/subscribe [:normal-tree rooturl])]
     [:div
      [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
      (when optree
@@ -44,6 +44,22 @@
              (map (fn [opid]
                     [disp/thread-opinion :opid opid])
                   (flatten optree))))]))
+
+(defn text-title-thread [& {:keys [rooturl]}]
+  (let [title-tree @(rf/subscribe [:title-tree rooturl])
+        text-tree @(rf/subscribe [:text-tree rooturl])]
+    [:div
+     [disp/root-title :url rooturl :display-depth 0]
+     (when-not (empty? title-tree)
+       (into [:<> [:h2 "Title discussion:"]]
+             (map (fn [opid]
+                    [disp/thread-opinion :opid opid])
+                  (flatten title-tree))))
+     (when-not (empty? text-tree)
+       (into [:<> [:h2 "Text discussion:"]]
+             (map (fn [opid]
+                    [disp/thread-opinion :opid opid])
+                  (flatten text-tree))))]))
 
 (defn target-root []
   (let [params @(rf/subscribe [:server-parameters])
@@ -55,7 +71,8 @@
           :model current
           :tabs [{:id :article :label "Article View"}
                  {:id :comment :label "Comment View"}
-                 {:id :summary :label "Summary"}]
+                 {:id :summary :label "Summary"}
+                 {:id :tt :label "Title/Text"}]
           :parts {:wrapper {:class "mt-2"}
                   :anchor {:style {:color "#777"}}}
           :on-change #(set! js/window.location.href
@@ -63,7 +80,8 @@
      (case @current
        :article [target-root-article :rooturl (:rooturl params)]
        :comment [target-root-thread :rooturl (:rooturl params)]
-       :summary [tsum/target-summary :rooturl (:rooturl params)])]))
+       :summary [tsum/target-summary :rooturl (:rooturl params)]
+       :tt [text-title-thread :rooturl (:rooturl params)])]))
 
 (rf/reg-event-fx
  :target
