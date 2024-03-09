@@ -16,40 +16,40 @@
 
 (def rangy js/rangy)
 
-;;FIXME: refactor -> *-tb-stuff
-(defn root-title-display [props & {:keys [url title intro-text hide-warstats
-                                          warstats hide-reply hide-count reply-excerpt reply-offset
-                                          hide-external-link children reorder
-                                          headline-style headline-class]}]
 
+(defn root-title [& {:keys [style url display-depth warstats no-grid class
+                            intro-text title headline-style headline-class
+                            reply-excerpt reply-offset children tt
+                            hide-reply hide-warstats hide-count hide-external-link
+                            ]}]
   (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
-        head [tb/headline :title title :rootid url :url true :style headline-style :class headline-class]
-        link (when (and url (not hide-external-link))
-               [tb/display-external-link :url url])
-        ws (when-not hide-warstats
-             [tb/display-warstats :warstats warstats])
-        rep (when-not hide-reply
-              [tb/reply-link :target url :excerpt reply-excerpt :offset reply-offset])
-        ct (when-not hide-count
-             [tb/reply-count :warstats warstats])]
-    (into [:div props]
-          (if reorder
-            [intro head link rep ws children count]
-            [intro head link ws children rep count]))))
-
-(defn root-title [& {:keys [style url display-depth warstats no-grid class] :as args}]
-  (let [small @(rf/subscribe [:window-small?])
+        small @(rf/subscribe [:window-small?])
         dd (nth deco/display-depths (or display-depth 0))
         warstats (or warstats @(rf/subscribe [:warstats-store url]))
-        flavor ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
+        db @(rf/subscribe [:core-db])
+        tbstuff (tb/root-tb-stuff
+                 url db
+                 :reply-excerpt reply-excerpt
+                 :reply-offset reply-offset
+                 :warstats warstats)
         box (if no-grid
               ""
               (if small
                 "grid-cols-2 grid child:justify-self-center child:self-center gap-y-0.5 pt-2"
                 "flex flex-row items-center"))
-        class (misc/class-string dd flavor box class)
-        props {:class class :style style}]
-    (reduce into [root-title-display props :reorder small] (assoc args :warstats warstats))))
+        class (misc/class-string dd (:bg-color tbstuff) box class)
+        props {:class class :style style}
+        head (into (:headline tbstuff) [:style headline-style :class headline-class])
+        head (if title (into head [:title title]) head)
+        link (when (and url (not hide-external-link)) (:external-link tbstuff))
+        rep (when-not hide-reply (:reply-link tbstuff))
+        rep (if (and rep tt) (into [tb/reply-link-tt] (rest rep)) rep)
+        ws (when-not hide-warstats (:warstats tbstuff))
+        ct (when-not hide-count (:count tbstuff))]
+    (into [:div props intro]
+          (if small
+            [head link rep ws children ct]
+            [head link ws children rep ct]))))
 
 (declare reference)
 
