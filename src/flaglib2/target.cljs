@@ -49,14 +49,14 @@
   (let [title-tree @(rf/subscribe [:title-tree rooturl])
         text-tree @(rf/subscribe [:text-tree rooturl])]
     [:div
-     [disp/root-title :url rooturl :display-depth 0]
+     [disp/root-title :url rooturl :display-depth 0 :tt true]
      (when-not (empty? title-tree)
-       (into [:<> [:h2 "Title discussion:"]]
+       (into [:<> [:h3 "Title discussion:"]]
              (map (fn [opid]
                     [disp/thread-opinion :opid opid])
                   (flatten title-tree))))
      (when-not (empty? text-tree)
-       (into [:<> [:h2 "Text discussion:"]]
+       (into [:<> [:h3 "Text discussion:"]]
              (map (fn [opid]
                     [disp/thread-opinion :opid opid])
                   (flatten text-tree))))]))

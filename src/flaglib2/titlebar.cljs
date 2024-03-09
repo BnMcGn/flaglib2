@@ -107,6 +107,7 @@
   (let [menu? (r/atom nil)
         tooltip? (r/atom nil)]
     [rc/popover-anchor-wrapper
+     :class "mr-3"
      :showing? (and (seq popover-content) tooltip? (not menu?))
      :position :below-right
      :popover [rc/popover-content-wrapper
@@ -320,5 +321,5 @@
   {:author-long [author-long {:author author}]})
 
 (defn assemble-bar-parts [stuff reqlist]
-  (filter identity (map #(%1 stuff) reqlist)))
+  (filter identity (map #(if (keyword? %1) (%1 stuff) %1) reqlist)))
 
