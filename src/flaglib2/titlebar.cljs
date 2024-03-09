@@ -103,21 +103,21 @@
     [:a {:style {:color "black"}
          :href (misc/make-author-url auth)} auth]))
 
-(defn reply-link-menu [excerpt body]
+(defn reply-link-menu [body & {:keys [popover-content button-label]}]
   (let [menu? (r/atom nil)
         tooltip? (r/atom nil)]
     [rc/popover-anchor-wrapper
-     :showing? (and (seq excerpt) tooltip? (not menu?))
+     :showing? (and (seq popover-content) tooltip? (not menu?))
      :position :below-right
      :popover [rc/popover-content-wrapper
-               :body (str "Reply to the excerpt: \"" excerpt "\"")]
+               :body popover-content]
      :anchor
      [rc/popover-anchor-wrapper
       :showing? menu?
       :position :below-right
       :anchor   [rc/button
                  :class (tw-btn (tw-btn-default))
-                 :label (if (seq excerpt) "Reply to Excerpt" "Reply")
+                 :label button-label
                  :attr {:on-mouse-over #(do (reset! tooltip? true) nil)
                         :on-mouse-out  #(do (reset! tooltip? false) nil)}
                  :on-click #(do (swap! menu? not) false)]
@@ -146,7 +146,6 @@
 
 (defn reply-link [& {:keys [target excerpt offset]}]
   [reply-link-menu
-   excerpt
    [:div
     [:div [:a
            {:class "text-black"
@@ -174,7 +173,34 @@
             :style {:color "black"}
             :href (target-link-url
                    :target target :excerpt excerpt :offset offset)}
-           "Other..."]]]])
+           "Other..."]]]
+   :popover-content (when excerpt (str "Reply to the excerpt: \"" excerpt "\""))
+   :button-label (if (seq excerpt) "Reply to Excerpt" "Reply")])
+
+(defn reply-link-tt [& {:keys [target excerpt offset]}]
+  [reply-link-menu
+   [:div
+    [:div [:a
+           {:style {:color "black"}
+            :href (target-link-url
+                   :target target :title-or-text :title)}
+           "Comment on title"]]
+    [:div [:a
+           {:style {:color "black"}
+            :href (target-link-url
+                   :target target :title-or-text :text)}
+           "Comment on text"]]
+    [:div [:a
+           {:style {:color "black"}
+            :href (target-link-url
+                   :target target :title-or-text :title :suggest true)}
+           "Supply article title"]]
+    [:div [:a
+           {:style {:color "black"}
+            :href (target-link-url
+                   :target target :title-or-text :text :suggest true)}
+           "Supply article text"]]]
+   :button-label "Discuss Title/Text"])
 
 ;;Old, simple version that might still be useful...
 (defn reply-link-x [& {:keys [target excerpt offset]}]
