@@ -184,21 +184,25 @@
     [:div [:a
            {:style {:color "black"}
             :href (target-link-url
+                   :flag :custodial-blank
                    :target target :title-or-text :title)}
            "Comment on title"]]
     [:div [:a
            {:style {:color "black"}
             :href (target-link-url
+                   :flag :custodial-blank
                    :target target :title-or-text :text)}
            "Comment on text"]]
     [:div [:a
            {:style {:color "black"}
             :href (target-link-url
+                   :flag :custodial-blank
                    :target target :title-or-text :title :suggest true)}
            "Supply article title"]]
     [:div [:a
            {:style {:color "black"}
             :href (target-link-url
+                   :flag :custodial-blank
                    :target target :title-or-text :text :suggest true)}
            "Supply article text"]]]
    :button-label "Discuss Title/Text"])

@@ -1,12 +1,14 @@
 (ns flaglib2.fabricate
   (:require
    [re-frame.core :as rf]
+   [clojure.set :as set]
 
    [flaglib2.fetchers :as fetchers]
    [flaglib2.misc :as misc]
    [flaglib2.subscriptions :as subs]
    [flaglib2.urlgrab :as ug]
-   [flaglib2.excerpts :as exc]))
+   [flaglib2.excerpts :as exc]
+   [flaglib2.posters :as posters]))
 
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
@@ -159,4 +161,15 @@
                :comment comment}}
     (when text? {:alternate supplied-text})
     (when title? {:alt-title supplied-title}))))
+
+;;Note: this is not much related to tt stuff above. Tt has been prechosen as primary target, not added on when we detect that the target URL is new.
+(rf/reg-sub
+ ::initialize-tt-parameters
+ (fn [db _]
+   (let [params (get-in db [:server-parameters :default])
+         tt (first
+             (set/intersection
+              (set (keys params))
+              #{:suggest-target-title :suggest-target-text :target-title :target-text}))]
+     (when tt (assoc db ::comment (posters/stick-dirc-on-text (name tt) ""))))))
 
