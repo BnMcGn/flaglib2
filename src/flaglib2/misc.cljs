@@ -153,12 +153,12 @@
 ;;Debugging tools
 
 (defn say [itm]
-  (do (println itm)
-      itm))
+  (println itm)
+  itm)
 
 (defn say-when [cond itm]
-  (do (when cond (println itm))
-      itm))
+  (when cond (println itm))
+  itm)
 
 (defn say-hiccup [itm]
   (println "SOURCE:")
@@ -168,8 +168,8 @@
   itm)
 
 (defn dump [itm]
-  (do (set! (. js/window -dumped) itm)
-      itm))
+  (set! (. js/window -dumped) itm)
+  itm)
 
 (defn dive []
   (. js/window -dumped))
@@ -186,20 +186,23 @@
   (let [store @re-frame.registrar/kind->id->handler]
     (keys (:fx store))))
 
-(defn reframe-db []
+(defn reframe-db
   "Fetch the reframe db. Used for testing/console. Not for live code!"
+  []
   @re-frame.db/app-db)
 
 
 
 
 
-(defn relative-to-range [start end num]
+(defn relative-to-range
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
+  [start end num]
   (/ (- num start) (- end start)))
 
-(defn as-in-range [start end num]
+(defn as-in-range
   "Complement of relative-to-range function. Treats num as if it were a fraction of the range specified by start and end. Returns the absolute number that results."
+  [start end num]
   (+ start (* num (- end start))))
 
 
@@ -223,7 +226,7 @@
 
 (defn reformat-urls-lists-simple [lists]
   (for [l lists
-        [k urls] (or l {})
+        [_ urls] (or l {})
         url (or urls [])]
     url))
 

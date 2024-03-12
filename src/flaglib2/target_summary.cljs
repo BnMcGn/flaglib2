@@ -1,14 +1,11 @@
 (ns flaglib2.target-summary
   (:require
    [re-frame.core :as rf]
-   [reagent.core :as r]
 
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
-   [flaglib2.titlebar :as tb]
-   [flaglib2.deco :as deco]
    [flaglib2.flags :as flags]
    [flaglib2.displayables :as disp]))
 
@@ -203,7 +200,7 @@
 (defn and-answers [qid]
   (let [opstore @(rf/subscribe [:opinion-store])
         replies @(rf/subscribe [:immediate-children qid])
-        answers (keep #(misc/answer? (opstore qid)) replies)]
+        answers (keep #(misc/answer? (opstore %1)) replies)]
     (for [o answers
           :let [opinion (get opstore o)]]
       [disp/tree-address-container

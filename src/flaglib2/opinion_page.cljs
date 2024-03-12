@@ -2,7 +2,6 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [goog.uri.utils :as uri]
 
    [re-com-tailwind.core :as rc]
 
@@ -19,10 +18,9 @@
    (misc/set-meta-property! "opinml:target" (:target opinion))))
 
 (defn opinion-root [& {:keys [rooturl focus]}]
-  (let [opinion @(rf/subscribe [:opinion-store (last focus)])
-        small @(rf/subscribe [:window-small?])]
+  (let [small @(rf/subscribe [:window-small?])]
     [:div
-     {:on-click (fn [ev] (set! (. js/window -location) (misc/make-target-url rooturl)))}
+     {:on-click (fn [] (set! (. js/window -location) (misc/make-target-url rooturl)))}
      [disp/root-title
       :url rooturl
       :hide-reply true
@@ -109,7 +107,7 @@
         curve-locator (curve-locator-by-index layers-curve (count focus))
         excerpt (r/atom "")
         offset (r/atom nil)]
-    (fn [& {:as args}]
+    (fn [& _]
       (into
        [:div {:class "relative"}
         [opinion-root :rooturl rooturl :focus focus]]

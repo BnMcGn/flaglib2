@@ -2,7 +2,6 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :as rf]
-   [reagent.core :as r]
    [flaglib2.misc :as misc]
    [flaglib2.deco :as deco]
 

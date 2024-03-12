@@ -140,14 +140,14 @@
 
 
 ;;FIXME: Don't have a way to input offset in case of unmatched excerpt
-(defn excerpt-search [& {:as init :keys [excerpt offset text]}]
+(defn excerpt-search
   "on-change can be an event or a function"
+  [& {:keys [excerpt offset text]}]
   (let [model (reagent/atom (when (not-empty excerpt) excerpt))
         tdat (excerpts/create-textdata text)]
     (rf/dispatch-sync [::init-excerpt-offset tdat excerpt offset])
-    (fn [& {:keys [text on-change width]}]
-      (let [start @(rf/subscribe [::excerpt-start])
-            location [::excerpt-suggester]]
+    (fn [& {:keys [on-change width]}]
+      (let [location [::excerpt-suggester]]
         [rc/v-box
          :class "rc-typeahead"
          :width width

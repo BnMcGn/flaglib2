@@ -1,12 +1,10 @@
 (ns flaglib2.things
   (:require
    [re-frame.core :as rf]
-   [reagent.core :as r]
 
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
-   [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]))
 
 (defn display-thing [tbstuff & {:keys [fields]}]

@@ -1,6 +1,6 @@
 (ns flaglib2.deco
   (:require
-   [clojure.string :as string]))
+   ))
 
 
 ;; formerly aside

@@ -2,20 +2,15 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-;   [clojure.walk :as walk]
-   [goog.string :as string]
    [goog.uri.utils :as uri]
 
+   [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-default tw-btn]]
 
    [flaglib2.misc :as misc]
-   [flaglib2.ipfs :as ipfs]
    [flaglib2.flags :as flags]
    [flaglib2.mood :as mood]
-   [flaglib2.deco :as deco]
-
-   [re-com-tailwind.core :as rc]
-   [flaglib2.excerpts :as excerpt]))
+   [flaglib2.deco :as deco]))
 
 (def indicator-names
   {:x-up "thumbs_up_sign"
@@ -245,7 +240,6 @@
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
-        tinfo (when id @(rf/subscribe [:title-store id]))
         [titl available? patch?]
         (if title
           [title true false]

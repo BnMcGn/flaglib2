@@ -1,10 +1,7 @@
 (ns flaglib2.mock-make
   (:require
-   [reagent.core :as reagent :refer [atom]]
-   [reagent.dom :as rdom]
    [re-frame.core :as rf]
 
-   [flaglib2.fabricate :as fab]
    [flaglib2.forms :as forms]
    [flaglib2.stepper :as step]
    [flaglib2.misc :as misc]
@@ -206,7 +203,7 @@ the Internet.
                        :post-fail [:specify-target :target-decision :review-text]})
 
 
-(defn mock-make [{:keys [section]}]
+(defn mock-make [_]
   [step/wf-stepper])
 
 (rf/reg-event-fx

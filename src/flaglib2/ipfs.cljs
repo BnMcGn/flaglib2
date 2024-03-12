@@ -1,6 +1,5 @@
 (ns flaglib2.ipfs
   (:require
-   [goog.dom :as gdom]
    [goog.object :as go]
    [re-frame.core :as rf]
    [day8.re-frame.http-fx]
@@ -9,9 +8,7 @@
    [clojure.set]
    [cljs.reader]
 
-   [flaglib2.misc :as misc]
-   [flaglib2.fetchers :as fetchers]
-   [cljs-time.core :as time]))
+   [flaglib2.misc :as misc]))
 
 (defn ipns-host []
   (go/get js/window "IPNSHOST"))

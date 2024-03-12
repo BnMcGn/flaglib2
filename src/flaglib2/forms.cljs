@@ -1,23 +1,17 @@
 (ns flaglib2.forms
   (:require
    [re-frame.core :as rf]
-   [reagent.core :as r]
 
-   [flaglib2.fetchers :as fetchers]
-   [flaglib2.ipfs :as ip]
    [flaglib2.misc :as misc]
    [flaglib2.subscriptions :as subs]
    [flaglib2.stepper :as step]
    [flaglib2.flags :as flags]
    [flaglib2.titlebar :as titlebar]
    [flaglib2.displayables :as displayables]
-   [flaglib2.excerpts :as excerpts]
    [flaglib2.excerpt-search :as xsearch]
-   [flaglib2.typeahead :as ta]
    [flaglib2.urlgrab :as ug]
    [flaglib2.posters :as posters]
 
-   [cljsjs.fuse :as fuse]
    [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-danger]]))
 
@@ -113,30 +107,29 @@
 
 ;;FIXME: Should also review title?
 (defn review-text []
-  (let [text @(rf/subscribe [:flaglib2.fabricate/review-text])]
-    [:div
-     [:h3 "Review article text for tidyness"]
-     [:ul
-      [:li "This text is automatically extracted. Please ensure that it is formatted pleasantly."]
-      [:li "Remove extraneous text that is not part of the article (Eg. footer and sidebar text, unrelated links)"]
-      [:li "Check that the article text is complete."]
-      [:li "Ensure that the title is uncluttered and informative."]
-      [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]
-      [:br]
-      [:li "To skip, click Next"]]
-     [:br]
+  [:div
+   [:h3 "Review article text for tidyness"]
+   [:ul
+    [:li "This text is automatically extracted. Please ensure that it is formatted pleasantly."]
+    [:li "Remove extraneous text that is not part of the article (Eg. footer and sidebar text, unrelated links)"]
+    [:li "Check that the article text is complete."]
+    [:li "Ensure that the title is uncluttered and informative."]
+    [:li "DO NOT edit the article text. Leave spelling errors and disagreements with content for later."]
+    [:br]
+    [:li "To skip, click Next"]]
+   [:br]
 
-     [rc/input-text
-      :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
-      :placeholder "Article Title"
-      :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
-     [rc/input-textarea
-      :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
-      :placeholder "Article Text"
-      :width "100%"
-      :height "14rem"
-      :rows 15
-      :on-change (fn [text] (rf/dispatch [:flaglib2.fabricate/set-supplied-text text]))]]))
+   [rc/input-text
+    :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
+    :placeholder "Article Title"
+    :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
+   [rc/input-textarea
+    :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
+    :placeholder "Article Text"
+    :width "100%"
+    :height "14rem"
+    :rows 15
+    :on-change (fn [text] (rf/dispatch [:flaglib2.fabricate/set-supplied-text text]))]])
 
 ;;FIXME: Previous button non-functional
 (defn review-text-buttons []
@@ -273,7 +266,7 @@
 
 (rf/reg-event-fx
  ::opine-initialize
- (fn [{:keys [db]} _]
+ (fn [{:keys [_]} _]
    {:fx
     [[:dispatch [:flaglib2.stepper/set-summary :excerpt]]
      [:dispatch [:flaglib2.stepper/set-summary :reference]]
@@ -347,9 +340,7 @@
 ;;Needs to be at bottom of file:
 
 (defn make-opinion []
-  (let [search @(rf/subscribe [:flaglib2.urlgrab/search [:flaglib2.fabricate/specify-target]])
-        search-res @(rf/subscribe [:url-search-results [:flaglib2.fabricate/specify-target]])]
-    [step/wf-stepper]))
+  [step/wf-stepper])
 
 (defn what-opin-form? [db]
   (let [params (get-in db [:server-parameters :default])

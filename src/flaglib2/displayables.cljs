@@ -2,7 +2,6 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [clojure.string :as string]
 
    [cljsjs.rangy-textrange]
 
@@ -272,19 +271,19 @@
 
 (defn question [opid & {:keys [minify style hide-warstats truncate]
                         :or {truncate :follow-minify}}]
-  (when-let [opinion @(rf/subscribe [:opinion-store opid])]
-    [question-container
-     {:style style}
-     :minify minify
-     :body
-     [:<>
+  (when @(rf/subscribe [:opinion-store opid]) 
+            [question-container
+             {:style style}
+             :minify minify
+             :body
+             [:<>
       ;;FIXME: Should manually truncate?
-      [tb/headline :opinionid opid :url true :class (when (if (= :follow-minify truncate)
-                                                            minify
-                                                            truncate)
-                                                      "truncate")]
-      (when-not hide-warstats
-        [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])])]]))
+              [tb/headline :opinionid opid :url true :class (when (if (= :follow-minify truncate)
+                                                                    minify
+                                                                    truncate)
+                                                              "truncate")]
+              (when-not hide-warstats
+                [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])])]]))
 
 (defn opinion-extras [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
@@ -297,7 +296,7 @@
 (defn thread-opinion [& {:keys [opid text]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
-    (fn [& {:as args}]
+    (fn [& _]
       (let
           [opinion @(rf/subscribe [:opinion-store opid])
            warstats @(rf/subscribe [:warstats-store opid])]

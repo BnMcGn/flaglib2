@@ -15,10 +15,10 @@
    [flaglib2.target-summary :as tsum]))
 
 
-(defn target-root-article [& {:keys [focus rooturl]}]
+(defn target-root-article [& {:keys [rooturl]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
-    (fn [& {:as args}]
+    (fn [& _]
      [:div
       [disp/root-title
        :display-depth 0
@@ -87,7 +87,6 @@
  :target
  (fn [{:keys [db]} _]
    (let [target (get-in db [:server-parameters :default :rooturl])
-         tmode (get-in db [:server-parameters :default :tmode])
          db (assoc db :root-element target-root)]
      {:db db
       :fx [ [:dispatch [:flaglib2.ipfs/request-rooturl-item target "opinion-tree"]]

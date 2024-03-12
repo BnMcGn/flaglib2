@@ -1,7 +1,6 @@
 (ns flaglib2.mood
   (:require
    [cljs-time.core :as tm]
-   [clojure.string :as str]
 
    [flaglib2.misc :as misc]
    [flaglib2.deco :as deco]))
@@ -19,8 +18,9 @@
           (tm/before? newest recent) "recent"
           :else "new")))
 
-(defn- significant [n1 n2]
+(defn- significant
   "is n1 significant related to n2"
+  [n1 n2]
   (when (< 0 n1)
     (if (>= n1 n2)
       true
@@ -34,8 +34,9 @@
                 :custodial-flag-abuse :custodial-offtopic :custodial-arcane})
 (def goodflags #{:positive-interesting :positive-funny})
 
-(defn flavor-from-multiple [db ids]
+(defn flavor-from-multiple
   "Creates a flavor descriptor from a collation of all the warstats passed in. Needs to handle multiple warstats collections because it is used for excerpts which may represent multiple opinions."
+  [db ids]
         ;;; controv: The opinions are themselves contested
         ;;; positive: Relatively uncontested postive opinions
         ;;; negative: Relatively uncontested negative opinions

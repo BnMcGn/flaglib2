@@ -1,17 +1,13 @@
 (ns flaglib2.suggester
   (:require
-    [re-com-tailwind.core        :refer [h-box v-box box gap line flex-child-style align-style]] ;; need?
-    
-    [flaglib2.misc :as misc]
-    [re-frame.core :as rf]
-    [reagent.core      :as    reagent]
-    [goog.events.KeyCodes]))
+   [re-frame.core :as rf]
+   [re-com-tailwind.core        :as rc]
+   [goog.events.KeyCodes]))
 
 (defn- activate-suggestion-by-index
   "Make the suggestion at `index` the active suggestion"
-  [{:as state :keys [suggestions]} index]
-  (let [suggestion (nth suggestions index)]
-    (assoc state :suggestion-active-index index)))
+  [state index]
+  (assoc state :suggestion-active-index index))
 
 (defn- wrap [index count] (mod (+ count index) count))
 
@@ -122,17 +118,17 @@
   (let [{:as state
          :keys [suggestions suggestion-active-index input render-suggestion]}
         @(rf/subscribe [::suggester location])]
-    [box
+    [rc/box
      :style {:position "relative"}
      :child
-     [v-box
+     [rc/v-box
       ;;We omit the waiting? code
       :children
       [(doall
         (for [[i s] (map vector (range) suggestions)
               :let [selected? (= suggestion-active-index i)]]
           ^{:key i}
-          [box
+          [rc/box
            :child (if render-suggestion
                     (render-suggestion s)
                     s)

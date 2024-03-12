@@ -2,10 +2,8 @@
   (:require
    [re-frame.core :as rf]
    [flaglib2.misc :as misc]
-   [flaglib2.urlgrab :as urlgrab]
 
-   [clojure.walk :as walk]
-   [clojure.string :as string]))
+   [clojure.walk :as walk]))
 
 
 (rf/reg-sub

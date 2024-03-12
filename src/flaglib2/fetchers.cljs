@@ -3,7 +3,6 @@
    [re-frame.core :as rf]
    [day8.re-frame.http-fx]
    [ajax.core :as ajax]
-   [clojure.string :as string]
    [clojure.walk :as walk]
    [flaglib2.misc :as misc]))
 

@@ -117,8 +117,10 @@
   (not (or (> start1 end2) (> start2 end1))))
 
 ;;Find all the indices where excerpts start or stop.
-(defn excerpt-segment-points [opset end]
+(defn excerpt-segment-points
   "End is the length of the text"
+  [opset end]
+
   (sort - (reduce into #{0 (+ 1 end)}
                   (for [itm opset
                         :let [[start end] (:text-position itm)]]
@@ -219,8 +221,9 @@
       (lazy-seq (cons node.data (proc-pre-excerpt (next nodes) range)))
       :else [:fail])))
 
-(defn text-location-from-dom-range [el range]
+(defn text-location-from-dom-range
   "el is presumed to be a hilited-text div"
+  [el range]
   (let [segments (proc-pre-excerpt (hilited-node-walk el) range)
         [pre excerpt] (split-with string? segments)]
     (when-not (or (= :fail (first excerpt)) (= :fail (last excerpt)))
@@ -240,9 +243,10 @@
 ;;  - If user selects, or we are down to one, move on to selecting end.
 ;;  - Minimum starting size, perhaps 5 characters. Must be contiguous. What about short excerpts?
 
-(defn find-possible-excerpt-ends [tdat end-of-start remainder]
+(defn find-possible-excerpt-ends
   "Find possible endings for an excerpt when start is already known.
 Decide before calling where the start has ended. Will return some-excerpt-here? style matches"
+  [tdat end-of-start remainder]
   (let [excerpt (create-textdata remainder)]
     (for [i (range end-of-start (:text-length tdat))
           :let [match (some-excerpt-here? tdat excerpt i)]
@@ -319,7 +323,7 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
        :else [res '()])))
   ;;Handle end search
   ([tdat search found-start]
-   (let [[seg1 seg2] (split-search-on-double-space search)
+   (let [[_ seg2] (split-search-on-double-space search)
          start (ensure-correct-start tdat search found-start)
          seg2 (or seg2
                   (remaining-portion-of-search search start))]

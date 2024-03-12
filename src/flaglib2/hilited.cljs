@@ -1,7 +1,6 @@
 (ns flaglib2.hilited
   (:require
    [re-frame.core :as rf]
-   [reagent.core :as r]
    [clojure.string :as string]
 
    [cljsjs.rangy-textrange]
@@ -10,7 +9,6 @@
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
    [flaglib2.excerpts :as excerpts]
-   [flaglib2.titlebar :as tb]
    [re-com-tailwind.core :as rc]))
 
 (def rangy js/rangy)
@@ -69,13 +67,12 @@
    (assoc db ::active-popup nil)))
 
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup? sub-opin-component]}]
-  (let [warstats @(rf/subscribe [:warstats-store])
-        popup-visible? @(rf/subscribe [:popup-is-active? id])
+  (let [popup-visible? @(rf/subscribe [:popup-is-active? id])
         db @(rf/subscribe [:core-db])
         class1 "relative font-bold"
         class2 (mood/flavor+freshness db excerpt-opinions)
         click-handler
-        (fn [ev]
+        (fn []
           ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So
           ;; check for selection. But we want to get rid of active popup in any case of a click or
           ;; drag.
@@ -160,7 +157,7 @@
         opstore @(rf/subscribe [:opinion-store])
         opids @(rf/subscribe [:immediate-children (or root-target-url (last tree-address))])
         selection-change
-        (fn [ev]
+        (fn []
           (when (and excerpt offset)
             (if (is-selection-in-single-hilited-text? (. rangy (getSelection)))
               (let [textel (. js/document (getElementById id))
