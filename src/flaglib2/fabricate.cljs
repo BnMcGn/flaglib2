@@ -163,7 +163,7 @@
     (when title? {:alt-title supplied-title}))))
 
 ;;Note: this is not much related to tt stuff above. Tt has been prechosen as primary target, not added on when we detect that the target URL is new.
-(rf/reg-sub
+(rf/reg-event-db
  ::initialize-tt-parameters
  (fn [db _]
    (let [params (get-in db [:server-parameters :default])

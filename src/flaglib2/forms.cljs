@@ -247,11 +247,10 @@
   [step/button-box (step/button-spacer nil [[step/next-button "Accept"]])])
 
 (defn opine []
-  (let [comment @(rf/subscribe [:flaglib2.fabricate/comment])
-        messages @(rf/subscribe [:opinion-post-messages])]
+  (let [messages @(rf/subscribe [:opinion-post-messages])]
     [:div
      [rc/input-textarea
-      :model ""
+      :model (rf/subscribe [:flaglib2.fabricate/comment])
       :width "100%"
       :height "14rem"
       :placeholder "Enter a Comment"
@@ -379,6 +378,7 @@
      {:db db
       :fx [[:dispatch [:add-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize form presets]]
+           [:dispatch [:flaglib2.fabricate/initialize-tt-parameters]]
            [:dispatch
             (if target
               [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
