@@ -2,12 +2,14 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [goog.uri.utils :as uri]
 
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
    [flaglib2.displayables :as disp]
-   [flaglib2.titlebar :as tb]))
+   [flaglib2.titlebar :as tb]
+   [flaglib2.target-summary :as tsum]))
 
 ;;FIXME: Should be done server side?
 (rf/reg-fx
@@ -102,7 +104,7 @@
       :titlebar titlebar
       :body body])))
 
-(defn opinion-page []
+(defn opinion-thread []
   (let [{:keys [focus rooturl]} @(rf/subscribe [:server-parameters])
         curve-locator (curve-locator-by-index layers-curve (count focus))
         excerpt (r/atom "")
@@ -114,6 +116,35 @@
        (for [opid focus]
          [opinion-layer :opid opid :curve-locator curve-locator :focus focus
           :excerpt excerpt :offset offset])))))
+
+
+(defn opinion-title-thread [& {:keys [iid]}]
+  (let [title-tree @(rf/subscribe [:title-tree iid])]
+    [:div
+     [disp/opinion-summary iid :hide-tree-address true :tt true]
+     (when-not (empty? title-tree)
+       (into [:<> [:h3 "Title discussion:"]]
+             (map (fn [opid]
+                    [disp/thread-opinion :opid opid])
+                  (flatten title-tree))))]))
+
+(defn opinion-page []
+  (let [{:keys [tmode focus]} @(rf/subscribe [:server-parameters])
+        current (r/atom (if tmode (keyword tmode) :thread))
+        small @(rf/subscribe [:window-small?])]
+    [:<> [(if small rc/vertical-bar-tabs rc/horizontal-tabs)
+          :model current
+          :tabs [{:id :thread :label "Thread View"}
+                 {:id :summary :label "Summary"}
+                 {:id :title :label "Title"}]
+          :parts {:wrapper {:class "mt-2"}
+                  :anchor {:style {:color "#777"}}}
+          :on-change #(set! js/window.location.href
+                            (uri/setParam js/window.location.href "tmode" (name %1)))]
+     (case @current
+       :thread [opinion-thread]
+       :summary [tsum/opinion-stats (last focus)]
+       :title [opinion-title-thread :iid (last focus)])]))
 
 (rf/reg-event-fx
  :opinion-page

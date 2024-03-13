@@ -51,10 +51,10 @@
      :text-anchor "middle"}
     label]])
 
-(defn summary-scores-chart [rooturl]
+(defn summary-scores-chart [targetid]
   (let [w (- 110 (m 1) (m 3))
         h (- (* 2 centerline) (m 0) (m 2))
-        warstats @(rf/subscribe [:warstats-store rooturl])
+        warstats @(rf/subscribe [:warstats-store targetid])
         colsize 20
         col2 70
         highest (max (:x-right warstats) (:x-wrong warstats) (:x-up warstats) (:x-down warstats))]
@@ -165,9 +165,9 @@
               [opid score])]
     (map first (sort-by second res))))
 
-(defn high-scores [rooturl]
+(defn high-scores [targetid]
   (let [db @(rf/subscribe [:core-db])
-        optree (get-in db [:opinion-tree-store rooturl])
+        optree (get-in db [:sub-tree targetid])
         opids (organize-opinion-tree optree (partial summary-score-val db))]
     (when-not (empty? opids)
       [:div
@@ -181,9 +181,9 @@
                 :body
                 [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]]))])))
 
-(defn controversial [rooturl]
+(defn controversial [targetid]
   (let [db @(rf/subscribe [:core-db])
-        optree (get-in db [:opinion-tree-store rooturl])
+        optree (get-in db [:sub-tree targetid])
         opids (organize-opinion-tree optree (partial summary-controversy-val db))]
     (when-not (empty? opids)
       [:div
@@ -209,9 +209,9 @@
        :body
        [disp/opinion-summary o :hide-tree-address true :hide-icon true :hide-reply true]])))
 
-(defn questions-and-answers [rooturl]
+(defn questions-and-answers [targetid]
   (let [warstats-store @(rf/subscribe [:warstats-store])
-        optree @(rf/subscribe [:opinion-tree-store rooturl])
+        optree @(rf/subscribe [:sub-tree targetid])
         questions (filter #(:question (warstats-store %1)) (flatten optree))]
     (when-not (empty? questions)
       [:div
@@ -221,7 +221,7 @@
                    r (cons [disp/question q :minify true] (and-answers q))]
                r))])))
 
-(defn target-summary [& {:keys [rooturl]}]
+(defn target-stats [& {:keys [rooturl]}]
   [:div
    [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
    [:div {:class "flex flex-col gap-4 mb-8"}
@@ -234,3 +234,17 @@
     [questions-and-answers rooturl]
     [high-scores rooturl]
     [controversial rooturl]]])
+
+(defn opinion-stats [& {:keys [iid]}]
+  [:div
+   [disp/opinion-summary iid :hide-tree-address true]
+   [:div {:class "flex flex-col gap-4 mb-8"}
+    [:div
+     {:class "flex flex-col sm:flex-row gap-4"}
+     [summary-scores-chart iid]
+     [display-other-flags iid]]
+    [references-summary iid]
+    [refd-summary iid]
+    [questions-and-answers iid]
+    [high-scores iid]
+    [controversial iid]]])

@@ -80,7 +80,7 @@
      (case @current
        :article [target-root-article :rooturl (:rooturl params)]
        :comment [target-root-thread :rooturl (:rooturl params)]
-       :summary [tsum/target-summary :rooturl (:rooturl params)]
+       :summary [tsum/target-stats :rooturl (:rooturl params)]
        :tt [text-title-thread :rooturl (:rooturl params)])]))
 
 (rf/reg-event-fx
