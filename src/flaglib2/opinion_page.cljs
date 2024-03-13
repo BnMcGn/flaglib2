@@ -143,7 +143,7 @@
                             (uri/setParam js/window.location.href "tmode" (name %1)))]
      (case @current
        :thread [opinion-thread]
-       :summary [tsum/opinion-stats (last focus)]
+       :summary [tsum/opinion-stats :iid (last focus)]
        :title [opinion-title-thread :iid (last focus)])]))
 
 (rf/reg-event-fx

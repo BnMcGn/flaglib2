@@ -60,7 +60,7 @@
         highest (max (:x-right warstats) (:x-wrong warstats) (:x-up warstats) (:x-down warstats))]
     [:div {:class "float-left"}
      [:h3 "Score"]
-     (when warstats
+     (when-not (empty? warstats)
        [:div
         {:class "border-[3px] border-black"}
         [:svg {:width (+ w (m 1) (m 3))
