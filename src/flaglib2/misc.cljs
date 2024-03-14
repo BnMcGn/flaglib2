@@ -80,6 +80,19 @@
   (not (some (partial opinion-has-dirc? opinion)
              [:target-text :suggest-target-text :target-title :suggest-target-title])))
 
+(defn opinion-suggests-tt? [opinion]
+  (some (partial opinion-has-dirc? opinion ) [:suggest-target-title :suggest-target-text]))
+
+(defn opinion-supplies-text? [opinion db]
+  (let [{:keys [iid target]} opinion
+        tinfo (get-in db [:text-store target])]
+    (= (:text-source tinfo) iid)))
+
+(defn opinion-supplies-title? [opinion db]
+  (let [{:keys [iid target]} opinion
+        tinfo (get-in db [:title-store target])]
+    (= (:title-source tinfo) iid)))
+
 (defn get-sub-tree [db [_ key]]
   (if (iid? key)
     (let [opinion (get-in db [:opinion-store key])

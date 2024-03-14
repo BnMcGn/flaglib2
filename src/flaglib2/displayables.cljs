@@ -295,7 +295,7 @@
      (when-let [ref (:reference opinion)] [reference ref])
      (when (:question warstats) [question-container {}])]))
 
-(defn thread-opinion [& {:keys [opid text]}]
+(defn thread-opinion [& {:keys [opid text children]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& _]
@@ -315,11 +315,13 @@
                 tbar (if small
                        [:<>
                         [tb/author-long opinion]
+                        children
                         [tb/display-warstats :warstats warstats]]
                        [:<>
                         [tb/flag-name opinion]
                         [tb/date-stamp opinion]
                         [tb/author-long opinion]
+                        children
                         [tb/display-warstats :warstats warstats]
                         ;;FIXME: should handle excerpts, could use iid instead of url?
                         #_[tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset]])
@@ -329,7 +331,7 @@
                   {:width "100%"}
                   {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"})]
             [(if small opinion-container-mobile opinion-container)
-             {:class "mb-6 sm:break-normal break-all sm:break-words"
+             {:class "mb-6 sm:break-normal break-all sm:break-words relative"
               :style main-style
               :on-click (fn [e]
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
@@ -370,3 +372,9 @@
                (str "opinion by " (:authorname opinion))
                "unknown opinion")]
     [:span text]))
+
+(defn tt-indicator [supply? description]
+  [:div
+   (if supply?
+     (str "Supplies the " description)
+     (str "Suggests a " description))])

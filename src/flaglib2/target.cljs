@@ -47,18 +47,25 @@
 
 (defn text-title-thread [& {:keys [rooturl]}]
   (let [title-tree @(rf/subscribe [:title-tree rooturl])
-        text-tree @(rf/subscribe [:text-tree rooturl])]
+        text-tree @(rf/subscribe [:text-tree rooturl])
+        db @(rf/subscribe [:core-db])]
     [:div
      [disp/root-title :url rooturl :display-depth 0 :tt true]
      (when-not (empty? title-tree)
        (into [:<> [:h3 "Title discussion:"]]
              (map (fn [opid]
-                    [disp/thread-opinion :opid opid])
+                    (let [ind (disp/tt-indicator
+                               (misc/opinion-supplies-title? (get-in db [:opinion-store opid]) db)
+                               "title")]
+                      [disp/thread-opinion :opid opid :children ind]))
                   (flatten title-tree))))
      (when-not (empty? text-tree)
        (into [:<> [:h3 "Text discussion:"]]
              (map (fn [opid]
-                    [disp/thread-opinion :opid opid])
+                    (let [ind (disp/tt-indicator
+                               (misc/opinion-supplies-text? (get-in db [:opinion-store opid]) db)
+                               "text")]
+                      [disp/thread-opinion :opid opid :children ind]))
                   (flatten text-tree))))]))
 
 (defn target-root []

@@ -119,13 +119,17 @@
 
 
 (defn opinion-title-thread [& {:keys [iid]}]
-  (let [title-tree @(rf/subscribe [:title-tree iid])]
+  (let [title-tree @(rf/subscribe [:title-tree iid])
+        db @(rf/subscribe [:core-db])]
     [:div
      [disp/opinion-summary iid :hide-tree-address true :tt true]
      (when-not (empty? title-tree)
        (into [:<> [:h3 "Title discussion:"]]
              (map (fn [opid]
-                    [disp/thread-opinion :opid opid])
+                    (let [ind (disp/tt-indicator
+                               (misc/opinion-supplies-title? (get-in db [:opinion-store opid]) db)
+                               "title")]
+                      [disp/thread-opinion :opid opid :children ind]))
                   (flatten title-tree))))]))
 
 (defn opinion-page []
