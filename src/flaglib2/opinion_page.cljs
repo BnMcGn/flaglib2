@@ -90,7 +90,7 @@
                   :left (str hpos "em")
                   :width (str "calc(100% - " hpos "em)")}}
          :box-props box-props
-         :icon-style :icon
+         :icon-layout :icon
          :opinion opinion
          :titlebar titlebar
          :body body])

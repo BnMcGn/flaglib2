@@ -52,23 +52,27 @@
 
 (declare reference)
 
-(defn opinion-container [props & {:keys [iconid titlebar body box-props]
+(defn opinion-container [props & {:keys [iconid titlebar body box-props substitutes]
                                   :or {box-props {:class "bg-white border-[3px] border-black ml-7"}}}]
   [:div
    props
-   [tb/opinion-icon iconid :style {:float "left" :position "relative" :top "3px"}]
+   (tb/rewidget-item
+    [tb/opinion-icon
+     iconid
+     :style {:float "left" :position "relative" :top "3px"}]
+    (:opinion-icon substitutes))
    [:div
     box-props
     [:div {:class "flex flex-row gap-4 items-center"} titlebar]
     body]])
 
-(defn opinion-container-mobile [props & {:keys [opinion titlebar body box-props icon-style]
-                                         :or {icon-style :tree-address}}]
+(defn opinion-container-mobile [props & {:keys [opinion titlebar body box-props icon-layout substitutes]
+                                         :or {icon-layout :tree-address}}]
   [:div
    (or props {})
-   (case icon-style
-     :tree-address [tb/display-tree-address (:tree-address opinion)]
-     :icon [tb/opinion-icon (:iid opinion)]
+   (case icon-layout
+     :tree-address [tb/display-tree-address (:tree-address opinion) :substitutes substitutes]
+     :icon (tb/rewidget-item [tb/opinion-icon (:iid opinion)] (:opinion-icon))
      nil)
    [:div
     (merge (or box-props {})
@@ -273,7 +277,7 @@
 
 (defn question [opid & {:keys [minify style hide-warstats truncate]
                         :or {truncate :follow-minify}}]
-  (when @(rf/subscribe [:opinion-store opid]) 
+  (when @(rf/subscribe [:opinion-store opid])
             [question-container
              {:style style}
              :minify minify
@@ -295,7 +299,7 @@
      (when-let [ref (:reference opinion)] [reference ref])
      (when (:question warstats) [question-container {}])]))
 
-(defn thread-opinion [& {:keys [opid text children]}]
+(defn thread-opinion [& {:keys [opid text children no-tree-address substitutes]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& _]
@@ -337,7 +341,9 @@
                           (set! (. js/window -location) (misc/make-opinion-url opinion))
                           (.stopPropagation e))}
              :iconid opid
+             :icon-layout (when small (if no-tree-address :icon :tree-address))
              :opinion opinion
+             :substitutes substitutes
              :titlebar tbar
              :body
              [:<>
@@ -374,7 +380,10 @@
     [:span text]))
 
 (defn tt-indicator [supply? description]
-  [:div
-   (if supply?
-     (str "Supplies the " description)
-     (str "Suggests a " description))])
+  (let [title (if supply?
+                (str "Supplies the active " description)
+                (str "Suggests a " description))]
+    [:div
+     {:class (misc/class-string "absolute" (if supply? "bg-[#80ff80]" "bg-black"))
+      :title title}
+     (misc/entities "&nbsp;")]))

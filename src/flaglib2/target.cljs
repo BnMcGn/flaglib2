@@ -12,7 +12,8 @@
    [flaglib2.deco :as deco]
    [flaglib2.displayables :as disp]
 
-   [flaglib2.target-summary :as tsum]))
+   [flaglib2.target-summary :as tsum]
+   [flaglib2.titlebar :as tb]))
 
 
 (defn target-root-article [& {:keys [rooturl]}]
@@ -45,6 +46,8 @@
                     [disp/thread-opinion :opid opid])
                   (flatten optree))))]))
 
+;;FIXME: Add title excerpt support
+;;FIXME: Display original title, maybe text?
 (defn text-title-thread [& {:keys [rooturl]}]
   (let [title-tree @(rf/subscribe [:title-tree rooturl])
         text-tree @(rf/subscribe [:text-tree rooturl])
@@ -54,18 +57,28 @@
      (when-not (empty? title-tree)
        (into [:<> [:h3 "Title discussion:"]]
              (map (fn [opid]
-                    (let [ind (disp/tt-indicator
-                               (misc/opinion-supplies-title? (get-in db [:opinion-store opid]) db)
-                               "title")]
-                      [disp/thread-opinion :opid opid :children ind]))
+                    (let [opinion (get-in db [:opinion-store opid])
+                          indicate (and (not (misc/deep-opinion? opinion))
+                                        (misc/opinion-suggests-tt? opinion))
+                          subs (when indicate
+                                 {:opinion-icon
+                                  [tb/opinion-icon-tt
+                                   :description "title"
+                                   :supply? (misc/opinion-supplies-title? opinion db)]})]
+                      [disp/thread-opinion :opid opid :substitutes subs]))
                   (flatten title-tree))))
      (when-not (empty? text-tree)
        (into [:<> [:h3 "Text discussion:"]]
              (map (fn [opid]
-                    (let [ind (disp/tt-indicator
-                               (misc/opinion-supplies-text? (get-in db [:opinion-store opid]) db)
-                               "text")]
-                      [disp/thread-opinion :opid opid :children ind]))
+                    (let [opinion (get-in db [:opinion-store opid])
+                          indicate (and (not (misc/deep-opinion? opinion))
+                                        (misc/opinion-suggests-tt? opinion))
+                          subs (when indicate
+                                 {:opinion-icon
+                                  [tb/opinion-icon-tt
+                                   :description "text"
+                                   :supply? (misc/opinion-supplies-text? opinion db)]})]
+                      [disp/thread-opinion :opid opid :substitutes subs]))
                   (flatten text-tree))))]))
 
 (defn target-root []

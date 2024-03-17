@@ -43,12 +43,21 @@
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
 
-(defn opinion-icon [opid & {:keys [style]}]
+(defn opinion-icon [opid & {:keys [class style title]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])]
     [:a
      {:href (misc/make-opinion-url opinion)
+      :title title
       :style (or style {})}
      [:img {:src (flag-icon (:flag opinion)) :class "inline"}]]))
+
+(defn opinion-icon-tt [opid & {:keys [class style supply? description]}]
+  [opinion-icon
+   :class (misc/class-string class (if supply? "border-[#80ff80]" "border-black") "border-1")
+   :title (if supply?
+            (str "Supplies the active " description)
+            (str "Suggests a " description))
+   :style style])
 
 (defn display-tree-address [tree-address & {:keys [style class]}]
   [rc/h-box
@@ -323,3 +332,14 @@
 (defn assemble-bar-parts [stuff reqlist]
   (filter identity (map #(if (keyword? %1) (%1 stuff) %1) reqlist)))
 
+(defn rewidget-item [orig sub]
+  (if sub
+    (let [sub (if (symbol? sub) [sub] sub)]
+     (reduce into [[(first sub)] (rest orig) (rest sub)]))
+    orig))
+
+(defn rewidget-stuff [stuff substitutes]
+  (merge stuff
+         (into {}
+               (for [[k v] substitutes]
+                 [k (rewidget-item (get stuff k) v)]))))
