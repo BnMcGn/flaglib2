@@ -47,13 +47,15 @@
   (let [opinion @(rf/subscribe [:opinion-store opid])]
     [:a
      {:href (misc/make-opinion-url opinion)
+      :class class
       :title title
       :style (or style {})}
      [:img {:src (flag-icon (:flag opinion)) :class "inline"}]]))
 
 (defn opinion-icon-tt [opid & {:keys [class style supply? description]}]
   [opinion-icon
-   :class (misc/class-string class (if supply? "border-[#80ff80]" "border-black") "border-1")
+   opid
+   :class (misc/class-string class (if supply? "border-[#80ff80]" "border-black") "border-2")
    :title (if supply?
             (str "Supplies the active " description)
             (str "Suggests a " description))
@@ -343,3 +345,4 @@
          (into {}
                (for [[k v] substitutes]
                  [k (rewidget-item (get stuff k) v)]))))
+

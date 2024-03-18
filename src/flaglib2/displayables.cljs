@@ -72,7 +72,7 @@
    (or props {})
    (case icon-layout
      :tree-address [tb/display-tree-address (:tree-address opinion) :substitutes substitutes]
-     :icon (tb/rewidget-item [tb/opinion-icon (:iid opinion)] (:opinion-icon))
+     :icon (tb/rewidget-item [tb/opinion-icon (:iid opinion)] (:opinion-icon substitutes))
      nil)
    [:div
     (merge (or box-props {})
