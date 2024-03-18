@@ -74,10 +74,7 @@
   (get deco/flavor-background (flavor-from-multiple db ids)))
 
 (defn flavor-from-own-warstats [warstats]
-  (let [effect (:effect warstats)
-        controv (:controv warstats)
-        ;;FIXME: pos is unused. Should it be used?
-        pos (+ (:x-right warstats) (:x-up warstats))
+  (let [pos (+ (:x-right warstats) (:x-up warstats))
         neg (+ (:x-wrong warstats) (:x-down warstats))
         ;; flags may eventually be put in own object, but for now...
         flags warstats
@@ -85,16 +82,14 @@
         ;; it just contributes to flavor. Will need visibility system to do this right.
         badness (reduce + (map #(get flags % 0) badflags))
         goodness (reduce + (map #(get flags % 0) goodflags))
-        diff (misc/relative-to-range 0 effect controv)]
-    (if (< 0 (+ effect goodness))
-      (if (> diff 0.7)
-        :contested
-        (if (and (> 10 effect) (< 0 badness))
-          :contested
-          :positive))
-      (if (< 0 neg)
-        :negative
-        :neutral))))
+                  ;;FIXME: might add multiplier for flags
+        badness (+ badness neg)
+        goodness (+ goodness pos)]
+    (cond
+      (misc/significant-majority? goodness badness) :positive
+      (misc/significant-majority? badness goodness) :negative
+      (< 0 (+ goodness badness)) :contested
+      :else :neutral)))
 
 (defn magnitude [item & {:keys [keyfunc] :or {keyfunc identity}}]
   (let [val (keyfunc item)]
