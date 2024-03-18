@@ -55,7 +55,7 @@
 (defn opinion-icon-tt [opid & {:keys [class style supply? description]}]
   [opinion-icon
    opid
-   :class (misc/class-string class (if supply? "border-[#80ff80]" "border-black") "border-2")
+   :class (misc/class-string class (if supply? "border-green-300" "border-black") "border-2")
    :title (if supply?
             (str "Supplies the active " description)
             (str "Suggests a " description))

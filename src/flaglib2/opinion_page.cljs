@@ -126,11 +126,16 @@
      (when-not (empty? title-tree)
        (into [:<> [:h3 "Title discussion:"]]
              (map (fn [opid]
-                    (let [ind (disp/tt-indicator
-                               (misc/opinion-supplies-title? (get-in db [:opinion-store opid]) db)
-                               "title")]
-                      [disp/thread-opinion :opid opid :children ind]))
-                  (flatten title-tree))))]))
+                      (let [opinion (get-in db [:opinion-store opid])
+                            indicate (and (not (misc/deep-opinion? opinion))
+                                          (misc/opinion-suggests-tt? opinion))
+                            subs (when indicate
+                                   {:opinion-icon
+                                    [tb/opinion-icon-tt
+                                     :description "title"
+                                     :supply? (misc/opinion-supplies-title? opinion db)]})]
+                        [disp/thread-opinion :opid opid :substitutes subs]))
+                    (flatten title-tree))))]))
 
 (defn opinion-page []
   (let [{:keys [tmode focus]} @(rf/subscribe [:server-parameters])

@@ -378,12 +378,3 @@
                (str "opinion by " (:authorname opinion))
                "unknown opinion")]
     [:span text]))
-
-(defn tt-indicator [supply? description]
-  (let [title (if supply?
-                (str "Supplies the active " description)
-                (str "Suggests a " description))]
-    [:div
-     {:class (misc/class-string "absolute" (if supply? "bg-[#80ff80]" "bg-black"))
-      :title title}
-     (misc/entities "&nbsp;")]))
