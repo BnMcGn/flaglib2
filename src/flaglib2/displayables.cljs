@@ -267,11 +267,20 @@
        :else
        (str "From " from-domain))]))
 
+(defn question-icon [warstats]
+  (let [question (:question warstats)
+        answered (:question-answered warstats)
+        listof (and question (set/intersection (set question) #{:tag :replies}))])
+  (str "/static/img/black-wf-"
+       (if listof "list-of-things" "question")
+       (when answered "-a")
+       ".svg"))
+
 ;;FIXME: refactor -> *-tb-stuff
-(defn question-container [props & {:keys [body minify]}]
+(defn question-container [props & {:keys [body minify warstats]}]
   [:div
    (merge {:class "flex flex-row items-center bg-[#f5eb72] pl-1.5 gap-4"} props)
-   [:img {:src "/static/img/black-wf-question.svg"
+   [:img {:src (question-icon warstats)
           :class (if minify "min-w-[21] h-[23]" "max-w-[42px] h-[45px]")}]
    body])
 
