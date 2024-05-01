@@ -50,6 +50,12 @@
                  :fields (into [:opinion-icon] (if short
                                          (if hide-author [:headline] [:author-long])
                                          [:flag-name :date-stamp :author-long :headline]))])
+              :question
+              [thing-element
+               (tb/question-tb-stuff id db)
+               :fields (if short
+                         [:headline]
+                         [:headline :warstats])]
               :author
               [thing-element
                (tb/author-tb-stuff id db)

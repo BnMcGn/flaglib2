@@ -3,6 +3,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [goog.uri.utils :as uri]
+   [clojure.set :as set]
 
    [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-default tw-btn]]
@@ -39,6 +40,15 @@
         ;;FIXME: unknown flag should have unique icon
         color (if flag (subs (:color flag) 1) "fff")]
     (str "/static/img/small/wf_flag-" color ".svg")))
+
+(defn question-icon [warstats]
+  (let [question (:question warstats)
+        answered (:question-answered warstats)
+        listof (and question (set/intersection (set question) #{:tag :replies}))]
+    (str "/static/img/black-wf-"
+         (if listof "list-of-things" "question")
+         (when answered "-a")
+         ".svg")))
 
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
@@ -310,7 +320,7 @@
 
 (defn question-tb-stuff [iid db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store iid]))]
-    {:icon "/static/img/black-wf-question.svg"
+    {:icon (question-icon warstats)
      :icon-size "max-w-[42px] h-[45px]"
      :icon-size-mini "min-w-[21px] h-[23px]"
      :bg-color "bg-[#f5eb72]"
