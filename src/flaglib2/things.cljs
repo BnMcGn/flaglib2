@@ -47,9 +47,10 @@
               (let [tbstuff (tb/opinion-tb-stuff id db)]
                 [(if short display-thing-opinion-short display-thing-opinion)
                  tbstuff
-                 :fields (into [:opinion-icon] (if short
-                                         (if hide-author [:headline] [:author-long])
-                                         [:flag-name :date-stamp :author-long :headline]))])
+                 :fields (into [:opinion-icon]
+                               (if short
+                                 (if hide-author [:headline] [:author-long])
+                                 [:flag-name :date-stamp :author-long :headline]))])
               :question
               [thing-element
                (tb/question-tb-stuff id db)
@@ -71,11 +72,13 @@
 (defn thing-loaders [things]
   (into []
         (for [{:keys [type id]} things
-              :when (#{:rooturl :opinion} type)]
+              :when (#{:rooturl :opinion :question} type)]
           (case type
             :rooturl
             [:dispatch [:load-rooturl id :no-text true :no-references true]]
             :opinion
+            [:dispatch [:load-opinion id]]
+            :question
             [:dispatch [:load-opinion id]]
             :author
             nil ;May need later

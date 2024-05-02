@@ -343,7 +343,6 @@
 
 (defn assemble-bar-parts [stuff reqlist]
   (filter identity (map #(if (keyword? %1) (%1 stuff) %1) reqlist)))
-
 (defn rewidget-item [orig sub]
   (if sub
     (let [sub (if (symbol? sub) [sub] sub)]
