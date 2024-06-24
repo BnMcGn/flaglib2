@@ -82,27 +82,28 @@
           (when topmost
             [disp/excerptless-opinions opid])]]
         class  "absolute sm:break-normal break-all sm:break-words"]
-    (if small
-      (let [hpos (- (curve-locator (count treead)) 0.75)]
-        [disp/opinion-container-mobile
+    (when opinion
+      (if small
+        (let [hpos (- (curve-locator (count treead)) 0.75)]
+          [disp/opinion-container-mobile
+           {:class class
+            :style {:top (str (+ -1.3 (* (count treead) 2.5)) "em")
+                    :left (str hpos "em")
+                    :width (str "calc(100% - " hpos "em)")}}
+           :box-props box-props
+           :icon-layout :icon
+           :opinion opinion
+           :titlebar titlebar
+           :body body])
+        [disp/opinion-container
          {:class class
-          :style {:top (str (+ -1.3 (* (count treead) 2.5)) "em")
-                  :left (str hpos "em")
-                  :width (str "calc(100% - " hpos "em)")}}
+          :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
+                  :left (str (curve-locator (count treead)) "em")
+                  :width "75%"}}
          :box-props box-props
-         :icon-layout :icon
-         :opinion opinion
+         :iconid opid
          :titlebar titlebar
-         :body body])
-      [disp/opinion-container
-      {:class class
-       :style {:top (str (+ -0.5 (* (count treead) 3)) "em")
-               :left (str (curve-locator (count treead)) "em")
-               :width "75%"}}
-      :box-props box-props
-      :iconid opid
-      :titlebar titlebar
-      :body body])))
+         :body body]))))
 
 (defn opinion-thread []
   (let [{:keys [focus rooturl]} @(rf/subscribe [:server-parameters])
