@@ -148,7 +148,7 @@
        (:refopiniid itm)
        depth
        [disp/reference
-        (:reference itm)
+        itm
         :style {:width "95%"}
         :minify true
         :hide-warstats small

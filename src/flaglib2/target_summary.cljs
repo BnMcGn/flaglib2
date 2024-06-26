@@ -137,7 +137,7 @@
                 {}
                 :tree-address (:tree-address opinion)
                 :body
-                [disp/reference (:reference opinion) :minify true]]))])))
+                [disp/reference opinion :minify true]]))])))
 
 (defn refd-summary [targetid]
   (let [refd @(rf/subscribe [:refd targetid])

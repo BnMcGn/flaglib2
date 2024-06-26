@@ -125,7 +125,7 @@
         ;;FIXME: should be clean comment?
         [:div (excerpts/rebreak (:comment opinion))])
       (when (:reference opinion)
-        [reference (:reference opinion)])]]))
+        [reference opinion])]]))
 
 ;;; Opinion-summary is used to display opinions in one line situations. It may be displayed with
 ;;; tree address icons.
@@ -235,14 +235,15 @@
 (defn reference-excerpt-display [])
 
 ;;FIXME: refactor -> *-tb-stuff
-(defn reference [reference & {:keys [minify style hide-warstats hide-external-link]}]
-  [:div
-   {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
-    :style style}
-   [:img {:src "/static/img/white-reference.svg"
-          :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
-   [(if (misc/iid? reference) reference-excerpt-display reference-root-display)
-    reference :minify minify :hide-warstats hide-warstats :hide-external-link hide-external-link]])
+(defn reference [opinion & {:keys [minify style hide-warstats hide-external-link]}]
+  (let [ref (or (:refd-opinion opinion) (:reference opinion))]
+    [:div
+     {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
+      :style style}
+     [:img {:src "/static/img/white-reference.svg"
+            :class (if minify "min-w-[21] h-[23]" "min-w-[42px] h-[45px]")}]
+     [(if (misc/iid? ref) reference-excerpt-display reference-root-display)
+      ref :minify minify :hide-warstats hide-warstats :hide-external-link hide-external-link]]))
 
 ;;Various ways to describe incoming references. Viewing the root article. Need to cover refs to root,
 ;; refs to excerpt of root, and refs to opinions in discussion of root.
@@ -297,7 +298,7 @@
         warstats @(rf/subscribe [:warstats-store opid])]
     [:div
      {:class "sm:flex sm:flex-row child:sm:grow child:sm:basis-0"}
-     (when-let [ref (:reference opinion)] [reference ref])
+     (when (:reference opinion) [reference opinion])
      (when (:question warstats) [question-container {}])]))
 
 (defn thread-opinion [& {:keys [opid text children no-tree-address substitutes]}]
