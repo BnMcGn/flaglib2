@@ -52,6 +52,7 @@
             [head link ws children rep ct]))))
 
 (declare reference)
+(declare thread-opinion)
 
 (defn opinion-container [props & {:keys [iconid titlebar body box-props substitutes]
                                   :or {box-props {:class "bg-white border-[3px] border-black ml-7"}}}]
@@ -232,7 +233,36 @@
      (when-not hide-warstats
        [tb/display-warstats :warstats warstats :black true])]))
 
-(defn reference-excerpt-display [])
+(defn reference-excerpt-display [refd & {:keys [minify hide-warstats hide-external-link]}]
+  (let [opinion @(rf/subscribe [:opinion-store refd])
+        popup-visible? @(rf/subscribe [:popup-is-active? refd])
+        treead (when opinion (:tree-address opinion))
+        deep (when treead (< 1 (count treead)))
+        description (if (and opinion (excerpts/has-excerpt? opinion))
+                      (if deep
+                        "Excerpt from discussion of article at "
+                        "Excerpt from article at ")
+                      (if deep
+                        "Opinion from discussion of article at "
+                        "Opinion on article at "))]
+    [rc/popover-anchor-wrapper
+     :showing? popup-visible?
+     :position :below-left
+     :style {:display "inline"}
+     :parts {:point-wrapper {:style {:display "inline"}}}
+     :anchor [:span
+              {:on-click #(rf/dispatch [:toggle-active-popup refd])}
+              (str description (misc/url-domain (:rooturl opinion)))]
+     :popover
+     [rc/popover-content-wrapper
+      :parts {:border
+              {:class "sm:w-[70rem]"
+               :style {:background-color "rgba(255, 255, 255, 0.7)"
+                       :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
+                       :border-radius "3px"}}}
+      :arrow-renderer deco/wf-arrow
+      :arrow-length 21
+      :body [thread-opinion :opid refd :no-tree-address true]]]))
 
 ;;FIXME: refactor -> *-tb-stuff
 (defn reference [opinion & {:keys [minify style hide-warstats hide-external-link]}]
