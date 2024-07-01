@@ -106,10 +106,15 @@
  ::received-opinion
  (fn [{:keys [db]} [_ key result]]
    (let [opinion (proc-opinion result)
-         warstats (proc-refd-warstat opinion db)]
+         warstats (proc-refd-warstat opinion db)
+         ref-opin (:refd-opinion opinion)
+         ;;FIXME: Slight possibility of endless opinion chain
+         ref-opin-loader (if ref-opin
+                           [:dispatch [:load-opinion ref-opin]]
+                           [])]
      {:db (assoc db ::opinion-tmp (assoc (::opinion-tmp db) key opinion)
                  ::warstats-tmp warstats)
-     :fx [ [:dispatch [::start-debounce]] ]})))
+      :fx [ (into ref-opin-loader [:dispatch [::start-debounce]]) ]})))
 
 (rf/reg-event-fx
  ::received-references
