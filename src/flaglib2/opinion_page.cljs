@@ -63,10 +63,12 @@
          (when topmost
            [tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset])]
         box-props
-        {:style {:border-color (if topmost "black" (random-gray))
-                 :background-color (if topmost "white" "#f5f5f5")}
-         :class "bg-white border-[3px] ml-7"
-         :on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))}
+        ;;FIXME; Hack to make click on reference block work. Should be a better way to get clicks thru.
+        (into (if topmost {}
+                  {:on-click #(set! (. js/window -location) (misc/make-opinion-url opinion))})
+              {:style {:border-color (if topmost "black" (random-gray))
+                       :background-color (if topmost "white" "#f5f5f5")}
+               :class "bg-white border-[3px] ml-7"})
         body
         [:<>
          [:div
