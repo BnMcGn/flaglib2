@@ -52,7 +52,7 @@
             [head link ws children rep ct]))))
 
 (declare reference)
-(declare thread-opinion)
+(declare thread-excerpt)
 
 (defn opinion-container [props & {:keys [iconid titlebar body box-props substitutes]
                                   :or {box-props {:class "bg-white border-[3px] border-black ml-7"}}}]
@@ -105,7 +105,7 @@
         [tb/display-tree-address tree-address]]
        body])))
 
-(defn opinion-info [opid]
+(defn opinion-info [opid & {:keys [show-excerpt]}]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])
         small @(rf/subscribe [:window-small?])]
@@ -122,6 +122,8 @@
         [tb/display-warstats :warstats warstats]])
      :body
      [:div
+      (when show-excerpt
+        [thread-excerpt :opinionid opid])
       (when-not (empty? (:comment opinion))
         ;;FIXME: should be clean comment?
         [:div (excerpts/rebreak (:comment opinion))])
@@ -247,24 +249,24 @@
                         "Opinion on article at "))]
     [rc/popover-anchor-wrapper
      :showing? popup-visible?
-     :position :below-left
+     :position :below-center
      :style {:display "inline"}
      :parts {:point-wrapper {:style {:display "inline"}}}
      :anchor [:span
               {:on-click (fn [e]
                            (rf/dispatch [:toggle-active-popup refd])
                            (.stopPropagation e))}
-              (str description (misc/url-domain (:rooturl opinion)))]
+              (if opinion (str description (misc/url-domain (:rooturl opinion))) "")]
      :popover
      [rc/popover-content-wrapper
       :parts {:border
-              {:class "sm:w-[70rem]"
+              {:class "sm:w-[70rem] text-black"
                :style {:background-color "rgba(255, 255, 255, 0.7)"
                        :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
                        :border-radius "3px"}}}
       :arrow-renderer deco/wf-arrow
-      :arrow-length 21
-      :body [thread-opinion :opid refd :no-tree-address true]]]))
+      :arrow-length 44 
+      :body [opinion-info refd :show-excerpt true]]]))
 
 ;;FIXME: refactor -> *-tb-stuff
 (defn reference [opinion & {:keys [minify style hide-warstats hide-external-link]}]
