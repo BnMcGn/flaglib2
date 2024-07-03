@@ -251,7 +251,9 @@
      :style {:display "inline"}
      :parts {:point-wrapper {:style {:display "inline"}}}
      :anchor [:span
-              {:on-click #(rf/dispatch [:toggle-active-popup refd])}
+              {:on-click (fn [e]
+                           (rf/dispatch [:toggle-active-popup refd])
+                           (.stopPropagation e))}
               (str description (misc/url-domain (:rooturl opinion)))]
      :popover
      [rc/popover-content-wrapper
