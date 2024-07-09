@@ -258,7 +258,6 @@
           :style {:min-width "22px"}
           :alt "Original article" :title "Original article"}]])
 
-
 (defn headline [& {:keys [title url domain rootid opinionid class style truncate no-fontsize]}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))

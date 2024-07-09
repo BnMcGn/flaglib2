@@ -253,7 +253,8 @@
      :style {:display "inline"}
      :parts {:point-wrapper {:style {:display "inline"}}}
      :anchor [:span
-              {:on-click (fn [e]
+              {:class "italic font-thin truncate"
+               :on-click (fn [e]
                            (rf/dispatch [:toggle-active-popup refd])
                            (.stopPropagation e))}
               (if opinion (str description (misc/url-domain (:rooturl opinion))) "")]
@@ -264,8 +265,11 @@
                :style {:background-color "rgba(255, 255, 255, 0.7)"
                        :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
                        :border-radius "3px"}}}
+      :showing-injected? popup-visible?
+      :on-cancel #(rf/dispatch [:toggle-active-popup refd])
+      :backdrop-opacity 0.5
       :arrow-renderer deco/wf-arrow
-      :arrow-length 44 
+      :arrow-length 44
       :body [opinion-info refd :show-excerpt true]]]))
 
 ;;FIXME: refactor -> *-tb-stuff
@@ -373,9 +377,12 @@
             [(if small opinion-container-mobile opinion-container)
              {:class "mb-6 sm:break-normal break-all sm:break-words relative"
               :style main-style
-              :on-click (fn [e]
-                          (set! (. js/window -location) (misc/make-opinion-url opinion))
-                          (.stopPropagation e))}
+              ;;Was causing trouble for sub component clicks. Don't actually need.
+              ;;To re-enable will need to constrain what clicks are accepted.
+              ;;:on-click (fn [e]
+              ;;            (set! (. js/window -location) (misc/make-opinion-url opinion))
+              ;;            (.stopPropagation e))
+              }
              :iconid opid
              :icon-layout (when small (if no-tree-address :icon :tree-address))
              :opinion opinion
