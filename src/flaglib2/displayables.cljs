@@ -237,6 +237,7 @@
 
 (defn reference-excerpt-display [refd & {:keys [minify hide-warstats hide-external-link]}]
   (let [opinion @(rf/subscribe [:opinion-store refd])
+        warstats @(rf/subscribe [:warstats-store refd])
         popup-visible? @(rf/subscribe [:popup-is-active? refd])
         treead (when opinion (:tree-address opinion))
         deep (when treead (< 1 (count treead)))
@@ -247,30 +248,35 @@
                       (if deep
                         "Opinion from discussion of article at "
                         "Opinion on article at "))]
-    [rc/popover-anchor-wrapper
-     :showing? popup-visible?
-     :position :below-center
-     :style {:display "inline"}
-     :parts {:point-wrapper {:style {:display "inline"}}}
-     :anchor [:span
-              {:class "italic font-thin truncate"
-               :on-click (fn [e]
-                           (rf/dispatch [:toggle-active-popup refd])
-                           (.stopPropagation e))}
-              (if opinion (str description (misc/url-domain (:rooturl opinion))) "")]
-     :popover
-     [rc/popover-content-wrapper
-      :parts {:border
-              {:class "sm:w-[70rem] text-black"
-               :style {:background-color "rgba(255, 255, 255, 0.7)"
-                       :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
-                       :border-radius "3px"}}}
-      :showing-injected? popup-visible?
-      :on-cancel #(rf/dispatch [:toggle-active-popup refd])
-      :backdrop-opacity 0.5
-      :arrow-renderer deco/wf-arrow
-      :arrow-length 44
-      :body [opinion-info refd :show-excerpt true]]]))
+    [:<>
+     [rc/popover-anchor-wrapper
+      :showing? popup-visible?
+      :position :below-center
+      :style {:display "inline" :flex-grow 0 :min-width "fit-content"}
+      :parts {:point-wrapper {:style {:display "inline"}}}
+      :anchor [:span
+               {:class "italic font-thin truncate"
+                :on-click (fn [e]
+                            (rf/dispatch [:toggle-active-popup refd])
+                            (.stopPropagation e))}
+               (if opinion (str description (misc/url-domain (:rooturl opinion))) "")]
+      :popover
+      [rc/popover-content-wrapper
+       :parts {:border
+               {:class "sm:w-[70rem] text-black"
+                :style {:background-color "rgba(255, 255, 255, 0.7)"
+                        :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
+                        :border-radius "3px"}}}
+       :showing-injected? popup-visible?
+       :on-cancel #(rf/dispatch [:toggle-active-popup refd])
+       :backdrop-opacity 0.0
+       :arrow-renderer deco/wf-arrow
+       :arrow-length 44
+       :body [opinion-info refd :show-excerpt true]]]
+     (when-not hide-external-link
+       [tb/display-external-link :url (:rooturl opinion) :black true])
+     (when-not hide-warstats
+       [tb/display-warstats :warstats warstats :black true])]))
 
 ;;FIXME: refactor -> *-tb-stuff
 (defn reference [opinion & {:keys [minify style hide-warstats hide-external-link]}]
