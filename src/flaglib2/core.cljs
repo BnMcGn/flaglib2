@@ -1,7 +1,6 @@
 (ns ^:figwheel-hooks flaglib2.core
   (:require
    [goog.dom :as gdom]
-   [goog.object :as go]
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
@@ -31,8 +30,6 @@
       (< size 1536) :xl
       :else :xxl)))
 
-(defn username []
-  (go/get js/window "USERNAME"))
 
 (rf/reg-event-fx
  :initialize

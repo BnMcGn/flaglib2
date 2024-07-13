@@ -8,7 +8,8 @@
    [re-frame.core :as rf]
    [re-frame.db]
    [clojure.string :as string]
-   [goog.string :as gstring]))
+   [goog.string :as gstring]
+   [goog.object :as go]))
 
 ;; Opinion url recognizer
 
@@ -40,6 +41,13 @@
                     (str "%" (.toUpperCase (.toString (.charCodeAt itm 0) 16)))))
                 (seq uri)))))
 
+
+(defn username []
+  (go/get js/window "USERNAME"))
+
+(defn make-login-url []
+  ;;FIXME: shouldn't be hard coded. Server should set?
+  (str "/clath/login/?destination=" (js/encodeURIComponent (.. js/document -location -url))))
 
 ;;; Tree tools
 
@@ -162,6 +170,12 @@
 
 (defn entities [itm]
   (gstring/unescapeEntities itm))
+
+(defn pluralize [countable label]
+  (let [ct (count countable)]
+    (if (= 1 ct)
+      label
+      (str label "s"))))
 
 ;;Debugging tools
 

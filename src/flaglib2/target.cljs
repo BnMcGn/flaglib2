@@ -81,7 +81,7 @@
                       [disp/thread-opinion :opid opid :substitutes subs]))
                   (flatten text-tree))))]))
 
-(defn target-root []
+(defn target-root-core []
   (let [params @(rf/subscribe [:server-parameters])
         current (r/atom (if-let [tmode (:tmode params)]
                           (keyword tmode)
@@ -102,6 +102,33 @@
        :comment [target-root-thread :rooturl (:rooturl params)]
        :summary [tsum/target-stats :rooturl (:rooturl params)]
        :tt [text-title-thread :rooturl (:rooturl params)])]))
+
+(defn text-missing-userless []
+  (let [{:keys [rooturl touched-p refd]} @(rf/subscribe [:server-parameters])
+        ;;FIXME: Should be from subscription?
+        login-url (misc/make-login-url)]
+    [:div
+     [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
+     [deco/casual-heading
+      (str "Text from article at " (misc/url-domain rooturl) " is not currently available")]
+     [:h4 "Reason: No discussion has been started on the article, so text extraction probably has not been attempted."]
+     [:ul
+      (when (not-empty refd)
+        (let [ct (count refd)]
+          [:li (if (= 1 ct)
+                 "1 reference has been made to this URL"
+                 (str ct " references have been made to this URL"))]))
+      [:li [:a {:href login-url} "Log In"] " to start a discussion of this article"]]]))
+
+(defn target-root []
+  (let [{:keys [rooturl touched-p]} @(rf/subscribe [:server-parameters])
+        uname (misc/username)]
+    ;;Has a text been extracted/provided? Yes? good!
+    ;;No? Is user logged in? Yes? user can do something about it.
+    ;;No? Nothing to do.
+    (if (or uname touched-p)
+      [target-root-core]
+      [text-missing-userless])))
 
 (rf/reg-event-fx
  :target
