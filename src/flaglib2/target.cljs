@@ -16,7 +16,7 @@
    [flaglib2.titlebar :as tb]))
 
 
-(defn target-root-article [& {:keys [rooturl]}]
+(defn target-root-article-core [& {:keys [rooturl]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& _]
@@ -35,6 +35,33 @@
        :excerpt excerpt
        :offset offset]
       [disp/excerptless-opinions rooturl]])))
+
+(defn text-missing []
+  (let [{:keys [rooturl touched-p refd]} @(rf/subscribe [:server-parameters])
+        {:keys [initial-message initial-status]}
+        (if touched-p
+          @(rf/subscribe [:text-store rooturl])
+          {})
+        reason (if touched-p
+                 initial-message
+                 "No discussion has been started on the article, so text extraction probably has not been attempted.")]
+    [:div
+     [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
+     [deco/casual-heading
+      (str "Text from article at " (misc/url-domain rooturl) " is not currently available")]
+     [:h4 (str "Reason: " reason)]
+     [:ul
+      (unless touched-p
+              [:li "Text extraction will be attempted by the system if you start a new post"])
+      [:li "You may still post flags on this article, though excerpts must be filled by hand"]
+      #_[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
+      [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]]]))
+
+(defn target-root-article [& {:keys [rooturl]}]
+  (let [text-info @(rf/subscribe [:text-store])]
+    (if (and text-info (not-empty (:text text-info)))
+      [target-root-article-core :rooturl rooturl]
+      [text-missing])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
   (let [optree @(rf/subscribe [:normal-tree rooturl])]
