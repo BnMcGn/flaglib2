@@ -51,8 +51,8 @@
       (str "Text from article at " (misc/url-domain rooturl) " is not currently available")]
      [:h4 (str "Reason: " reason)]
      [:ul
-      (unless touched-p
-              [:li "Text extraction will be attempted by the system if you start a new post"])
+      (when-not touched-p
+        [:li "Text extraction will be attempted by the system if you start a new post"])
       [:li "You may still post flags on this article, though excerpts must be filled by hand"]
       #_[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
       [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]]]))

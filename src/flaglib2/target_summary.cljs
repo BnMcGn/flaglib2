@@ -146,9 +146,8 @@
       [:div
        [:h3 "Incoming References"]
        (into [:div {:class "child:p-1"}]
-             (for [r refd
-                   :let [opinion (opstore r)]]
-               [disp/display-refd-root-pov opinion]))])))
+             (for [r refd]
+               [disp/display-refd-root-pov r]))])))
 
 (defn summary-score-val [db opid]
   (let [effect (get-in db [:warstats-store opid :effect])]
