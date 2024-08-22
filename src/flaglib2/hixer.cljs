@@ -8,6 +8,9 @@
    [flaglib2.deco :as deco]
    [flaglib2.displayables :as disp]))
 
+;; Hixer: hiccup displayer
+;;
+;; Load and display articles represented in hiccup format, probably from IPFS
 
 ;; Begin check-hiccup stuff
 

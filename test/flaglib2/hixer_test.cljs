@@ -18,8 +18,8 @@
 
 (deftest check-hiccup
   (is (not (hixer/check-hiccup good1)))
-  (is (thrown? js/Error (hixer/check-hiccup bad1)))
-  (is (thrown? js/Error (hixer/check-hiccup bad2)))
-  (is (thrown? js/Error (hixer/check-hiccup bad3)))
-  (is (thrown? js/Error (hixer/check-hiccup bad4)))
-  (is (thrown? js/Error (hixer/check-hiccup bad5))))
+  (is (thrown-with-msg? js/Error #"Only strings and vectors" (hixer/check-hiccup bad1)))
+  (is (thrown-with-msg? js/Error #"Only strings and vectors" (hixer/check-hiccup bad2)))
+  (is (thrown-with-msg? js/Error #"known element type" (hixer/check-hiccup bad3)))
+  (is (thrown-with-msg? js/Error #"attrib must be a string" (hixer/check-hiccup bad4)))
+  (is (thrown-with-msg? js/Error #"known display component" (hixer/check-hiccup bad5))))
