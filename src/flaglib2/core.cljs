@@ -41,6 +41,7 @@
       :opinion-store {}
       :text-store {}
       :title-store {}
+      :hiccup-store {}
       :window-size (window-size)
       }
      (posters/init))

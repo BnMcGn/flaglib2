@@ -63,6 +63,13 @@
      (:opinion-tree-store db))))
 
 (rf/reg-sub
+ :hiccup-store
+ (fn [db [_ key]]
+   (if key
+     (get-in db [:hiccup-store key])
+     (:hiccup-store db))))
+
+(rf/reg-sub
  :text-status
  (fn [db [_ key]]
    (get-in db [:text-status key])))

@@ -2,9 +2,10 @@
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [cljs.reader]
 
    [flaglib2.misc :as misc]
-   [flaglib2.ipfs]
+   [flaglib2.ipfs :as ipfs]
    [flaglib2.deco :as deco]
    [flaglib2.displayables :as disp]))
 
@@ -70,3 +71,30 @@
              (cons (rest (first work)) (rest work))
              (list* res (rest (first work)) (rest work)))))))))
 
+
+(rf/reg-event-fx
+ ::request-opinion-hiccup
+ (fn [{:keys [db]} [_ iid]]
+   {:http-xhrio {:method :get
+                 :uri (str "/ipns/" (ipfs/ipns-host) "/opinions/" iid "/hiccup.edn")
+                 :timeout 18000
+                 :response-format (ajax/text-response-format)
+                 :on-success [::received-opinion-hiccup iid]}}))
+
+(rf/reg-event-db
+ ::received-opinion-hiccup
+ (fn [db [_ key result]]
+   (let [hiccup (cljs.reader/read-string result)]
+     (try
+       (check-hiccup hiccup)
+       (assoc-in db [:hiccup-store key] hiccup)
+       (catch js/Error e
+         (println "Error loading hiccup:")
+         (throw e)
+         ;;Don't store on error
+         db)))))
+
+
+(defn opinion-hiccup [iid]
+  (let [hic @(rf/subscribe [:hiccup-store iid])]
+    hic))

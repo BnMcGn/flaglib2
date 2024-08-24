@@ -9,7 +9,8 @@
    [flaglib2.misc :as misc]
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]
-   [flaglib2.target-summary :as tsum]))
+   [flaglib2.target-summary :as tsum]
+   [flaglib2.hixer :as hixer :as-alias hixer]))
 
 ;;FIXME: Should be done server side?
 (rf/reg-fx
@@ -143,10 +144,13 @@
 (defn opinion-page []
   (let [{:keys [tmode focus]} @(rf/subscribe [:server-parameters])
         current (r/atom (if tmode (keyword tmode) :thread))
+        has-hiccup @(rf/subscribe [:hiccup-store (last focus)])
         small @(rf/subscribe [:window-small?])]
     [:<> [(if small rc/vertical-bar-tabs rc/horizontal-tabs)
           :model current
-          :tabs [{:id :thread :label "Thread View"}
+          :tabs [(when has-hiccup
+                   {:id :article :label "Article View"})
+                 {:id :thread :label "Thread View"}
                  {:id :summary :label "Summary"}
                  {:id :title :label "Title"}]
           :parts {:wrapper {:class "mt-2"}
@@ -154,6 +158,7 @@
           :on-change #(set! js/window.location.href
                             (uri/setParam js/window.location.href "tmode" (name %1)))]
      (case @current
+       :article [hixer/opinion-hiccup (last focus)]
        :thread [opinion-thread]
        :summary [tsum/opinion-stats :iid (last focus)]
        :title [opinion-title-thread :iid (last focus)])]))
@@ -170,6 +175,7 @@
      {:db db
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
+           [:dispatch [:hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]
       :set-opinion-meta {:rooturl rooturl :opinion (last focus)
