@@ -3,6 +3,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [cljs.reader]
+   [ajax.core :as ajax]
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs :as ipfs]
@@ -35,7 +36,7 @@
   (check-contents contents))
 
 (defmethod check-element cljs.core/Symbol [[el & contents]]
-  (when-not (#{'disp/thread-opinion} el)
+  (when-not (#{'flaglib2.displayables/thread-opinion} el)
     (throw (js/Error. "Not a known display component")))
   ;;FIXME: Need specific checks
   (check-contents contents))

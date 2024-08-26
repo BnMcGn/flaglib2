@@ -10,7 +10,8 @@
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]
    [flaglib2.target-summary :as tsum]
-   [flaglib2.hixer :as hixer :as-alias hixer]))
+   [flaglib2.hixer :as-alias hixer]
+   [flaglib2.hixer :as hixer]))
 
 ;;FIXME: Should be done server side?
 (rf/reg-fx
@@ -143,16 +144,21 @@
 
 (defn opinion-page []
   (let [{:keys [tmode focus]} @(rf/subscribe [:server-parameters])
-        current (r/atom (if tmode (keyword tmode) :thread))
-        has-hiccup @(rf/subscribe [:hiccup-store (last focus)])
+        has-hiccup? @(rf/subscribe [:hiccup-store (last focus)])
+        tmode (keyword tmode)
+        tmode (if has-hiccup?
+                tmode
+                (if (= tmode :article) nil tmode))
+        current (r/atom (if tmode tmode :thread))
+        tabs [(when has-hiccup? {:id :article :label "Article View"})
+              {:id :thread :label "Thread View"}
+              {:id :summary :label "Summary"}
+              {:id :title :label "Title"}]
+        tabs (into [] (filter #'identity tabs))
         small @(rf/subscribe [:window-small?])]
     [:<> [(if small rc/vertical-bar-tabs rc/horizontal-tabs)
           :model current
-          :tabs [(when has-hiccup
-                   {:id :article :label "Article View"})
-                 {:id :thread :label "Thread View"}
-                 {:id :summary :label "Summary"}
-                 {:id :title :label "Title"}]
+          :tabs tabs
           :parts {:wrapper {:class "mt-2"}
                   :anchor {:style {:color "#777"}}}
           :on-change #(set! js/window.location.href
@@ -175,7 +181,7 @@
      {:db db
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
-           [:dispatch [:hixer/request-opinion-hiccup (last focus)]]
+           [:dispatch [:flaglib2.hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]
       :set-opinion-meta {:rooturl rooturl :opinion (last focus)
