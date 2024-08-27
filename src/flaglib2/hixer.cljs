@@ -4,6 +4,7 @@
    [reagent.core :as r]
    [cljs.reader]
    [ajax.core :as ajax]
+   [clojure.walk :as walk]
 
    [flaglib2.misc :as misc]
    [flaglib2.ipfs :as ipfs]
@@ -72,6 +73,10 @@
              (cons (rest (first work)) (rest work))
              (list* res (rest (first work)) (rest work)))))))))
 
+(defn process-hiccup [hic]
+  (walk/postwalk-replace
+   {'flaglib2.displayables/thread-opinion disp/thread-opinion}
+   hic))
 
 (rf/reg-event-fx
  ::request-opinion-hiccup
@@ -98,4 +103,4 @@
 
 (defn opinion-hiccup [iid]
   (let [hic @(rf/subscribe [:hiccup-store iid])]
-    hic))
+    (process-hiccup hic)))
