@@ -37,10 +37,11 @@
   (check-contents contents))
 
 (defmethod check-element cljs.core/Symbol [[el & contents]]
-  (when-not (#{'flaglib2.displayables/thread-opinion} el)
+  (when-not (#{'flaglib2.displayables/thread-opinion 'flaglib2.hixer/embedded-opinion} el)
     (throw (js/Error. "Not a known display component")))
   ;;FIXME: Need specific checks
-  (check-contents contents))
+  ;(check-contents contents)
+  )
 
 (defmethod check-element :a [[el & contents]]
   (let [[attrib & contents] (if (map? (first contents)) contents (into [nil] contents))]
@@ -73,10 +74,24 @@
              (cons (rest (first work)) (rest work))
              (list* res (rest (first work)) (rest work)))))))))
 
+(defn embedded-opinion [& {:keys [iid]}]
+  [:div {:class "bg-slate-100"}
+   [disp/thread-opinion :opid iid]])
+
 (defn process-hiccup [hic]
   (walk/postwalk-replace
-   {'flaglib2.displayables/thread-opinion disp/thread-opinion}
+   {'flaglib2.displayables/thread-opinion disp/thread-opinion
+    'flaglib2.hixer/embedded-opinion embedded-opinion}
    hic))
+
+(defn extract-hiccup-ids [hiccup]
+  (loop [stuff (flatten hiccup)
+         accum '()]
+    (case (first stuff)
+      nil (reverse accum)
+      :iid (recur (rest (rest stuff)) (conj accum [:dispatch [:load-opinion (second stuff)]]))
+      :rooturl (recur (rest (rest stuff)) (conj accum [:dispatch [:load-rooturl (second stuff)]]))
+      (recur (rest stuff) accum))))
 
 (rf/reg-event-fx
  ::request-opinion-hiccup
@@ -87,20 +102,24 @@
                  :response-format (ajax/text-response-format)
                  :on-success [::received-opinion-hiccup iid]}}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::received-opinion-hiccup
- (fn [db [_ key result]]
-   (let [hiccup (cljs.reader/read-string result)]
-     (try
-       (check-hiccup hiccup)
-       (assoc-in db [:hiccup-store key] hiccup)
-       (catch js/Error e
-         (println "Error loading hiccup:")
-         (throw e)
-         ;;Don't store on error
-         db)))))
+ (fn [{:keys [db]} [_ key result]]
+   (let [hiccup (cljs.reader/read-string result)
+         pass? (try
+                 (check-hiccup hiccup)
+                 true
+                 (catch js/Error e
+                   (println "Error loading hiccup:")
+                   (throw e)
+                   ;;Don't store on error
+                   false))]
+     {:db (if pass? (assoc-in db [:hiccup-store key] hiccup) db)
+      :fx (into [] (when pass? (extract-hiccup-ids hiccup)))})))
 
 
 (defn opinion-hiccup [iid]
   (let [hic @(rf/subscribe [:hiccup-store iid])]
-    (process-hiccup hic)))
+    (into [:div
+           {:class "m-1 mt-4"}]
+          (process-hiccup hic))))
