@@ -58,7 +58,7 @@
       [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]]]))
 
 (defn target-root-article [& {:keys [rooturl]}]
-  (let [text-info @(rf/subscribe [:text-store])]
+  (let [text-info @(rf/subscribe [:text-store rooturl])]
     (if (and text-info (not-empty (:text text-info)))
       [target-root-article-core :rooturl rooturl]
       [text-missing])))
