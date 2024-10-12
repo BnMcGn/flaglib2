@@ -37,7 +37,9 @@
   (check-contents contents))
 
 (defmethod check-element cljs.core/Symbol [[el & contents]]
-  (when-not (#{'flaglib2.displayables/thread-opinion 'flaglib2.hixer/embedded-opinion} el)
+  (when-not (#{'flaglib2.displayables/thread-opinion
+               'flaglib2.hixer/embedded-opinion
+               'flaglib2.hixer/embedded-article} el)
     (throw (js/Error. "Not a known display component")))
   ;;FIXME: Need specific checks
   ;(check-contents contents)
@@ -78,9 +80,13 @@
   [:div {:class "bg-slate-100"}
    [disp/thread-opinion :opid iid]])
 
+(defn embedded-article [& {:keys [url]}]
+  [disp/root-title :url url])
+
 (defn process-hiccup [hic]
   (walk/postwalk-replace
    {'flaglib2.displayables/thread-opinion disp/thread-opinion
+    'flaglib2.hixer/embedded-article embedded-article
     'flaglib2.hixer/embedded-opinion embedded-opinion}
    hic))
 
@@ -97,7 +103,7 @@
  ::request-opinion-hiccup
  (fn [{:keys [db]} [_ iid]]
    {:http-xhrio {:method :get
-                 :uri (str "/ipns/" (ipfs/ipns-host) "/opinions/" iid "/hiccup.edn")
+                 :uri (str "/ipns/" (:ipns-host db) "/opinions/" iid "/hiccup.edn")
                  :timeout 18000
                  :response-format (ajax/text-response-format)
                  :on-success [::received-opinion-hiccup iid]}}))
