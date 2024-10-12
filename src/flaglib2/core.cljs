@@ -1,6 +1,8 @@
 (ns ^:figwheel-hooks flaglib2.core
   (:require
    [goog.dom :as gdom]
+   [goog.object :as go]
+
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
@@ -43,6 +45,7 @@
       :title-store {}
       :hiccup-store {}
       :window-size (window-size)
+      :ipns-host (go/get js/window "IPNSHOST")
       }
      (posters/init))
     :fx [[:dispatch [:initialize-local-store]]]}))

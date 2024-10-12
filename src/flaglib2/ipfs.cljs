@@ -10,17 +10,15 @@
 
    [flaglib2.misc :as misc]))
 
-(defn ipns-host []
-  (go/get js/window "IPNSHOST"))
 
-(defn data-url [rest]
-  (str "/ipns/" (ipns-host) "/" rest))
+(defn data-url [host rest]
+  (str "/ipns/" host "/" rest))
 
-(defn opinion-data-url [iid itype]
-  (str "/ipns/" (ipns-host) "/opinions/" iid "/" itype ".data"))
+(defn opinion-data-url [host iid itype]
+  (str "/ipns/" host "/opinions/" iid "/" itype ".data"))
 
-(defn rooturl-data-url [rooturl rtype]
-  (str "/ipns/" (ipns-host) "/rooturls/"
+(defn rooturl-data-url [host rooturl rtype]
+  (str "/ipns/" host "/rooturls/"
        (.replaceAll (misc/encode-uri-component2 rooturl) "%" "*")
        "/" rtype ".data"))
 
@@ -29,7 +27,7 @@
  (fn [{:keys [db]} [_ rooturl resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
    {:http-xhrio {:method :get
-                 :uri (rooturl-data-url rooturl resource-type)
+                 :uri (rooturl-data-url (:ipns-host db) rooturl resource-type)
                  :timeout 18000
                  :response-format (ajax/text-response-format)
                  :on-success
@@ -43,7 +41,7 @@
  (fn [{:keys [db]} [_ iid resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
    {:http-xhrio {:method :get
-                 :uri (opinion-data-url iid resource-type)
+                 :uri (opinion-data-url (:ipns-host db) iid resource-type)
                  :timeout 18000
                  :response-format (ajax/text-response-format)
                  :on-success
@@ -150,7 +148,7 @@
  ::request-grouped
  (fn [{:keys [db]} _]
    {:http-xhrio {:method :get
-                 :uri (data-url "/subjective/default/grouped.data")
+                 :uri (data-url (:ipns-host db) "/subjective/default/grouped.data")
                  :timeout 18000
                  :response-format (ajax/text-response-format)
                  :on-success [::received-grouped]
