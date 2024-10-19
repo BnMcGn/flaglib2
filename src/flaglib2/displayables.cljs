@@ -122,7 +122,7 @@
         [tb/display-warstats :warstats warstats]])
      :body
      [:div
-      (when show-excerpt
+      (when (and show-excerpt (:excerpt opinion))
         [thread-excerpt :opinionid opid])
       (when-not (empty? (:comment opinion))
         ;;FIXME: should be clean comment?

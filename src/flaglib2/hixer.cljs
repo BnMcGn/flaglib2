@@ -77,11 +77,12 @@
              (list* res (rest (first work)) (rest work)))))))))
 
 (defn embedded-opinion [& {:keys [iid]}]
-  [:div {:class "bg-slate-100"}
-   [disp/thread-opinion :opid iid]])
+  [:div {:class "bg-slate-100 p-3 sm:mx-3"}
+   [disp/opinion-info iid :show-excerpt true]])
 
 (defn embedded-article [& {:keys [url]}]
-  [disp/root-title :url url])
+  [:div {:class "bg-slate-100 p-3 sm:mx-3"}
+   [disp/root-title :url url]])
 
 (defn process-hiccup [hic]
   (walk/postwalk-replace
@@ -96,7 +97,7 @@
     (case (first stuff)
       nil (reverse accum)
       :iid (recur (rest (rest stuff)) (conj accum [:dispatch [:load-opinion (second stuff)]]))
-      :rooturl (recur (rest (rest stuff)) (conj accum [:dispatch [:load-rooturl (second stuff)]]))
+      :url (recur (rest (rest stuff)) (conj accum [:dispatch [:load-rooturl (second stuff)]]))
       (recur (rest stuff) accum))))
 
 (rf/reg-event-fx
@@ -127,5 +128,6 @@
 (defn opinion-hiccup [iid]
   (let [hic @(rf/subscribe [:hiccup-store iid])]
     (into [:div
-           {:class "m-1 mt-4"}]
-          (process-hiccup hic))))
+           {:class "m-1 mt-4 child-div:my-5"}]
+          ;;Drop initial :div
+          (rest (process-hiccup hic)))))
