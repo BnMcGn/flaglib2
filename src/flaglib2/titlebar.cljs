@@ -319,12 +319,12 @@
 
 (defn question-tb-stuff [iid db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store iid]))]
-    {:icon (question-icon warstats)
-     :icon-size "max-w-[42px] h-[45px]"
-     :icon-size-mini "min-w-[21px] h-[23px]"
-     :bg-color "bg-[#f5eb72]"
-     :warstats [display-warstats :warstats warstats]
-     :headline [headline :opinionid iid :url true]}))
+     {:icon (question-icon warstats)
+      :icon-size "max-w-[42px] h-[45px]"
+      :icon-size-mini "min-w-[21px] h-[23px]"
+      :bg-color "bg-[#f5eb72]"
+      :warstats [display-warstats :warstats warstats]
+      :headline [headline :opinionid iid :url true]}))
 
 (defn reference-tb-stuff [reference db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store reference]))]
@@ -342,6 +342,7 @@
 
 (defn assemble-bar-parts [stuff reqlist]
   (filter identity (map #(if (keyword? %1) (%1 stuff) %1) reqlist)))
+
 (defn rewidget-item [orig sub]
   (if sub
     (let [sub (if (symbol? sub) [sub] sub)]

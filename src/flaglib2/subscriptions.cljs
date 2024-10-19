@@ -205,5 +205,6 @@
        iid
        (if-let [cmt (and opinion (:clean-comment opinion))]
          [cmt true false]
-         ["" false false])
+         ;;NOTE: might cause trouble, can return to ""?
+         [(misc/entities "&nbsp;") false false])
        :else [(or key "") false false]))))
