@@ -219,18 +219,19 @@
   @re-frame.db/app-db)
 
 
-
-
-
 (defn relative-to-range
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
   [start end num]
-  (/ (- num start) (- end start)))
+  (if (= start end)
+    0
+    (/ (- num start) (- end start))))
 
 (defn as-in-range
   "Complement of relative-to-range function. Treats num as if it were a fraction of the range specified by start and end. Returns the absolute number that results."
   [start end num]
-  (+ start (* num (- end start))))
+  (if (= start end)
+    0
+    (+ start (* num (- end start)))))
 
 (defn vast-majority?
   "Is A at least 1000% larger than B?"

@@ -57,7 +57,13 @@
         warstats @(rf/subscribe [:warstats-store targetid])
         colsize 20
         col2 70
-        highest (max (:x-right warstats) (:x-wrong warstats) (:x-up warstats) (:x-down warstats))]
+        highest (max (:x-right warstats) (:x-wrong warstats)
+                     (:x-up warstats) (:x-down warstats))
+        height-range-adjust
+        (fn [val]
+          (max 1 (misc/as-in-range
+                  0 bar-height-max
+                  (misc/relative-to-range 0 highest val))))]
     [:div {:class "float-left"}
      [:h3 "Score"]
      (when-not (empty? warstats)
@@ -70,33 +76,25 @@
           :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
           :label (:x-up warstats)
           :title "Up"
-          :height (misc/as-in-range
-                   0 bar-height-max
-                   (misc/relative-to-range 0 highest (:x-up warstats)))
+          :height (height-range-adjust (:x-up warstats))
           :transform (translate colsize 0)]
          [positive-bar
           :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
           :label (:x-right warstats)
           :title "Right"
-          :height (misc/as-in-range
-                   0 bar-height-max
-                   (misc/relative-to-range 0 highest (:x-right warstats)))
+          :height (height-range-adjust (:x-right warstats))
           :transform (translate col2 0)]
          [negative-bar
           :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
           :label (:x-down warstats)
           :title "Down"
-          :height (misc/as-in-range
-                   0 bar-height-max
-                   (misc/relative-to-range 0 highest (:x-down warstats)))
+          :height (height-range-adjust (:x-down warstats))
           :transform (translate colsize centerline)]
          [negative-bar
           :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
           :label (:x-wrong warstats)
           :title "Wrong"
-          :height (misc/as-in-range
-                   0 bar-height-max
-                   (misc/relative-to-range 0 highest (:x-wrong warstats)))
+          :height (height-range-adjust (:x-wrong warstats))
           :transform (translate col2 centerline)]]])]))
 
 (defn display-other-flags [targetid]
