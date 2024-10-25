@@ -13,10 +13,10 @@
 
 ;; Opinion url recognizer
 
-(def ipfs-hash-pattern #"baf[a-z0-9]{56}")
+(def iid-pattern #"pnn[a-z0-9]{56}")
 
 (defn iid? [item]
-  (when (string? item) (re-matches ipfs-hash-pattern item)))
+  (when (string? item) (re-matches iid-pattern item)))
 
 
 (defn make-opinion-url [opinion]

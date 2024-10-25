@@ -168,7 +168,7 @@
             [:a {:href (misc/excerpt-reply-link
                         (if (empty? tree-address)
                           root-target-url
-                          (get-in opstore [(last tree-address) :url]))
+                          (last tree-address))
                         excerpt)
                  :style {:color "black"}
                  :class "m-0 bold italic bg-gray-300 leading-4"}
