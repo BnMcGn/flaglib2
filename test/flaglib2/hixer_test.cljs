@@ -8,7 +8,7 @@
 
 (def good1 [[:a {:href "http://there/"} "is"]
             [:div [:h1 "thing"] [:p "thing"]]
-            ['disp/thread-opinion]])
+            ['hixer/embedded-opinion]])
 
 (def bad1 [[:div {:class "less"}]])
 (def bad2 [:a :b :c])
