@@ -21,7 +21,7 @@
                             intro-text title headline-style headline-class
                             reply-excerpt reply-offset children tt
                             hide-reply hide-warstats hide-count hide-external-link
-                            ]}]
+                            no-main-link]}]
   (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
         small @(rf/subscribe [:window-small?])
         dd (nth deco/display-depths (or display-depth 0))
@@ -39,7 +39,9 @@
                 "flex flex-row items-center"))
         class (misc/class-string dd (:bg-color tbstuff) box class)
         props {:class class :style style}
-        head (into (:headline tbstuff) [:style headline-style :class headline-class])
+        head (into (:headline tbstuff)
+                   [:style headline-style :class headline-class
+                    :url (if no-main-link false true)])
         head (if title (into head [:title title]) head)
         link (when (and url (not hide-external-link)) (:external-link tbstuff))
         rep (when-not hide-reply (:reply-link tbstuff))

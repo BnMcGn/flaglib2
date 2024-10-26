@@ -258,7 +258,8 @@
           :style {:min-width "22px"}
           :alt "Original article" :title "Original article"}]])
 
-(defn headline [& {:keys [title url domain rootid opinionid class style truncate no-fontsize]}]
+(defn headline [& {:keys [title url domain rootid opinionid class style truncate no-fontsize]
+                   :or {url true}}]
   (when (and rootid opinionid)
     (throw (js/Error. "Can only use one of rootid or opinionid")))
   (let [id (or rootid opinionid)
@@ -299,7 +300,7 @@
      :reply-link [reply-link :target url :excerpt reply-excerpt :offset reply-offset]
      :count [reply-count :warstats warstats]
      :bg-color ((mood/flavor-from-own-warstats warstats) deco/flavor-background)
-     :headline [headline :rootid url :url true]}))
+     :headline [headline :rootid url]}))
 
 (defn opinion-tb-stuff [iid db & {:keys [reply-excerpt reply-offset warstats]}]
   (let [warstats (or warstats (get (:warstats-store db) iid))
@@ -315,7 +316,7 @@
      :comment? (not (empty? (:clean-comment opinion)))
      :bg-color ""
      :reply-link [reply-link :target iid :excerpt reply-excerpt :offset reply-offset]
-     :headline [headline :opinionid iid :url true]}))
+     :headline [headline :opinionid iid]}))
 
 (defn question-tb-stuff [iid db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store iid]))]
@@ -324,7 +325,7 @@
       :icon-size-mini "min-w-[21px] h-[23px]"
       :bg-color "bg-[#f5eb72]"
       :warstats [display-warstats :warstats warstats]
-      :headline [headline :opinionid iid :url true]}))
+      :headline [headline :opinionid iid]}))
 
 (defn reference-tb-stuff [reference db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store reference]))]
@@ -334,7 +335,7 @@
      :bg-color "bg-black"
      :warstats [display-warstats :warstats warstats :black true]
      :external-link [display-external-link :url reference :black true]
-     :headline [headline :rootid reference :url true :class "text-white"]}))
+     :headline [headline :rootid reference :class "text-white"]}))
 
 (defn author-tb-stuff [author db]
   ;;Use fake opinion

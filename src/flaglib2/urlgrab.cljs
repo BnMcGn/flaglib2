@@ -69,7 +69,12 @@
   [rc/button
    :class "sm:border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
    :parts {:wrapper {:class "sm:w-[calc(100%_-_25px)]"}}
-   :label [disp/root-title :url itm :hide-reply true :hide-external-link true :display-depth 0]
+   :label [disp/root-title
+           :url itm
+           :hide-reply true
+           :hide-external-link true
+           :no-main-link true
+           :display-depth 0]
    :on-click (fn [] (rf/dispatch [::enter-search location itm :is-click? true]))])
 
 (defn display-urls-in-categories [location]
