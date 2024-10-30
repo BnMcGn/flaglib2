@@ -22,3 +22,13 @@
    (rf-test/wait-for [::res]
     (is (= :that @(rf/subscribe [::res]))))))
 
+(deftest target-adjust
+  (let [res (misc/target-adjust "https://web.archive.org/web/20120424172252/https://www.nytimes.com/2012/04/23/business/media/tv-news-corrects-itself-just-not-on-the-air.htm")]
+    (is (:message res))
+    (is (= 97 (count (:adjusted res)))))
+  (let [res (misc/target-adjust "https://warflagger.net/target/43")]
+    (is (:message res))
+    (is (not (:adjusted res))))
+  (let [res (misc/target-adjust "https://warflagger.com/o/pnnkreiab3ysddpms3i4hzfx2oyr42ysm6fmpdd2zm3qug73n4g3tz5zsge")]
+    (is (:message res))
+    (is (misc/iid? (:adjusted res)))))

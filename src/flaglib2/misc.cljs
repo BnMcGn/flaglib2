@@ -9,7 +9,8 @@
    [re-frame.db]
    [clojure.string :as string]
    [goog.string :as gstring]
-   [goog.object :as go]))
+   [goog.object :as go]
+   [goog.Uri :as uri]))
 
 ;; Opinion url recognizer
 
@@ -18,6 +19,48 @@
 (defn iid? [item]
   (when (string? item) (re-matches iid-pattern item)))
 
+(defn normalize-iid [item]
+  (or
+   (iid? item)
+   (let [path (.getPath (uri/parse item))]
+     (when (string/starts-with? path "/o/")
+       (iid? (subs path 3))))))
+
+(defn is-string-integer? [itm]
+  (and (string? itm)
+       (every? #(< 47 (.charCodeAt % 0) 58) itm)))
+
+;;We shouldn't post to some targets. Offer adjustments when possible.
+
+(defn target-adjust-warflagger [purl]
+  (let [path (.getPath purl)]
+    (cond
+      (string/starts-with? path "/o/")
+      {:adjusted (normalize-iid path)
+       :message "Adjusted to target the opinion IID"}
+      (string/starts-with? path "/target/")
+      (let [tid (subs path 8)]
+        (if (is-string-integer? tid)
+          {:message "Please target the original rooturl, not the discussion page."}
+          {:message "Adjusted to target the original rooturl"
+           :adjusted (js/decodeURIComponent tid)}))
+      :else {})))
+
+(defn target-adjust-archive-org [purl]
+  (let [path (.getPath purl)]
+    (let [pattern #"/web/\d*/(.*)"
+          res (re-matches pattern path)]
+      (if res {:adjusted (js/decodeURIComponent (second res))
+               :message "Adjusted to target the original unarchived url"}
+          {}))))
+
+(defn target-adjust [url]
+  (let [purl (uri/parse url)]
+    (case (.getDomain purl)
+      "warflagger.net" (target-adjust-warflagger purl)
+      "warflagger.com" (target-adjust-warflagger purl)
+      "web.archive.org" (target-adjust-archive-org purl)
+      {})))
 
 (defn make-opinion-url [opinion]
   (str "/o/" (:iid opinion)))

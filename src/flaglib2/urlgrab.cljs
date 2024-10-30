@@ -26,18 +26,18 @@
  (fn [db [_ location]]
    (::search (get-in db location))))
 
+(defn selected-url-from-db [location db]
+  (or (::modified-selection (get-in db location)) (::selection (get-in db location))))
+
 (rf/reg-sub
  :selected-url
  (fn [db [_ location]]
-   (::selection (get-in db location))))
+   (selected-url-from-db location db)))
 
 (rf/reg-sub
  ::suppress-search-results
  (fn [db [_ location]]
    (:suppress-search-results (get-in db location))))
-
-(defn selected-url-from-db [location db]
-  (::selection (get-in db location)))
 
 (rf/reg-event-fx
  ::enter-search

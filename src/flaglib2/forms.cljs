@@ -22,7 +22,8 @@
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
   [ug/url-search [:flaglib2.fabricate/specify-target]
-   :placeholder "Target URL or search terms"])
+   :placeholder "Target URL or search terms"]
+  )
 
 (defn specify-target-summary []
   (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
