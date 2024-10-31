@@ -13,6 +13,10 @@
 (def fabricate-hooks
   {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
 
+(rf/reg-sub
+ :target-adjustment
+ (fn [db _]
+   (misc/target-adjust (ug/unmodified-selected-from-db [::specify-target] db))))
 
 (rf/reg-sub ::review-text :-> ::review-text)
 
@@ -30,7 +34,7 @@
 
 (rf/reg-sub
  ::active-text
- ;;FIXME: could consider caching a tdat?
+ ;;FIXME: could consider cacheing a tdat?
  :<- [::supplied-text]
  :<- [::existing-text]
  (fn [[supplied existing] _]

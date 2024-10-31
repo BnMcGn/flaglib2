@@ -26,6 +26,9 @@
  (fn [db [_ location]]
    (::search (get-in db location))))
 
+(defn unmodified-selected-from-db [location db]
+  (::selection (get-in db location)))
+
 (defn selected-url-from-db [location db]
   (or (::modified-selection (get-in db location)) (::selection (get-in db location))))
 
@@ -33,6 +36,16 @@
  :selected-url
  (fn [db [_ location]]
    (selected-url-from-db location db)))
+
+(rf/reg-event-db
+ ::choose-adjusted-target
+ (fn [db [_ location target]]
+   (assoc-in db (into location ::modified-selection) target)))
+
+(rf/reg-event-db
+ ::choose-original-target
+ (fn [db [_ location]]
+   (assoc-in db (into location ::modified-selection) (unmodified-selected-from-db location db))))
 
 (rf/reg-sub
  ::suppress-search-results

@@ -16,6 +16,11 @@
    {:class "m-0 bold italic bg-gray-300 leading-4 my-1.5"}
    contents])
 
+(defn error-msg [contents]
+  [:p
+   {:class "bold italic text-red-900"}
+   contents])
+
 (def pos-mag-0 "bg-[#00ff0000]")
 (def pos-mag-1 "bg-[#00ff0033]")
 (def pos-mag-2 "bg-[#00ff0055]")

@@ -11,6 +11,7 @@
    [flaglib2.excerpt-search :as xsearch]
    [flaglib2.urlgrab :as ug]
    [flaglib2.posters :as posters]
+   [flaglib2.deco :as deco]
 
    [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-danger]]))
@@ -21,9 +22,12 @@
 
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
-  [ug/url-search [:flaglib2.fabricate/specify-target]
-   :placeholder "Target URL or search terms"]
-  )
+ (let [{:keys [message]} @(rf/subscribe [:target-adjustment])]
+   [:<>
+    [ug/url-search [:flaglib2.fabricate/specify-target]
+    :placeholder "Target URL or search terms"]
+  (when message
+    [deco/error-msg message])]))
 
 (defn specify-target-summary []
   (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
@@ -32,12 +36,37 @@
        :specify-target (str "Target: Opinion: " @(rf/subscribe [:proper-title selection]))]
       [step/summary-button :specify-target (str "Target: " selection)])))
 
+(defn choose-adjusted []
+  (let [{:keys [adjusted]} @(rf/subscribe [:target-adjustment])]
+    [rc/button
+     :label "Next (Corrected Target)"
+     :on-click (fn []
+                 (rf/dispatch [:flaglib2.urlgrab/choose-adjusted-target
+                               [:flaglib2.fabricate/specify-target]
+                               adjusted])
+                 (rf/dispatch [:flaglib2.stepper/next]))] ))
+
+(defn choose-original []
+  [rc/button
+   :label "Next (Accept as Entered)"
+   :on-click (fn []
+               (rf/dispatch [:flaglib2.urlgrab/choose-original-target
+                             [:flaglib2.fabricate/specify-target]])
+               (rf/dispatch [:flaglib2.stepper/next]))])
+
 (defn specify-target-buttons []
-  (let [url @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
+  (let [url @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])
+        {:keys [message adjusted]} @(rf/subscribe [:target-adjustment])]
     [step/button-box
      (step/button-spacer
       [[step/previous-button nil]]
-      [(if (empty? url) [step/next-button-disabled] [step/next-button nil])])]))
+      (cond
+        (and message adjusted)
+        [[choose-original] [choose-adjusted]]
+        message
+        [[choose-adjusted]]
+        :else
+        [(if (empty? url) [step/next-button-disabled] [step/next-button nil])]))]))
 
 ;;Decisioner: what to do if we don't have text
 
