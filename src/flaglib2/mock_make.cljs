@@ -104,6 +104,14 @@ the Internet.
    :flaglib2.urlgrab/search target-url,
    :flaglib2.urlgrab/selection target-url})
 
+(def adjust-url "https://web.archive.org/web/1234123412342/http://www.columbia.edu/~fdc/sample.html")
+
+(def specify-target-adjustable
+  {:on-select nil,
+   :suppress-search-results true,
+   :flaglib2.urlgrab/search adjust-url,
+   :flaglib2.urlgrab/selection adjust-url})
+
 (def warstats-store-unreviewed
   (assoc-in warstats-store [target-url :replies-total] 0))
 
@@ -119,6 +127,9 @@ the Internet.
     :text-store text-store
     :warstats-store warstats-store
     :flaglib2.fabricate/specify-target specify-target}))
+
+(def adjustable-db
+  (assoc targetted-db :flaglib2.fabricate/specify-target specify-target-adjustable))
 
 (def reference-url "http://google.com/")
 
@@ -170,6 +181,7 @@ the Internet.
                              :flaglib2.fabricate/excerpt ["nonexist" 0]
                              :flaglib2.excerpt-search/raw-excerpt-search "nonexist")
    :target-return extra-db
+   :target-adjustable adjustable-db
    :post-success (merge extra-db server-success)
    :post-fail (merge extra-db server-fail)
    :simple-vote (-> targetted-db
@@ -189,6 +201,7 @@ the Internet.
                    :opine-deluxe :opine
                    :opine-bad-excerpt :opine
                    :target-return :specify-target
+                   :target-adjustable :specify-target
                    :post-success :opine
                    :post-fail :opine
                    :simple-vote :confirm
