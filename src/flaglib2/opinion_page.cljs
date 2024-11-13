@@ -75,7 +75,7 @@
         [:<>
          [:div
           {:class "m-4 mt-1"}
-          (when-let [comment (:comment opinion)]
+          (when-let [comment (:clean-comment opinion)]
             [disp/hilited-text
              :text comment
              :tree-address treead

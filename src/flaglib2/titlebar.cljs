@@ -313,6 +313,7 @@
      :author-long [author-long opinion]
      :warstats [display-warstats :warstats warstats]
      :count [reply-count :warstats warstats]
+     ;;FIXME: need proper spec for no visible comment. Factor in hashtags?
      :comment? (not (empty? (:clean-comment opinion)))
      :bg-color ""
      :reply-link [reply-link :target iid :excerpt reply-excerpt :offset reply-offset]

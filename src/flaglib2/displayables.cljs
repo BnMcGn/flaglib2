@@ -126,9 +126,8 @@
      [:div
       (when (and show-excerpt (:excerpt opinion))
         [thread-excerpt :opinionid opid])
-      (when-not (empty? (:comment opinion))
-        ;;FIXME: should be clean comment?
-        [:div (excerpts/rebreak (:comment opinion))])
+      (when-not (empty? (:clean-comment opinion))
+        [:div (excerpts/rebreak (:clean-comment opinion))])
       (when (:reference opinion)
         [reference opinion])]]))
 
@@ -361,7 +360,7 @@
                 parent (when parid
                          @(rf/subscribe [:opinion-store parid]))
                 text (if parent
-                       (or (:comment parent) "")
+                       (or (:clean-comment parent) "")
                        text)
                 small  @(rf/subscribe [:window-small?])
                 tbar (if small
@@ -403,9 +402,9 @@
                ;; {:overflow "overlay"} ??
                (when (excerpts/has-excerpt? opinion)
                  [thread-excerpt :opinionid opid :text text])
-               (when (:comment opinion)
+               (when (:clean-comment opinion)
                  [hilited-text
-                  :text (:comment opinion)
+                  :text (:clean-comment opinion)
                   :tree-address tree-address
                   :focus nil
                   :disable-popup? true
