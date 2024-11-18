@@ -238,7 +238,7 @@ the Internet.
      {:db db
       :fx (into
            [
-            ;;[:dispatch [:add-hooks fabricate-hooks]]
+            ;;[:dispatch [:add-after-hooks fabricate-hooks]]
             [:dispatch [:flaglib2.stepper/initialize steps]]
             (when-let [step (get section-step section-name)]
               [:dispatch [:flaglib2.stepper/goto step]])

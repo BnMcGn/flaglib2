@@ -397,7 +397,7 @@
                        #(first (filter (partial misc/string= %1) (keys flags/flags))))
          [form presets] (what-opin-form? db)]
      {:db db
-      :fx [[:dispatch [:add-hooks fabricate-hooks]]
+      :fx [[:dispatch [:add-after-hooks fabricate-hooks]]
            [:dispatch [:flaglib2.stepper/initialize form presets]]
            [:dispatch [:flaglib2.fabricate/initialize-tt-parameters]]
            [:dispatch

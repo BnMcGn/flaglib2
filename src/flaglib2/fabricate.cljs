@@ -10,9 +10,6 @@
    [flaglib2.excerpts :as exc]
    [flaglib2.posters :as posters]))
 
-(def fabricate-hooks
-  {:flaglib2.fetchers/received-author-urls [::get-stuff-for-author-urls]})
-
 (rf/reg-sub
  :target-adjustment
  (fn [db _]

@@ -80,6 +80,7 @@
 
 (rf/reg-event-fx
  ::received-title
+ [misc/after-hook]
  (fn [{:keys [db]} [_ key result]]
    {:db (assoc db ::title-tmp (assoc (::title-tmp db) key (proc-title result)))
     :fx [ [:dispatch [::start-debounce]] ]}))

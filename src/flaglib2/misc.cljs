@@ -322,6 +322,31 @@
        (rf/dispatch call-info)))))
 
 
+;; Hook effects
+
+;;Designed for situations where we occasionally want an interception to happen.
+
+(rf/reg-fx
+ ::hook-trigger
+ (fn [event]
+   (rf/dispatch event)))
+
+(def after-hook
+  (rf/->interceptor
+   :id :after-hook
+   :after (fn [context]
+            (let [evid (first (get-in context [:coeffects :event]))
+                  entry (get-in context [:effects :db ::hooks evid])]
+              (if entry
+                (assoc-in context [:effects ::hook-trigger] entry)
+                context)))))
+
+(rf/reg-event-db
+ :add-after-hooks
+ (fn [db [_ hookspecs]]
+   (assoc db ::hooks (merge (::hooks db) hookspecs))))
+
+
 (defn element-ancestors [element]
   (when element
     (lazy-seq (cons element (element-ancestors (.-parentElement element))))))
