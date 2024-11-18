@@ -13,14 +13,6 @@
    [flaglib2.hixer :as-alias hixer]
    [flaglib2.hixer :as hixer]))
 
-;;FIXME: Should be done server side?
-(rf/reg-fx
- :set-opinion-meta
- (fn [opinion]
-   (misc/set-meta-property! "opinml:opinion" (:url opinion))
-   (misc/set-meta-property! "opinml:rooturl" (:rooturl opinion))
-   (misc/set-meta-property! "opinml:target" (:target opinion))))
-
 (defn opinion-root [& {:keys [rooturl focus]}]
   (let [small @(rf/subscribe [:window-small?])]
     [:div

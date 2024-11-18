@@ -10,6 +10,7 @@
    [flaglib2.init :as init]
    [flaglib2.fetchers]
    [flaglib2.ipfs :as ip]
+   [flaglib2.headlets :as headlets]
    [flaglib2.fabricate :as fab]
    [flaglib2.forms :as forms]
    [flaglib2.target]
