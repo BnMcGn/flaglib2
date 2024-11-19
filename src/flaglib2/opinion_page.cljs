@@ -161,6 +161,29 @@
        :summary [tsum/opinion-stats :iid (last focus)]
        :title [opinion-title-thread :iid (last focus)])]))
 
+(defn opinion-page-title [iid db]
+  (let [opinion (get-in db [:opinion-store] iid)
+        title (get-in db [:title-store] iid)
+        title (misc/has-title? title)
+        title (or title (:clean-comment opinion))
+        title (and title (misc/truncate title 80))
+        author (:authorname opinion)
+        author (and author (misc/truncate author 20))
+        flag (:flag opinion)
+        flag (if (= flag :custodial-blank) nil flag)
+        flag (and flag (str (tb/flag-name opinion) "|"))]
+    (if (or title author)
+      (str "WF: " author "|" flag title)
+      (str "WF: Loading opinion..."))))
+
+(rf/reg-event-fx
+ ::set-opinion-page-headers
+ (fn [{:keys [db]} [_ event]]
+   (let [iid (second event)
+         focus (get-in db [:server-parameters :default :focus])]
+     (when (= iid focus)
+       {:fx [:dispatch [:set-page-title (opinion-page-title iid db)]]}))))
+
 (rf/reg-event-fx
  :opinion-page
  (fn [{:keys [db]} _]
@@ -168,11 +191,14 @@
    ;; -Needs a little thinking to get working: can't load subtree without opinion, rooturl, treead
    (let [rooturl (get-in db [:server-parameters :default :rooturl])
          focus (get-in db [:server-parameters :default :focus])
-         db (assoc db :root-element opinion-page ;;:focus-id (last focus)
-                   )]
+         db (assoc db :root-element opinion-page)]
      {:db db
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
+           [:dispatch [:add-after-hooks {:flaglib2.ipfs/received-opinion
+                                         [::set-opinion-page-headers :flaglib2.misc/event]
+                                         :flaglib2.ipfs/received-title
+                                         [::set-opinion-page-headers :flaglib2.misc/event]}]]
            [:dispatch [:flaglib2.hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]

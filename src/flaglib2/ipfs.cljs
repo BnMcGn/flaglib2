@@ -103,6 +103,7 @@
 
 (rf/reg-event-fx
  ::received-opinion
+ [misc/after-hook]
  (fn [{:keys [db]} [_ key result]]
    (let [opinion (proc-opinion result)
          warstats (proc-refd-warstat opinion db)

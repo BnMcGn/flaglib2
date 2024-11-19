@@ -205,6 +205,13 @@
    (= a b)
    (= (name (or a "")) (name (or b "")))))
 
+(defn truncate [string len]
+  (when (string? string)
+    (let [slen (count string)]
+      (if (< len slen)
+        (str (subs string len) "…")
+        string))))
+
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
@@ -335,10 +342,15 @@
   (rf/->interceptor
    :id :after-hook
    :after (fn [context]
-            (let [evid (first (get-in context [:coeffects :event]))
-                  entry (get-in context [:effects :db ::hooks evid])]
+            (let [event (get-in context [:coeffects :event])
+                  evid (first event)
+                  entry (get-in context [:effects :db ::hooks evid])
+                  inject #(case %
+                            ::context context
+                            ::event event
+                            :else %)]
               (if entry
-                (assoc-in context [:effects ::hook-trigger] entry)
+                (assoc-in context [:effects ::hook-trigger] (map inject entry))
                 context)))))
 
 (rf/reg-event-db
