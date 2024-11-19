@@ -23,7 +23,7 @@
 
 (rf/reg-event-db
  ::received-author-urls
- [hook-inserter]
+ [misc/after-hook]
  (fn [db [_ result]]
    (assoc db ::author-urls (walk/keywordize-keys result))))
 

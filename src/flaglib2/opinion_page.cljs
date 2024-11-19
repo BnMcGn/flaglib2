@@ -196,9 +196,9 @@
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
            [:dispatch [:add-after-hooks {:flaglib2.ipfs/received-opinion
-                                         [::set-opinion-page-headers :flaglib2.misc/event]
+                                         [[::set-opinion-page-headers :flaglib2.misc/event]]
                                          :flaglib2.ipfs/received-title
-                                         [::set-opinion-page-headers :flaglib2.misc/event]}]]
+                                         [[::set-opinion-page-headers :flaglib2.misc/event]]}]]
            [:dispatch [:flaglib2.hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]

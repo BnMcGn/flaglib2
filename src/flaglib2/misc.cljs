@@ -348,9 +348,9 @@
                   inject #(case %
                             ::context context
                             ::event event
-                            :else %)]
+                            %)]
               (if entry
-                (assoc-in context [:effects ::hook-trigger] (map inject entry))
+                (assoc-in context [:effects ::hook-trigger] (into [] (map inject entry)))
                 context)))))
 
 (rf/reg-event-db
