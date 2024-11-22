@@ -8,7 +8,7 @@
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
-   [flaglib2.ipfs]
+   [flaglib2.ipfs :as ipfs]
    [flaglib2.deco :as deco]
    [flaglib2.displayables :as disp]
 
@@ -147,6 +147,24 @@
                  (str ct " references have been made to this URL"))]))
       [:li [:a {:href login-url} "Log In"] " to start a discussion of this article"]]]))
 
+(defn target-page-title [rooturl db]
+  (let [tinfo (ipfs/get-any-title db rooturl)
+        title (misc/has-title? tinfo)
+        domain (misc/url-domain rooturl)]
+    (if title
+      (str "WF: (" domain ") " title)
+      (str "WF: Article at " domain))))
+
+(rf/reg-event-fx
+ ::set-target-page-headers
+ (fn [{:keys [db]} [_ context]]
+   (let [newdb (get-in context [:effects :db])
+         event (get-in context [:coeffects :event])
+         eurl (second event)
+         rooturl (get-in db [:server-parameters :default :rooturl])]
+     (when (= rooturl eurl)
+       {:set-page-title (target-page-title rooturl newdb)}))))
+
 (defn target-root []
   (let [{:keys [rooturl touched-p]} @(rf/subscribe [:server-parameters])
         uname (misc/username)]
@@ -164,5 +182,8 @@
          db (assoc db :root-element target-root)]
      {:db db
       :fx [ [:dispatch [:flaglib2.ipfs/request-rooturl-item target "opinion-tree"]]
+            [:dispatch [:add-after-hooks
+                        {:flaglib2.ipfs/received-title
+                         [::set-target-page-headers :flaglib2.misc/context]}]]
             [:dispatch [:load-rooturl target]]
-           [:dispatch [:mount-registered]]]})))
+            [:dispatch [:mount-registered]]]})))
