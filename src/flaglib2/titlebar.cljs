@@ -31,9 +31,12 @@
    :x-right "Has supporting evidence"
    :x-wrong "Has contradicting evidence"})
 
-(defn flag-name [opinion]
+(defn flag-string [opinion]
   (let [flag (get flags/flags (:flag opinion))]
-    [:span (str (:category flag) " " (:label flag))]))
+    (str (:category flag) " " (:label flag))))
+
+(defn flag-name [opinion]
+  [:span (flag-string opinion)])
 
 (defn flag-icon [type]
   (let [flag (get flags/flags type)

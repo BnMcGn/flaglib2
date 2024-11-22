@@ -74,6 +74,14 @@
    {:db (assoc db ::text-tmp (assoc (::text-tmp db) key (proc-text result)))
     :fx [ [:dispatch [::start-debounce]] ]}))
 
+(defn get-any-title [db iid]
+  (or (get-in db [::title-tmp] iid)
+      (get-in db [:title-store] iid)))
+
+(defn get-any-opinion [db iid]
+  (or (get-in db [::opinion-tmp iid])
+      (get-in db [:opinion-store iid])))
+
 (defn proc-title [data]
   (let [{:as title} (cljs.reader/read-string data)]
     title))

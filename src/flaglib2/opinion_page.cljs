@@ -10,6 +10,7 @@
    [flaglib2.displayables :as disp]
    [flaglib2.titlebar :as tb]
    [flaglib2.target-summary :as tsum]
+   [flaglib2.ipfs :as ipfs]
    [flaglib2.hixer :as-alias hixer]
    [flaglib2.hixer :as hixer]))
 
@@ -162,27 +163,29 @@
        :title [opinion-title-thread :iid (last focus)])]))
 
 (defn opinion-page-title [iid db]
-  (let [opinion (get-in db [:opinion-store] iid)
-        title (get-in db [:title-store] iid)
-        title (misc/has-title? title)
+  (let [opinion (ipfs/get-any-opinion db iid)
+        tinfo (ipfs/get-any-title db iid)
+        title (misc/has-title? tinfo)
         title (or title (:clean-comment opinion))
         title (and title (misc/truncate title 80))
         author (:authorname opinion)
         author (and author (misc/truncate author 20))
         flag (:flag opinion)
         flag (if (= flag :custodial-blank) nil flag)
-        flag (and flag (str (tb/flag-name opinion) "|"))]
-    (if (or title author)
+        flag (and flag (str (tb/flag-string opinion) "|"))]
+    (if (or tinfo opinion)
       (str "WF: " author "|" flag title)
       (str "WF: Loading opinion..."))))
 
 (rf/reg-event-fx
  ::set-opinion-page-headers
- (fn [{:keys [db]} [_ event]]
-   (let [iid (second event)
+ (fn [{:keys [db]} [_ context]]
+   (let [event (get-in context [:coeffects :event])
+         newdb (get-in context [:effects :db])
+         iid (second event)
          focus (get-in db [:server-parameters :default :focus])]
-     (when (= iid focus)
-       {:fx [:dispatch [:set-page-title (opinion-page-title iid db)]]}))))
+     (when (= iid (last focus))
+       {:set-page-title (opinion-page-title iid newdb)}))))
 
 (rf/reg-event-fx
  :opinion-page
@@ -196,9 +199,9 @@
       :fx [;;[:dispatch [:load-opinions focus]]
            [:dispatch [:load-rooturl rooturl]]
            [:dispatch [:add-after-hooks {:flaglib2.ipfs/received-opinion
-                                         [[::set-opinion-page-headers :flaglib2.misc/event]]
+                                         [::set-opinion-page-headers :flaglib2.misc/context]
                                          :flaglib2.ipfs/received-title
-                                         [[::set-opinion-page-headers :flaglib2.misc/event]]}]]
+                                         [::set-opinion-page-headers :flaglib2.misc/context]}]]
            [:dispatch [:flaglib2.hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]
