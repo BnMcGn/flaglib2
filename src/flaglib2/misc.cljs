@@ -8,6 +8,7 @@
    [re-frame.core :as rf]
    [re-frame.db]
    [clojure.string :as string]
+   [clojure.set :as set]
    [goog.string :as gstring]
    [goog.object :as go]
    [goog.Uri :as uri]))
@@ -335,8 +336,8 @@
 
 (rf/reg-fx
  ::hook-trigger
- (fn [event]
-   (rf/dispatch event)))
+ (fn [events]
+   (run! rf/dispatch events)))
 
 (def after-hook
   (rf/->interceptor
@@ -344,19 +345,26 @@
    :after (fn [context]
             (let [event (get-in context [:coeffects :event])
                   evid (first event)
-                  entry (get-in context [:effects :db ::hooks evid])
+                  entries (get-in context [:effects :db ::hooks evid])
                   inject #(case %
                             ::context context
                             ::event event
                             %)]
-              (if entry
-                (assoc-in context [:effects ::hook-trigger] (into [] (map inject entry)))
+              (if entries
+                (assoc-in context [:effects ::hook-trigger]
+                          (map #(into [] (map inject %)) entries))
                 context)))))
 
 (rf/reg-event-db
  :add-after-hooks
  (fn [db [_ hookspecs]]
-   (assoc db ::hooks (merge (::hooks db) hookspecs))))
+   (assoc db ::hooks
+          (merge-with
+           set/union
+           (::hooks db)
+           (into {}
+                 (for [[k v] hookspecs]
+                   [k #{v}]))))))
 
 
 (defn element-ancestors [element]
