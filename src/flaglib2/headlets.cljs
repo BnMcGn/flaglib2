@@ -1,6 +1,9 @@
 (ns flaglib2.headlets
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [goog.object :as go]
+
+   [flaglib2.misc :as misc]))
 
 
 
@@ -52,19 +55,15 @@
    (set-meta-property! "opinml:target" (:target opinion))))
 
 (rf/reg-fx
- :set-opengraph-meta
- (fn [{:keys [title type url image]}]
+ :set-social-meta
+ (fn [{:keys [title description id]}]
    (set-meta-property! "og:title" title)
-   (set-meta-property! "og:type" type)
-   (set-meta-property! "og:url" url)
-   (set-meta-property! "og:image" image)))
-
-(rf/reg-fx
- :set-twitter-meta
- (fn [{:keys [title description image card]}]
-   (set-meta-name! "twitter:title" title)
-   (set-meta-name! "twitter:description" description)
-   (set-meta-name! "twitter:image" image)
-   (set-meta-name! "twitter:card" card)))
-
+   (set-meta-property! "og:type" "article")
+   (set-meta-property! "og:description" description)
+   (set-meta-property! "og:image" (misc/make-social-image-url id))
+   (set-meta-property! "og:url" (str (go/get js/window "SERVER")
+                                     (if (misc/iid? id)
+                                       (misc/make-opinion-url id)
+                                       (misc/make-target-url id))))
+   (set-meta-name! "twitter:card" "summary_large_image")))
 

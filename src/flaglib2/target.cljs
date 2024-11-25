@@ -163,7 +163,10 @@
          eurl (second event)
          rooturl (get-in db [:server-parameters :default :rooturl])]
      (when (= rooturl eurl)
-       {:set-page-title (target-page-title rooturl newdb)}))))
+       {:set-page-title (target-page-title rooturl newdb)
+        :set-social-meta {:title "WarFlagger.net" :id eurl
+                          :description (str "Discussion of article at "
+                                            (misc/url-domain eurl))}}))))
 
 (defn target-root []
   (let [{:keys [rooturl touched-p]} @(rf/subscribe [:server-parameters])

@@ -177,6 +177,22 @@
       (str "WF: " author "|" flag title)
       (str "WF: Loading opinion..."))))
 
+(defn opinion-social-meta [iid db]
+  (let [opinion (ipfs/get-any-opinion db iid)
+        blank? (= :custodial-blank (:flag opinion))
+        comment (not-empty (:clean-comment opinion))
+        desc (if comment
+               (if blank? "Comment" "Opinion")
+               (if blank? "Opinion" "Flag"))
+        deep (misc/deep-opinion? opinion)
+        dom (misc/url-domain (:rooturl opinion))
+        title (if deep
+                (str desc " from discussion of article at " dom)
+                (str desc " on article at " dom))]
+    {:id iid
+     :title "WarFlagger.net"
+     :description title}))
+
 (rf/reg-event-fx
  ::set-opinion-page-headers
  (fn [{:keys [db]} [_ context]]
@@ -185,7 +201,8 @@
          iid (second event)
          focus (get-in db [:server-parameters :default :focus])]
      (when (= iid (last focus))
-       {:set-page-title (opinion-page-title iid newdb)}))))
+       {:set-page-title (opinion-page-title iid newdb)}
+       {:set-social-meta (opinion-social-meta iid newdb)}))))
 
 (rf/reg-event-fx
  :opinion-page

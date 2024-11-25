@@ -72,6 +72,9 @@
 (defn make-target-url [identifier]
   (str "/target/" (js/encodeURIComponent identifier)))
 
+(defn make-social-image-url [identifier]
+  (str (go/get js/window "SERVER") "/social-image/" identifier))
+
 (defn excerpt-reply-link [target excerpt]
   (let [exstr (when excerpt (str "&excerpt=" (js/encodeURIComponent excerpt)))]
     (str "/opinion/?target=" (js/encodeURIComponent target) exstr)))
