@@ -97,7 +97,7 @@
           :height (height-range-adjust (:x-wrong warstats))
           :transform (translate col2 centerline)]]])]))
 
-(defn display-other-flags [targetid]
+(defn display-other-flags [targetid & {:keys [hide-inactive]}]
   (let [warstats @(rf/subscribe [:warstats-store targetid])
         flags
         [:negative-inflammatory :negative-language-warning :negative-disturbing
@@ -109,7 +109,8 @@
        (into [:div
              {:class "grid gap-1 grid-cols-2 sm:grid-cols-1 text-xs sm:text-sm"}]
             (for [flag flags
-                  :let [flinfo (flags/flags flag)]]
+                  :let [flinfo (flags/flags flag)]
+                  :when (not (and hide-inactive (not (warstats flag))))]
               [:div
                {:class "border-[2px] rounded sm:w-44 w-36 flex justify-center"
                 :style (cond

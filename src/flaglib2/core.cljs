@@ -20,6 +20,7 @@
    [flaglib2.mock-make :as mock]
    [flaglib2.things :as things]
    [flaglib2.hixer :as hixer]
+   [flaglib2.social-card :as scard]
    [cljs.reader]))
 
 
