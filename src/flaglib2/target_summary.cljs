@@ -123,6 +123,22 @@
                                 :border-color (str (flinfo :color) "bb")})}
                (:label flinfo)])))]))
 
+(defn reply-count-long [target]
+  (let [warstats @(rf/subscribe [:warstats-store target])
+        opinions @(rf/subscribe [:opinion-store])
+        children @(rf/subscribe [:immediate-children target])
+        immediate (:replies-immediate warstats)
+        total (:replies-total warstats)
+        excerpts (count
+                  (for [iid children
+                        :let [opin (get opinions iid)]
+                        :when (:excerpt opin)]
+                    opin))]
+    [:div [:h3 "Replies"]
+     [:div (str "Direct responses: " immediate)]
+     [:div (str "In conversation: " total )]
+     [:div (str "As excerpts: " excerpts)]]))
+
 (defn references-summary [targetid]
   (let [references @(rf/subscribe [:references targetid])
         opstore @(rf/subscribe [:opinion-store])]

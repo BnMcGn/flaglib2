@@ -16,14 +16,17 @@
 (defn rooturl-card []
   (let [params @(rf/subscribe [:server-parameters])
         target (:target params)]
-    [:div
-     (merge card-size
-            {})
-     [disp/root-title :url target :hide-reply true :hide-count true :hide-external-link true]
-     [tsum/summary-scores-chart target]
-     [tsum/display-other-flags target :hide-inactive true]
-     ])
+    (misc/say [:div
+               (merge card-size
+                      {})
+               [disp/root-title :url target :hide-reply true :hide-count true :hide-external-link true]
+               [tsum/summary-scores-chart target]
+               [tsum/reply-count-long target]
+               [tsum/display-other-flags target :hide-inactive true]
+               ]))
   )
+
+(defn opinion-card [])
 
 (rf/reg-event-fx
  :social-card
