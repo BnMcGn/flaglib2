@@ -20,6 +20,9 @@
     [:div.grid-cols-4
      (merge card-size
             {:class "grid gap-4"})
+     [:img {:src "/static/img/wf_logo_large.png"
+            :class "absolute"
+            :style {:top "340px" :left "390px" :opacity "25%"}}]
      [disp/root-title
       :url target
       :hide-reply true
@@ -30,7 +33,14 @@
      [tsum/reply-count-long target]
      [tsum/display-other-flags target :hide-inactive true]]))
 
-(defn opinion-card [])
+(defn opinion-card []
+  (let [params @(rf/subscribe [:server-parameters])
+        target (:target params)
+        rooturl (:rooturl params)]
+    [:div
+     (merge card-size
+            {})
+     [disp/thread-opinion :opid target]]))
 
 (rf/reg-event-fx
  :social-card
