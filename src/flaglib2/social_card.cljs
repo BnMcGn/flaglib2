@@ -11,20 +11,24 @@
    [flaglib2.ipfs :as ipfs]
    [flaglib2.target-summary :as tsum]))
 
-(def card-size {:width "1200px" :height "630px"})
+(def card-size {:style {:max-width "1200px" :min-width "1200px"
+                        :max-height "630px" :min-height "630px"}})
 
 (defn rooturl-card []
   (let [params @(rf/subscribe [:server-parameters])
         target (:target params)]
-    (misc/say [:div
-               (merge card-size
-                      {})
-               [disp/root-title :url target :hide-reply true :hide-count true :hide-external-link true]
-               [tsum/summary-scores-chart target]
-               [tsum/reply-count-long target]
-               [tsum/display-other-flags target :hide-inactive true]
-               ]))
-  )
+    [:div.grid-cols-4
+     (merge card-size
+            {:class "grid gap-4"})
+     [disp/root-title
+      :url target
+      :hide-reply true
+      :hide-count true
+      :hide-external-link true
+      :class "col-span-4"]
+     [tsum/summary-scores-chart target]
+     [tsum/reply-count-long target]
+     [tsum/display-other-flags target :hide-inactive true]]))
 
 (defn opinion-card [])
 
