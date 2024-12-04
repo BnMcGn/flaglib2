@@ -148,6 +148,17 @@
         tinfo (get-in db [:title-store target])]
     (= (:title-source tinfo) iid)))
 
+(defn is-question? [warstats]
+  (:question warstats))
+
+(defn is-answered? [warstats]
+  (:question-answered warstats))
+
+(defn is-list-of-things? [warstats]
+  (let [q (is-question? warstats)]
+    (when q
+      (set/intersection (set q) #{:tag :replies}))))
+
 (defn get-sub-tree [db [_ key]]
   (if (iid? key)
     (let [opinion (get-in db [:opinion-store key])

@@ -17,19 +17,26 @@
   {:x-up "thumbs_up_sign"
    :x-down "thumbs_down_sign"
    :x-right "check_mark"
-   :x-wrong "ballot_x"})
+   :x-wrong "ballot_x"
+   :x-right-source "minus"
+   :x-wrong-source "plus"})
 
 (def indicator-names-black
   {:x-up "thumbs_up_white"
    :x-down "thumbs_down_white"
    :x-right "check_mark_white"
-   :x-wrong "ballot_x_white"})
+   :x-wrong "ballot_x_white"
+   :x-right-source "minus_white"
+   :x-wrong-source "plus_white"})
 
-(def warstat-text
-  {:x-up "Has approval"
-   :x-down "Has disapproval"
-   :x-right "Has supporting evidence"
-   :x-wrong "Has contradicting evidence"})
+(defn warstat-text [axis stat]
+  (when (and stat (not (zero? stat)))
+    {:x-up "Has approval"
+     :x-down "Has disapproval"
+     :x-right "Has supporting evidence"
+     :x-wrong "Has contradicting evidence"
+     :x-right-source (str stat (misc/pluralize stat " counter-reference"))
+     :x-wrong-source (str stat (misc/pluralize stat " reference"))}))
 
 (defn flag-string [opinion]
   (let [flag (get flags/flags (:flag opinion))]
@@ -45,13 +52,10 @@
     (str "/static/img/small/wf_flag-" color ".svg")))
 
 (defn question-icon [warstats]
-  (let [question (:question warstats)
-        answered (:question-answered warstats)
-        listof (and question (set/intersection (set question) #{:tag :replies}))]
-    (str "/static/img/black-wf-"
-         (if listof "list-of-things" "question")
-         (when answered "-a")
-         ".svg")))
+  (str "/static/img/black-wf-"
+       (if (misc/is-list-of-things? warstats) "list-of-things" "question")
+       (when (misc/is-answered? warstats) "-a")
+       ".svg"))
 
 ;; Might not need, dependent on need for tooltip
 ;;(defn opinion-icon-core [])
@@ -87,29 +91,33 @@
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats target-id class black]}]
   (let [warstats (or warstats
-                     @(rf/subscribe [:warstats-store target-id]))]
+                     @(rf/subscribe [:warstats-store target-id]))
+        listof (misc/is-list-of-things? warstats)
+        make-icon
+        (fn [axis]
+          (let [stat (get warstats axis)
+                stat (if (list? stat) (count stat) stat)
+                mag (if (integer? stat) (mood/magnitude stat) 0)
+                opacity (if black "opacity-50" "opacity-25")
+                opacity (when (or (not stat) (zero? stat)) (str " " opacity))
+                mags (if (#{:x-up :x-right} axis)
+                       deco/positive-magnitude
+                       deco/negative-magnitude)]
+            [:span
+             {:class (str (nth mags mag) opacity)}
+             [:img {:src (str "/static/img/" (get (if black
+                                                    indicator-names-black
+                                                    indicator-names) axis) ".svg")
+                    :style {:width "12px" :height "12px"}
+                    :title (warstat-text axis stat)}]]))]
     [rc/h-box
      :class (str "mr-3 " class)
      :children
      (into []
-           (map
-            (fn [axis]
-              (let [stat (get warstats axis)
-                    mag (if (integer? stat) (mood/magnitude stat) 0)
-                    opacity (if black "opacity-50" "opacity-25")
-                    opacity (when (or (not stat) (zero? stat)) (str " " opacity))
-                    mags (if (#{:x-up :x-right} axis)
-                           deco/positive-magnitude
-                           deco/negative-magnitude)]
-                [:span
-                 {:class (str (nth mags mag) opacity)}
-                 [:img {:src (str "/static/img/" (get (if black
-                                                        indicator-names-black
-                                                        indicator-names) axis) ".svg")
-                        :style {:width "12px" :height "12px"}
-                        :title (when (and stat (not (zero? stat)))
-                                 (get warstat-text axis))}]]))
-            '(:x-up :x-down :x-right :x-wrong)))]))
+           (map make-icon
+                (if listof
+                  '(:x-up :x-down :x-right :x-wrong)
+                  '(:x-up :x-down :x-wrong-source :x-right-source))))]))
 
 (defn date-stamp [opinion]
   (let [created (:created opinion)

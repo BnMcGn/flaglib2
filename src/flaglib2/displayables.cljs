@@ -338,13 +338,29 @@
               (when-not hide-warstats
                 [tb/display-warstats :warstats @(rf/subscribe [:warstats-store opid])])]]))
 
+(defn question-info [opid]
+  (let [warstats @(rf/subscribe [:warstats-store opid])
+        listof (misc/is-list-of-things? warstats)
+        answered (misc/is-answered? warstats)]
+    [question-container {}
+     :warstats warstats
+     :body
+     (if listof
+       [:<>
+        [:span (tb/warstat-text :x-wrong-source (count (:x-wrong-source warstats)))]
+        [:span (tb/warstat-text :x-right-source (count (:x-right-source warstats)))]]
+       [:<>
+        (if answered
+          [:span {:class deco/casual} "Answered"]
+          [:span {:class deco/casual} "Open"])])]))
+
 (defn opinion-extras [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
         warstats @(rf/subscribe [:warstats-store opid])]
     [:div
      {:class "sm:flex sm:flex-row child:sm:grow child:sm:basis-0"}
      (when (:reference opinion) [reference opinion])
-     (when (:question warstats) [question-container {}])]))
+     (when (:question warstats) [question-info opid])]))
 
 (defn thread-opinion [& {:keys [opid text children no-tree-address substitutes]}]
   (let [excerpt (r/atom "")

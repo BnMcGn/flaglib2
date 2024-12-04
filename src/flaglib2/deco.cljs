@@ -5,6 +5,8 @@
 
 ;; formerly aside
 
+(def casual "m-0 bold italic bg-gray-300 leading-4")
+
 (defn casual-note-heading [contents & {:keys [style]}]
   [:h4
    {:class "m-0 bold italic font-[0.9rem] bg-gray-300 leading-4"
