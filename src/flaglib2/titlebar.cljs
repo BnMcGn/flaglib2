@@ -31,12 +31,12 @@
 
 (defn warstat-text [axis stat]
   (when (and stat (not (zero? stat)))
-    {:x-up "Has approval"
-     :x-down "Has disapproval"
-     :x-right "Has supporting evidence"
-     :x-wrong "Has contradicting evidence"
-     :x-right-source (str stat (misc/pluralize stat " counter-reference"))
-     :x-wrong-source (str stat (misc/pluralize stat " reference"))}))
+    ({:x-up "Has approval"
+      :x-down "Has disapproval"
+      :x-right "Has supporting evidence"
+      :x-wrong "Has contradicting evidence"
+      :x-right-source (str stat (misc/pluralize stat " counter-reference"))
+      :x-wrong-source (str stat (misc/pluralize stat " reference"))} axis)))
 
 (defn flag-string [opinion]
   (let [flag (get flags/flags (:flag opinion))]
@@ -91,7 +91,8 @@
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats target-id class black]}]
   (let [warstats (or warstats
-                     @(rf/subscribe [:warstats-store target-id]))
+                     (when target-id
+                       @(rf/subscribe [:warstats-store target-id])))
         listof (misc/is-list-of-things? warstats)
         make-icon
         (fn [axis]
@@ -116,8 +117,8 @@
      (into []
            (map make-icon
                 (if listof
-                  '(:x-up :x-down :x-right :x-wrong)
-                  '(:x-up :x-down :x-wrong-source :x-right-source))))]))
+                  '(:x-up :x-down :x-wrong-source :x-right-source)
+                  '(:x-up :x-down :x-right :x-wrong))))]))
 
 (defn date-stamp [opinion]
   (let [created (:created opinion)

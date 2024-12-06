@@ -237,7 +237,7 @@
   (gstring/unescapeEntities itm))
 
 (defn pluralize [countable label]
-  (let [ct (count countable)]
+  (let [ct (if (integer? countable) countable (count countable))]
     (if (= 1 ct)
       label
       (str label "s"))))
