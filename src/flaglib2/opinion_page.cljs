@@ -74,10 +74,10 @@
              :tree-address treead
              :focus focus
              :excerpt excerpt
-             :offset offset])
-          [disp/opinion-extras opid]
-          (when topmost
-            [disp/excerptless-opinions opid])]]
+             :offset offset])]
+         [disp/opinion-extras opid]
+         (when topmost
+           [disp/excerptless-opinions opid])]
         class  "absolute sm:break-normal break-all sm:break-words"]
     (when opinion
       (if small

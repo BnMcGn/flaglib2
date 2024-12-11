@@ -396,7 +396,8 @@
                 (if
                   small
                   {:width "100%"}
-                  {:margin-left (deco/thread-opinion-indent (dec (count tree-address))) :width "80%"})]
+                  {:margin-left (deco/thread-opinion-indent (dec (count tree-address)))
+                   :width "80%"})]
             [(if small opinion-container-mobile opinion-container)
              {:class "mb-6 sm:break-normal break-all sm:break-words relative"
               :style main-style
