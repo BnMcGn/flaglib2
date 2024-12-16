@@ -22,7 +22,7 @@
    (let [spec (db loc)]
      {:http-xhrio {:method :get
                    :uri (parameterize-source-url spec)
-                   :timeout (::timeout spec)18000
+                   :timeout (::timeout spec)
                    :response-format (::response-format spec)
                    :on-success [::received-chunk loc]
                    :on-failure [::failure loc]}
@@ -36,7 +36,7 @@
 (rf/reg-event-fx
  ::received-chunk
  (fn [{:keys [db]} [_ loc result]]
-   (let [spec (assoc-in db loc)
+   (let [spec (get-in db loc)
          {:keys [::on-chunk ::stack]} spec
          chunk (proc-chunk spec (cljs.reader/read-string result))
          stack (into stack chunk)]
