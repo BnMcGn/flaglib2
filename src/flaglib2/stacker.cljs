@@ -77,7 +77,7 @@
          on-chunk (::on-chunk spec)
          chunk (when chunk (proc-chunk spec chunk))
          stack (or chunk [])]
-     {:db (assoc-in db loc (assoc spec ::stack stack))
+     {:db (update-in db loc #(merge (assoc spec ::stack stack) %))
       :fx (when (and chunk on-chunk)
             [ [:dispatch (into on-chunk chunk)] ])})))
 

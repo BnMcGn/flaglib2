@@ -18,6 +18,7 @@
    [flaglib2.posters :as posters]
    [flaglib2.grouped :as grouped]
    [flaglib2.mock-make :as mock]
+   [flaglib2.stacker :as stacker]
    [flaglib2.things :as things]
    [flaglib2.hixer :as hixer]
    [flaglib2.social-card :as scard]

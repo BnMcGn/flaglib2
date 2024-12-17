@@ -204,6 +204,7 @@
 
 (rf/reg-event-db
  ::complete-debounce
+ [misc/after-hook]
  (fn [db _]
    (assoc
     db

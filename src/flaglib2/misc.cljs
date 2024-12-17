@@ -283,6 +283,20 @@
   []
   @re-frame.db/app-db)
 
+;;Re-frame tools
+
+(defn append-dispatch [fx & dispatches]
+  (let [dispatches (for [d dispatches
+                         :when d]
+                     [:dispatch d])]
+    (update fx :fx #(into (or % []) dispatches))))
+
+(defn prepend-dispatch [fx & dispatches]
+  (let [dispatches (for [d dispatches
+                         :when d]
+                     [:dispatch d])]
+    (update fx :fx #(into (into [] dispatches) (or % [])))))
+
 
 (defn relative-to-range
   "Returns a value indicating where num is positioned relative to start and end. If num lies between start and end, the return value will be between 0.0 and 1.0."
@@ -369,6 +383,7 @@
                           (map #(into [] (map inject %)) entries))
                 context)))))
 
+;;FIXME: Might want to add multiple calls per hook
 (rf/reg-event-db
  :add-after-hooks
  (fn [db [_ hookspecs]]
