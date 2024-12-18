@@ -20,13 +20,14 @@
  ::request-chunk
  (fn [{:keys [db]} [_ loc]]
    (let [spec (db loc)]
-     {:http-xhrio {:method :get
-                   :uri (parameterize-source-url spec)
-                   :timeout (::timeout spec)
-                   :response-format (::response-format spec)
-                   :on-success [::received-chunk loc]
-                   :on-failure [::failure loc]}
-      :db (assoc-in db (into loc [::requested]) (tm/now))})))
+     (when-not (::requested spec)
+       {:http-xhrio {:method :get
+                     :uri (parameterize-source-url spec)
+                     :timeout (::timeout spec)
+                     :response-format (::response-format spec)
+                     :on-success [::received-chunk loc]
+                     :on-failure [::failure loc]}
+        :db (assoc-in db (into loc [::requested]) (tm/now))}))))
 
 (defn proc-chunk [spec chunk]
   (let [{:keys [::process-chunk ::process-item ::stack ::on-chunk]} spec]
@@ -43,7 +44,7 @@
      {:db (assoc-in db loc (assoc spec ::stack stack ::requested nil))
       :fx
       (when on-chunk
-        [ [:dispatch (into on-chunk chunk)]])})))
+        [ [:dispatch (into on-chunk chunk)] ])})))
 
 (rf/reg-event-fx
  ::failure
@@ -72,7 +73,8 @@
           ::process-chunk identity
           ::process-item identity
           ::on-error true
-          ::on-chunk nil}
+          ::on-chunk nil
+          ::limit 100}
          spec (merge defaults spec)
          on-chunk (::on-chunk spec)
          chunk (when chunk (proc-chunk spec chunk))
