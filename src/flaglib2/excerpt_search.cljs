@@ -10,6 +10,7 @@
    [flaglib2.suggester :as suggester]
    [flaglib2.excerpts :as excerpts]
    [flaglib2.displayables :as disps]
+   [flaglib2.fabricate :as fabricate]
    [flaglib2.stepper :as step]))
 
 (rf/reg-sub ::raw-excerpt-search :-> ::raw-excerpt-search)
@@ -23,7 +24,7 @@
  ::excerpt-start-selected
  (fn [{:keys [db]} [_ location start]]
    {:db (assoc db ::excerpt-start start)
-    :fx [[:dispatch [:flaglib2.suggester/reset location]]]}))
+    :fx [[:dispatch [::suggester/reset location]]]}))
 
 (rf/reg-event-db
  ::do-search
@@ -125,7 +126,7 @@
      (if-let [start? (::excerpt-start db)]
        {:db (assoc db ::excerpt-end item)
         :call-something [endpoint (excerpts/start-end->excerpt-offset (::tdat db) start? item)]
-        :fx [[:dispatch [:flaglib2.suggester/reset location]]]}
+        :fx [[:dispatch [::suggester/reset location]]]}
        {:db (assoc db ::excerpt-end nil)
         :fx [[:dispatch [::excerpt-start-selected [::excerpt-suggester] item]]]})
      {:call-something [endpoint nil]})))
@@ -175,7 +176,7 @@
 (rf/reg-event-fx
  ::accept-entry
  (fn [{:keys [db]} [_ status]]
-   {:db (assoc db :flaglib2.fabricate/excerpt
+   {:db (assoc db ::fabricate/excerpt
                (cond
                  (= status :failed)
                  [(::raw-excerpt-search db) nil]
@@ -186,7 +187,7 @@
                   (::tdat db) (::excerpt-start db) (::excerpt-end db))
                  :else
                  [nil nil]))
-    :fx [ [:dispatch [:flaglib2.stepper/goto :opine]]]}))
+    :fx [ [:dispatch [::step/goto :opine]]]}))
 
 (defn excerpt-search-buttons []
   (let [status @(rf/subscribe [::excerpt-search-status])]

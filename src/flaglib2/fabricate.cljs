@@ -76,7 +76,7 @@
  ;;We assume that author-urls are already in ipfs. No check.
  (fn [{:keys [db]} _]
    {:dispatch [:load-rooturls
-               (misc/reformat-urls-lists-simple (list (:flaglib2.fetchers/author-urls db)))
+               (misc/reformat-urls-lists-simple (list (::fetchers/author-urls db)))
                :no-text true :no-references true]}))
 
 

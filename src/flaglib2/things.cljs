@@ -5,6 +5,7 @@
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
+   [flaglib2.ipfs :as ipfs]
    [flaglib2.stacker :as stack]
    [flaglib2.titlebar :as tb]))
 
@@ -134,7 +135,7 @@
               :fx [[:dispatch [:mount-registered key]]]}
          out (cond-> out
                (:url spec) (misc/prepend-dispatch [:add-after-hooks
-                                                   {:flaglib2.ipfs/complete-debounce
+                                                   {::ipfs/complete-debounce
                                                     [::filter-things key]}]))
          prepender (fn [fx dispatches] (apply misc/prepend-dispatch fx dispatches))]
      ;;url indicates that we have an "infinite" source

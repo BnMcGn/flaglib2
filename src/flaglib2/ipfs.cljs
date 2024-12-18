@@ -221,19 +221,19 @@
 (rf/reg-event-fx
  :load-rooturl
  (fn [_ [_ rooturl & {:keys [no-text no-references]}]]
-   {:fx [[:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "warstats"]]
-         [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "title"]]
+   {:fx [[:dispatch [::request-rooturl-item rooturl "warstats"]]
+         [:dispatch [::request-rooturl-item rooturl "title"]]
          (when-not no-references
-           [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "references"]])
+           [:dispatch [::request-rooturl-item rooturl "references"]])
          (when-not no-text
-           [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "text"]])]}))
+           [:dispatch [::request-rooturl-item rooturl "text"]])]}))
 
 (rf/reg-event-fx
  :load-opinion
  (fn [_ [_ iid]]
-   {:fx [[:dispatch [:flaglib2.ipfs/request-opinion-item iid "warstats"]]
-         [:dispatch [:flaglib2.ipfs/request-opinion-item iid "title"]]
-         [:dispatch [:flaglib2.ipfs/request-opinion-item iid "opinion"]]]}))
+   {:fx [[:dispatch [::request-opinion-item iid "warstats"]]
+         [:dispatch [::request-opinion-item iid "title"]]
+         [:dispatch [::request-opinion-item iid "opinion"]]]}))
 
 
 ;; Warstats requester

@@ -12,25 +12,27 @@
    [flaglib2.urlgrab :as ug]
    [flaglib2.posters :as posters]
    [flaglib2.deco :as deco]
+   [flaglib2.fabricate :as fab]
+   [flaglib2.fetchers :as fetch]
 
    [re-com-tailwind.core :as rc]
    [re-com-tailwind.functions :refer [tw-btn-danger]]))
 
 (def fabricate-hooks
-  {:flaglib2.fetchers/received-author-urls [:flaglib2.fabricate/get-stuff-for-author-urls]})
+  {::fetch/received-author-urls [::fab/get-stuff-for-author-urls]})
 
 
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
  (let [{:keys [message]} @(rf/subscribe [:target-adjustment])]
    [:<>
-    [ug/url-search [:flaglib2.fabricate/specify-target]
+    [ug/url-search [::fab/specify-target]
     :placeholder "Target URL or search terms"]
   (when message
     [deco/error-msg message])]))
 
 (defn specify-target-summary []
-  (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])]
+  (let [selection @(rf/subscribe [:selected-url [::fab/specify-target]])]
     (if (misc/iid? selection)
       [step/summary-button
        :specify-target (str "Target: Opinion: " @(rf/subscribe [:proper-title selection]))]
@@ -41,21 +43,21 @@
     [rc/button
      :label "Next (Corrected Target)"
      :on-click (fn []
-                 (rf/dispatch [:flaglib2.urlgrab/choose-adjusted-target
-                               [:flaglib2.fabricate/specify-target]
+                 (rf/dispatch [::ug/choose-adjusted-target
+                               [::fab/specify-target]
                                adjusted])
-                 (rf/dispatch [:flaglib2.stepper/next]))] ))
+                 (rf/dispatch [::step/next]))] ))
 
 (defn choose-original []
   [rc/button
    :label "Next (Accept as Entered)"
    :on-click (fn []
-               (rf/dispatch [:flaglib2.urlgrab/choose-original-target
-                             [:flaglib2.fabricate/specify-target]])
-               (rf/dispatch [:flaglib2.stepper/next]))])
+               (rf/dispatch [::ug/choose-original-target
+                             [::fab/specify-target]])
+               (rf/dispatch [::step/next]))])
 
 (defn specify-target-buttons []
-  (let [url @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])
+  (let [url @(rf/subscribe [:selected-url [::fab/specify-target]])
         {:keys [message adjusted]} @(rf/subscribe [:target-adjustment])]
     [step/button-box
      (step/button-spacer
@@ -73,16 +75,16 @@
 (defn review-text-button []
   [rc/button
    :label "Review Text"
-   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :review-text]))])
+   :on-click (fn [] (rf/dispatch [::step/goto :review-text]))])
 
 (defn supply-text-button []
   [rc/button
    :label "Supply Text"
-   :on-click (fn [] (rf/dispatch [:flaglib2.stepper/goto :supply-text]))])
+   :on-click (fn [] (rf/dispatch [::step/goto :supply-text]))])
 
 
 (defn target-decision []
-  (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])
+  (let [selection @(rf/subscribe [:selected-url [::fab/specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -115,7 +117,7 @@
 
 
 (defn target-decision-buttons []
-  (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-target]])
+  (let [selection @(rf/subscribe [:selected-url [::fab/specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]
     (if factors
       (case (:status factors)
@@ -150,21 +152,21 @@
    [:br]
 
    [rc/input-text
-    :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
+    :model (rf/subscribe [::fab/supplied-title])
     :placeholder "Article Title"
-    :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
+    :on-change (fn [title] (rf/dispatch [::fab/set-supplied-title title]))]
    [rc/input-textarea
-    :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
+    :model (rf/subscribe [::fab/supplied-text])
     :placeholder "Article Text"
     :width "100%"
     :height "14rem"
     :rows 15
-    :on-change (fn [text] (rf/dispatch [:flaglib2.fabricate/set-supplied-text text]))]])
+    :on-change (fn [text] (rf/dispatch [::fab/set-supplied-text text]))]])
 
 ;;FIXME: Previous button non-functional
 (defn review-text-buttons []
   (step/stepper-buttons
-   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [:flaglib2.fabricate/reset-supplied-tt])]]))
+   :buttons [[rc/button :label "Reset" :on-click #(rf/dispatch [::fab/reset-supplied-tt])]]))
 
 (defn supply-text []
   [:div
@@ -177,16 +179,16 @@
    [:br]
 
    [rc/input-text
-    :model (rf/subscribe [:flaglib2.fabricate/supplied-title])
+    :model (rf/subscribe [::fab/supplied-title])
     :placeholder "Article Title"
-    :on-change (fn [title] (rf/dispatch [:flaglib2.fabricate/set-supplied-title title]))]
+    :on-change (fn [title] (rf/dispatch [::fab/set-supplied-title title]))]
    [rc/input-textarea
-    :model (rf/subscribe [:flaglib2.fabricate/supplied-text])
+    :model (rf/subscribe [::fab/supplied-text])
     :placeholder "Article Text"
     :width "100%"
     :height "14rem"
     :rows 15
-    :on-change (fn [text] (rf/dispatch [:flaglib2.fabricate/set-supplied-text text]))]])
+    :on-change (fn [text] (rf/dispatch [::fab/set-supplied-text text]))]])
 
 (defn flag-options []
   (into []
@@ -196,7 +198,7 @@
 
 
 (defn flag-page []
-  (let [flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
+  (let [flag @(rf/subscribe [::fab/flag-or-default])
         finfo (when flag (get flags/flags flag))]
     [:div
      {:class "w-full"}
@@ -206,7 +208,7 @@
       :width "90%"
       :choices (flag-options)
       :group-fn :category
-      :on-change (fn [flag] (rf/dispatch [:flaglib2.fabricate/set-flag flag]))
+      :on-change (fn [flag] (rf/dispatch [::fab/set-flag flag]))
       :label-fn (fn [item]
                   [:span (str (:category item) ": " (:label item))])
       :render-fn (fn [item]
@@ -231,19 +233,19 @@
          )]))
 
 (defn excerpt-page []
-  (let [[excerpt offset] @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default])
-        text @(rf/subscribe [:flaglib2.fabricate/active-text])]
+  (let [[excerpt offset] @(rf/subscribe [::fab/excerpt-or-default])
+        text @(rf/subscribe [::fab/active-text])]
     [:div
      [xsearch/excerpt-search
       :text text
       :excerpt excerpt
       :offset offset
-      :on-change :flaglib2.fabricate/set-excerpt]
+      :on-change ::fab/set-excerpt]
      [xsearch/excerpt-search-context]]))
 
 (defn excerpt-summary []
-  (let [[excerpt _] @(rf/subscribe [:flaglib2.fabricate/excerpt-or-default])
-        found @(rf/subscribe [:flaglib2.fabricate/excerpt-found?])
+  (let [[excerpt _] @(rf/subscribe [::fab/excerpt-or-default])
+        found @(rf/subscribe [::fab/excerpt-found?])
         text (if (empty? excerpt)
                "Choose an Excerpt"
                excerpt)]
@@ -262,7 +264,7 @@
    :placeholder "Reference URL or search terms"])
 
 (defn specify-reference-summary []
-  (let [selection @(rf/subscribe [:selected-url [:flaglib2.fabricate/specify-reference]])
+  (let [selection @(rf/subscribe [:selected-url [::fab/specify-reference]])
         text (if (empty? selection) "Set a Reference" (str "Reference: " selection))]
     [step/summary-button :reference text]))
 
@@ -273,11 +275,11 @@
   (let [messages @(rf/subscribe [:opinion-post-messages])]
     [:div
      [rc/input-textarea
-      :model (rf/subscribe [:flaglib2.fabricate/comment])
+      :model (rf/subscribe [::fab/comment])
       :width "100%"
       :height "14rem"
       :placeholder "Enter a Comment"
-      :on-change (fn [comment] (rf/dispatch [:flaglib2.fabricate/set-comment comment]))]
+      :on-change (fn [comment] (rf/dispatch [::fab/set-comment comment]))]
      [rc/v-box
       :children
       (into []
@@ -298,9 +300,9 @@
  ::opine-initialize
  (fn [{:keys [_]} _]
    {:fx
-    [[:dispatch [:flaglib2.stepper/set-summary :excerpt]]
-     [:dispatch [:flaglib2.stepper/set-summary :reference]]
-     [:dispatch [:flaglib2.stepper/set-summary :flag]]]}))
+    [[:dispatch [::step/set-summary :excerpt]]
+     [:dispatch [::step/set-summary :reference]]
+     [:dispatch [::step/set-summary :flag]]]}))
 
 (def steps-advanced
   [{:id :specify-target
@@ -308,16 +310,16 @@
     :page [specify-target]
     :buttons [specify-target-buttons]
     :next (fn [db]
-            (let [target (ug/selected-url-from-db [:flaglib2.fabricate/specify-target] db)]
+            (let [target (ug/selected-url-from-db [::fab/specify-target] db)]
               (cond
                 (misc/iid? target) :opine
                 (= :reviewed (:status
                               (subs/target-decision
                                db
-                               (ug/selected-url-from-db [:flaglib2.fabricate/specify-target] db))))
+                               (ug/selected-url-from-db [::fab/specify-target] db))))
                 :opine
                 :else :target-decision)))
-    :once [:initialize-url-search [:flaglib2.fabricate/specify-target]]}
+    :once [:initialize-url-search [::fab/specify-target]]}
    {:id :target-decision
     :page [target-decision]
     :buttons [target-decision-buttons]
@@ -326,7 +328,7 @@
    {:id :review-text
     :page [review-text]
     :buttons [review-text-buttons]
-    :once [:flaglib2.fabricate/reset-supplied-tt]
+    :once [::fab/reset-supplied-tt]
     :next :opine}
    {:id :supply-text
     :page [supply-text]
@@ -398,12 +400,12 @@
          [form presets] (what-opin-form? db)]
      {:db db
       :fx [[:dispatch [:add-after-hooks fabricate-hooks]]
-           [:dispatch [:flaglib2.stepper/initialize form presets]]
-           [:dispatch [:flaglib2.fabricate/initialize-tt-parameters]]
+           [:dispatch [::step/initialize form presets]]
+           [:dispatch [::fab/initialize-tt-parameters]]
            [:dispatch
             (if target
-              [:flaglib2.urlgrab/enter-search [:flaglib2.fabricate/specify-target] target]
-              [:flaglib2.fetchers/load-author-urls])]
+              [::ug/enter-search [::fab/specify-target] target]
+              [::fetch/load-author-urls])]
            (when target
              [:dispatch (if (misc/iid? target)
                           [:load-opinion target]
