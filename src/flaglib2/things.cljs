@@ -120,6 +120,15 @@
      (cond-> newdb
        need-more (misc/append-dispatch [::stack/request-chunk [:thing-listers key]])))))
 
+(rf/reg-event-db
+ ::check-chunk
+ (fn [db [_ key chunk]]
+   (let [loc [:thing-listers key]
+         spec (get-in db loc)
+         limit (::stack/limit spec)]
+     (cond-> db
+       (< (count chunk) limit) (assoc-in (into loc [:finished]) true)))))
+
 (rf/reg-sub
  :thing-lister
  (fn [db [_ key]]
@@ -158,5 +167,6 @@
        url (misc/prepend-dispatch [::stack/init loc
                                    {::stack/url url
                                     ::stack/process-chunk process-things
-                                    ::stack/chunk things}])
+                                    ::stack/chunk things
+                                    ::stack/on-chunk [::check-chunk key]}])
        (not url) (prepender (thing-loaders things))))))
