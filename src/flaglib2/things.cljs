@@ -112,7 +112,6 @@
  ::filter-things
  (fn [{:keys [db]} [_ key]]
    (let [spec (get-in db [:thing-listers key])
-         filter (:filter spec)
          things (or (::stack/stack spec) (:things1 spec))
          filterable (filter #((:warstats-store db) (:id %)) things)
          things2 ((:filter spec) db filterable)
@@ -127,12 +126,20 @@
    (if key (get-in db [:thing-listers key])
        (:thing-listers db))))
 
+(def settings
+  {"author-open-questions"
+   {:filter (fn [db things]
+              (for [{:keys [type id]:as th} things
+                    :when (not (misc/is-answered? (get-in db [:warstats-store id])))]
+                th))}})
+
 (rf/reg-event-fx
  :thing-lister
  (fn [{:keys [db]} [_ key]]
    (let [spec (get-in db [:server-parameters key])
          loc [:thing-listers key]
          {:keys [url things]} spec
+         spec (merge spec (get (:name spec) settings))
          things (if url things (process-things things))
          spec (cond-> spec
                 (not url) (assoc :things1 things))
