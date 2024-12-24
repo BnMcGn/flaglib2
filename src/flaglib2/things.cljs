@@ -83,11 +83,11 @@
               :when (#{:rooturl :opinion :question} type)]
           (case type
             :rooturl
-            [:dispatch [:load-rooturl id :no-text true :no-references true]]
+            [:load-rooturl id :no-text true :no-references true]
             :opinion
-            [:dispatch [:load-opinion id]]
+            [:load-opinion id]
             :question
-            [:dispatch [:load-opinion id]]
+            [:load-opinion id]
             :author
             nil ;May need later
             ))))
@@ -120,14 +120,17 @@
      (cond-> newdb
        need-more (misc/append-dispatch [::stack/request-chunk [:thing-listers key]])))))
 
-(rf/reg-event-db
- ::check-chunk
- (fn [db [_ key chunk]]
+(rf/reg-event-fx
+ ::on-thing-chunk
+ (fn [{:keys [db]} [_ key chunk]]
    (let [loc [:thing-listers key]
          spec (get-in db loc)
          limit (::stack/limit spec)]
-     (cond-> db
-       (< (count chunk) limit) (assoc-in (into loc [:finished]) true)))))
+     (apply
+      misc/append-dispatch
+      {:db (cond-> db
+             (< (count chunk) limit) (assoc-in (into loc [:finished]) true))}
+      (thing-loaders chunk)))))
 
 (rf/reg-sub
  :thing-lister
@@ -148,7 +151,7 @@
    (let [spec (get-in db [:server-parameters key])
          loc [:thing-listers key]
          {:keys [url things]} spec
-         spec (merge spec (get (:name spec) settings))
+         spec (merge spec (get settings (:name spec)))
          things (if url things (process-things things))
          spec (cond-> spec
                 (not url) (assoc :things1 things))
@@ -168,5 +171,5 @@
                                    {::stack/url url
                                     ::stack/process-chunk process-things
                                     ::stack/chunk things
-                                    ::stack/on-chunk [::check-chunk key]}])
+                                    ::stack/on-chunk [::on-thing-chunk key]}])
        (not url) (prepender (thing-loaders things))))))

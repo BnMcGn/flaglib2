@@ -81,5 +81,5 @@
          stack (or chunk [])]
      {:db (update-in db loc #(merge (assoc spec ::stack stack) %))
       :fx (when (and chunk on-chunk)
-            [ [:dispatch (into on-chunk chunk)] ])})))
+            [ [:dispatch (into on-chunk [chunk])] ])})))
 
