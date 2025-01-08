@@ -73,23 +73,6 @@
   ;; ignore freshness, use tailwind stuff
   (get deco/flavor-background (flavor-from-multiple db ids)))
 
-(defn flavor-from-own-warstats [warstats]
-  (let [pos (+ (:x-right warstats) (:x-up warstats))
-        neg (+ (:x-wrong warstats) (:x-down warstats))
-        ;; flags may eventually be put in own object, but for now...
-        flags warstats
-        ;;FIXME: Need clearer indicators and more nuance for handling other flags. Not too bad because
-        ;; it just contributes to flavor. Will need visibility system to do this right.
-        badness (reduce + (map #(get flags % 0) badflags))
-        goodness (reduce + (map #(get flags % 0) goodflags))
-                  ;;FIXME: might add multiplier for flags
-        badness (+ badness neg)
-        goodness (+ goodness pos)]
-    (cond
-      (misc/significant-majority? goodness badness) :positive
-      (misc/significant-majority? badness goodness) :negative
-      (< 0 (+ goodness badness)) :contested
-      :else :neutral)))
 
 (defn magnitude [item & {:keys [keyfunc] :or {keyfunc identity}}]
   (let [val (keyfunc item)]
@@ -99,3 +82,54 @@
       (< 10 val) 2
       (< 3 val) 1
       :else 0)))
+
+;;A more detailed version of flavor-from-own-warstats
+;;FIXME: would like :ambivalent, but need own contrary votes, excerpt score separated out,
+;; perhaps faction info to see if faction is internally ambivalent. Not easy now!
+;;FIXME: Would like info on participants in this conversation
+(defn in-a-word [warstats & {:keys [key db]}]
+  (let [flags warstats
+        goodness (reduce + (map #(get flags % 0) goodflags))
+        badness (reduce + (map #(get flags % 0) badflags))
+        {:keys [x-right x-wrong x-up x-down]} warstats
+        goodcount (+ goodness x-right x-up)
+        badcount (+ badness x-wrong x-down)
+        refd (and key db (get-in db [:refd key]))]
+    (cond
+      (misc/significant-majority? goodcount badcount)
+      (if (empty? refd) :positive :significant)
+      (misc/significant-majority? badcount goodcount) :negative
+      (< 0 (+ goodcount badcount))
+      (cond
+        ;;Is the badcount coming (mostly) from flags?
+        (misc/significant-majority-of? badness badcount)
+        (let [{:keys [negative-spam negative-inflammatory negative-language-warning
+                      negative-disturbing negative-out-of-bounds custodial-redundant
+                      custodial-out-of-date custodial-retraction custodial-flag-abuse
+                      custodial-arcane]} flags]
+          (cond
+            (misc/significant-majority-of? (+ negative-spam
+                                              negative-disturbing
+                                              negative-out-of-bounds)
+                                           badcount) :restricted
+            (misc/significant-majority-of? (+ custodial-redundant
+                                              custodial-out-of-date
+                                              custodial-retraction
+                                              custodial-arcane)
+                                           badcount) :sidelined
+            :else :contested))
+        (and (misc/significant-majority-of? x-up goodcount)
+             (misc/significant-majority-of? x-wrong badcount)) :unsupported
+        (and (misc/significant-majority-of? x-right goodcount)
+             (misc/significant-majority-of? x-down badcount)) :awkward
+        :else :contested)
+      :else :ignored)))
+
+(defn flavor-from-own-warstats [warstats]
+  (let [word (in-a-word warstats)]
+    (case word
+      :ignored :neutral
+      (:positive :significant) :positive
+      :negative :negative
+      (:sidelined :restricted :unsupported :awkward :contested) :contested
+      :neutral)))

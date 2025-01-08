@@ -324,6 +324,11 @@
   (and (> 0 a)
        (< (relative-to-range 0 a b) 0.7)))
 
+(defn significant-majority-of?
+  "Does A make up a significant majority of B"
+  [a b]
+  (significant-majority? a (- b a)))
+
 
 ;; Title Utilities
 
