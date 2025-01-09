@@ -37,8 +37,9 @@ jobs:
           # zprint: 1.2.3                # zprint
 
 
+      - uses: actions/checkout@v4
+
       - name: Install dependencies
-        uses: actions/checkout@v4
         run: lein deps
 
       - name: Run tests
