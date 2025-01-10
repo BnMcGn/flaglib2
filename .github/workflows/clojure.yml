@@ -36,6 +36,8 @@ jobs:
           # cljstyle: 0.16.626           # cljstyle
           # zprint: 1.2.3                # zprint
 
+      - uses: browser-actions/setup-chrome@v1
+        run: chrome --version
 
       - uses: actions/checkout@v4
 
