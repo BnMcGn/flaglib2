@@ -14,7 +14,7 @@ jobs:
     docker:
       # Specify the version you desire here
       # See: https://circleci.com/developer/images/image/cimg/clojure
-      - image: cimg/clojure:1.11.1
+      - image: cimg/clojure-browsers:1.11.1
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -47,7 +47,7 @@ jobs:
           key: v1-dependencies-{{ checksum "project.clj" }}
 
       # run tests!
-      - run: lein test
+      - run: lein fig:test
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
