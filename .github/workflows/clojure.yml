@@ -36,6 +36,9 @@ jobs:
           # cljstyle: 0.16.626           # cljstyle
           # zprint: 1.2.3                # zprint
 
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
       - uses: browser-actions/setup-chrome@v1
       - run: chrome --version
 
