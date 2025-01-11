@@ -6,7 +6,7 @@
    [flaglib2.excerpts-test]
    [flaglib2.excerpt-search-test]
    [flaglib2.misc-test]
-   ;[flaglib2.mood-test]
+   [flaglib2.mood-test]
    [flaglib2.hixer-test]
 
    [figwheel.main.testing :refer [run-tests-async]]

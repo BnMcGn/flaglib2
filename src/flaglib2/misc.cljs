@@ -315,13 +315,13 @@
 (defn vast-majority?
   "Is A at least 1000% larger than B?"
   [a b]
-  (and (> 0 a)
+  (and (< 0 a)
        (< (relative-to-range 0 a b) 0.1)))
 
 (defn significant-majority?
   "Is B 70% or less of the size of A?"
   [a b]
-  (and (> 0 a)
+  (and (< 0 a)
        (< (relative-to-range 0 a b) 0.7)))
 
 (defn significant-majority-of?
