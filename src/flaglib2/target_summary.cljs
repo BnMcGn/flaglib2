@@ -97,6 +97,22 @@
           :height (height-range-adjust (:x-wrong warstats))
           :transform (translate col2 centerline)]]])]))
 
+(defn display-summary-word [targetid]
+  (let [db @(rf/subscribe [:core-db])
+        warstats @(rf/subscribe [:warstats-store targetid])
+        word (mood/in-a-word warstats :db db :key targetid)]
+    [:div
+     ({:positive "Positive"
+       :significant "Significant"
+       :negative "Negative"
+       :restricted "Restricted"
+       :sidelined "Sidelined"
+       :contested "Contested"
+       :unsupported "Unsupported"
+       :awkward "Awkward"
+       :ignored "Ignored"}
+      word)]))
+
 (defn display-other-flags [targetid & {:keys [hide-inactive]}]
   (let [warstats @(rf/subscribe [:warstats-store targetid])
         flags

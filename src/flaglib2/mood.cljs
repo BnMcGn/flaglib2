@@ -106,7 +106,7 @@
         (let [{:keys [negative-spam negative-inflammatory negative-language-warning
                       negative-disturbing negative-out-of-bounds custodial-redundant
                       custodial-out-of-date custodial-retraction custodial-flag-abuse
-                      custodial-arcane]} flags]
+                      custodial-arcane custodial-offtopic]} flags]
           (cond
             (misc/significant-majority-of? (+ negative-spam
                                               negative-disturbing
@@ -115,6 +115,7 @@
             (misc/significant-majority-of? (+ custodial-redundant
                                               custodial-out-of-date
                                               custodial-retraction
+                                              custodial-offtopic
                                               custodial-arcane)
                                            badcount) :sidelined
             :else :contested))
