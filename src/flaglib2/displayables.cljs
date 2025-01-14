@@ -24,7 +24,8 @@
                             no-main-link]}]
   (let [intro (when intro-text [:span {:class "font-bold"} intro-text])
         small @(rf/subscribe [:window-small?])
-        dd (nth deco/display-depths (or display-depth 0))
+        dd (if (= false display-depth) ""
+               (nth deco/display-depths (or display-depth 0)))
         warstats (or warstats @(rf/subscribe [:warstats-store url]))
         db @(rf/subscribe [:core-db])
         tbstuff (tb/root-tb-stuff

@@ -7,7 +7,8 @@
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
    [flaglib2.flags :as flags]
-   [flaglib2.displayables :as disp]))
+   [flaglib2.displayables :as disp]
+   [flaglib2.mood :as mood]))
 
 (defn translate [x y]
   (str "translate(" x "," y ")"))
@@ -97,11 +98,12 @@
           :height (height-range-adjust (:x-wrong warstats))
           :transform (translate col2 centerline)]]])]))
 
-(defn display-summary-word [targetid]
+(defn display-summary-word [targetid & {:keys [class]}]
   (let [db @(rf/subscribe [:core-db])
         warstats @(rf/subscribe [:warstats-store targetid])
         word (mood/in-a-word warstats :db db :key targetid)]
-    [:div
+    [:span
+     {:class class}
      ({:positive "Positive"
        :significant "Significant"
        :negative "Negative"

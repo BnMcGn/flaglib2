@@ -12,26 +12,39 @@
    [flaglib2.target-summary :as tsum]))
 
 (def card-size {:style {:max-width "1200px" :min-width "1200px"
-                        :max-height "630px" :min-height "630px"}})
+                        :max-height "630px" :min-height "630px"
+                        :background-color "white"
+                        :padding "1.5rem"
+                        :justify-content "space-around"}})
 
 (defn rooturl-card []
   (let [params @(rf/subscribe [:server-parameters])
         target (:target params)]
-    [:div.grid-cols-4
+    [:div
      (merge card-size
-            {:class "grid gap-4"})
+            {:class "p-6 flex flex-col justify-around"})
+     [:div
+      {:style {:background-color "white" :padding "0.5em"
+               :border-size "4px" :border-color "#f9f5d8"}}
+      [:span {:class "text-xl bold" :style {:font-size "x-large"}}
+       [tsum/display-summary-word target :class "bold text-xl"]]
+      [disp/root-title
+       :url target
+       :hide-reply true
+       :hide-count true
+       :hide-external-link true
+       :display-depth false
+       :class "m-4"]]
      [:img {:src "/static/img/wf_logo_large.png"
             :class "absolute"
-            :style {:top "340px" :left "390px" :opacity "25%"}}]
-     [disp/root-title
-      :url target
-      :hide-reply true
-      :hide-count true
-      :hide-external-link true
-      :class "col-span-4"]
-     [tsum/summary-scores-chart target]
-     [tsum/reply-count-long target]
-     [tsum/display-other-flags target :hide-inactive true]]))
+            :style {:top "390px" :left "130px" :opacity "25%"}}]
+     [:div
+      {:class "flex flex-row w-full justify-around self-center"
+       :style {:background-color "white" :width "50rem" :justify-content "space-around"
+               :align-self "center"}}
+      [tsum/reply-count-long target]
+      [tsum/display-other-flags target :hide-inactive true]
+      [tsum/summary-scores-chart target]]]))
 
 (defn opinion-card []
   (let [params @(rf/subscribe [:server-parameters])
