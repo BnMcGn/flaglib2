@@ -230,6 +230,17 @@
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
+(defn part-on-index [coll index]
+  (if (and (integer? index) (>= 0 index))
+    (let [tail (nthrest coll index)]
+      (if (empty? tail)
+        [coll]
+        [(take index coll) tail]))
+    [coll]))
+
+(defn part-on-true [predicate coll]
+  (part-on-index coll (first (keep-indexed predicate coll))))
+
 (defn class-string [& colls]
   (string/join " " (flatten colls)))
 

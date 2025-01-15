@@ -153,9 +153,10 @@
                         :when (:excerpt opin)]
                     opin))]
     [:div [:h3 "Replies"]
-     [:div (str "Direct responses: " immediate)]
-     [:div (str "In conversation: " total )]
-     [:div (str "As excerpts: " excerpts)]]))
+     [:div {:class "grid w-44" :style {:grid-template-columns "90% 10%"}}
+      [:span "Direct responses:"] [:span immediate]
+      [:span "In conversation:"] [:span total]
+      [:span "As excerpts:"] [:span excerpts]]]))
 
 (defn references-summary [targetid]
   (let [references @(rf/subscribe [:references targetid])

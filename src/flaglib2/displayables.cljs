@@ -446,3 +446,4 @@
                (str "opinion by " (:authorname opinion))
                "unknown opinion")]
     [:span text]))
+
