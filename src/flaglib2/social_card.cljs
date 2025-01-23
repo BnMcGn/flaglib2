@@ -14,8 +14,7 @@
 (def card-size {:style {:max-width "1200px" :min-width "1200px"
                         :max-height "630px" :min-height "630px"
                         :background-color "white"
-                        :padding "1.5rem"
-                        :justify-content "space-around"}})
+                        :padding "1.5rem"}})
 
 (defn rooturl-card []
   (let [params @(rf/subscribe [:server-parameters])
@@ -52,8 +51,11 @@
         rooturl (:rooturl params)]
     [:div
      (merge card-size
-            {})
-     [disp/thread-opinion :opid target]]))
+            {:class "p-6 flex flex-col"})
+     [disp/thread-opinion :opid target :style {:width "98%" :margin-left "0px"}]
+     [:img {:src "/static/img/wf_logo_large.png"
+            :class "absolute"
+            :style {:top "290px" :left "300px" :opacity "25%"}}]]))
 
 (rf/reg-event-fx
  :social-card

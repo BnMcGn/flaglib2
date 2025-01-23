@@ -363,7 +363,7 @@
      (when (:reference opinion) [reference opinion])
      (when (:question warstats) [question-info opid])]))
 
-(defn thread-opinion [& {:keys [opid text children no-tree-address substitutes]}]
+(defn thread-opinion [& {:keys [opid text children no-tree-address substitutes style]}]
   (let [excerpt (r/atom "")
         offset (r/atom nil)]
     (fn [& _]
@@ -401,7 +401,7 @@
                    :width "80%"})]
             [(if small opinion-container-mobile opinion-container)
              {:class "mb-6 sm:break-normal break-all sm:break-words relative"
-              :style main-style
+              :style (merge main-style style)
               ;;Was causing trouble for sub component clicks. Don't actually need.
               ;;To re-enable will need to constrain what clicks are accepted.
               ;;:on-click (fn [e]
