@@ -215,10 +215,16 @@
   (let [opinion (or opinion
                     @(rf/subscribe [:opinion-store opinionid]))
         opid (or opinionid (:id opinion))
+        {:keys [text-position excerpt offset]} opinion
         {:keys [leading trailing excerpt]}
         (cond (and opinion (:leading opinion)) opinion
-              text (let [tpos (:text-position opinion)]
-                     (excerpts/excerpt-context text (nth tpos 0) (nth tpos 1)))
+              (and text (nth text-position 0))
+              (excerpts/excerpt-context text (nth text-position 0) (nth text-position 1))
+              text
+              (try
+                (excerpts/excerpt-context2 (excerpts/create-textdata text) excerpt offset)
+                (catch js/Error e
+                  opinion))
               :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt

@@ -88,6 +88,8 @@
   (string/index-of text \newline index))
 
 (defn excerpt-context [text position1 position2]
+  (when-not (and (integer? position1) (integer? position2))
+    (throw (js/Error. "Position vars must be integers")))
   (let [text (string/trim text)
         tlength (count text)
         estart position1
