@@ -433,7 +433,7 @@
 (defn excerptless-opinions [target-id]
   (let [opstore @(rf/subscribe [:opinion-store])
         idlist @(rf/subscribe [:immediate-children target-id])
-        idlist (remove #(excerpts/has-excerpt? (get opstore %1)) idlist)]
+        idlist (remove #(excerpts/has-found-excerpt? (get opstore %1)) idlist)]
     (when-not (empty? idlist)
       [:div
        {:class "mt-4"}
