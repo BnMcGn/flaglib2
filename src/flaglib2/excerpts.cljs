@@ -2,7 +2,11 @@
   (:require
    [clojure.string :as string]
    [clojure.set :as set]
-   [flaglib2.misc :as misc]))
+
+   [re-frame.core :as rf]
+
+   [flaglib2.misc :as misc]
+   [flaglib2.subscriptions :as subs]))
 
 
 ;;; Excerpt and text tools
@@ -135,6 +139,32 @@
   (and (has-excerpt? opin)
        (when-let [pos (:text-position opin)]
          (first pos))))
+
+;; Is the original text position available and applicable?
+;; If not, generate a new one when possible.
+(defn recalc-text-position [db key]
+  (when (misc/iid? key)
+    (let [opinion (get-in db [:opinion-store key])
+          {:keys [target text-position excerpt offset]} opinion]
+      (when (has-excerpt? opinion)
+        (if (misc/iid? target)
+          (if (and text-position (integer? (first text-position)))
+            :original
+            (find-excerpt-position
+             (create-textdata (subs/proper-text db target)) excerpt :offset offset))
+          (let [tinfo (get-in db [:text-store target])]
+            (if (and (= :initial (:text-source tinfo))
+                     (and text-position (integer? (first text-position))))
+              :original
+              (find-excerpt-position
+               (create-textdata (subs/proper-text db target))
+                excerpt :offset offset))))))))
+
+(rf/reg-sub
+ :text-position-recalc
+ :<- [:core-db]
+ (fn [db [_ key]]
+   (recalc-text-position db key)))
 
 ;;Can an opinion be considered 'bookmark' for an excerpt? As such it might serve as a target
 ;; for inrefs. If so, it should look like a utility opinion.

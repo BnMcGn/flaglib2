@@ -120,7 +120,8 @@
 (defn- make-segments [text
                       opinion-store
                       opids
-                      & {:keys [tree-address focus root-target-url disable-popup? sub-opin-component]}]
+                      & {:keys [tree-address focus root-target-url
+                                disable-popup? sub-opin-component]}]
   (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
         opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opids))
         segpoints (excerpts/excerpt-segment-points opins (count text))
