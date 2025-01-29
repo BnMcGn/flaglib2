@@ -135,11 +135,6 @@
 (defn has-excerpt? [opin]
   (not (empty? (:excerpt opin))))
 
-(defn has-found-excerpt? [opin]
-  (and (has-excerpt? opin)
-       (when-let [pos (:text-position opin)]
-         (first pos))))
-
 ;; Is the original text position available and applicable?
 ;; If not, generate a new one when possible.
 (defn recalc-text-position [db key]

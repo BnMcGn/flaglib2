@@ -215,16 +215,11 @@
   (let [opinion (or opinion
                     @(rf/subscribe [:opinion-store opinionid]))
         opid (or opinionid (:id opinion))
+        tpos @(rf/subscribe [:text-position-recalc opid])
         {:keys [text-position excerpt offset]} opinion
         {:keys [leading trailing excerpt]}
-        (cond (and opinion (:leading opinion)) opinion
-              (and text (nth text-position 0))
-              (excerpts/excerpt-context text (nth text-position 0) (nth text-position 1))
-              text
-              (try
-                (excerpts/excerpt-context2 (excerpts/create-textdata text) excerpt offset)
-                (catch js/Error e
-                  opinion))
+        (cond (= tpos :original) opinion
+              tpos (excerpts/excerpt-context text (first tpos) (second tpos))
               :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
@@ -439,7 +434,8 @@
 (defn excerptless-opinions [target-id]
   (let [opstore @(rf/subscribe [:opinion-store])
         idlist @(rf/subscribe [:immediate-children target-id])
-        idlist (remove #(excerpts/has-found-excerpt? (get opstore %1)) idlist)]
+        cdb @(rf/subscribe [:core-db])
+        idlist (remove (partial excerpts/recalc-text-position cdb) idlist)]
     (when-not (empty? idlist)
       [:div
        {:class "mt-4"}

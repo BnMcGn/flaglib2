@@ -9,6 +9,7 @@
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.subscriptions :as subs]
    [re-com-tailwind.core :as rc]))
 
 (def rangy js/rangy)
@@ -117,45 +118,57 @@
         bg (if focussed "bg-white" "bg-neutral-400")]
     [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(defn- make-segments [text
-                      opinion-store
+(defn- make-segments [key
+                      db
                       opids
                       & {:keys [tree-address focus root-target-url
                                 disable-popup? sub-opin-component]}]
-  (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
-        opins (filter excerpts/has-found-excerpt? (map #(get opinion-store %) opids))
-        segpoints (excerpts/excerpt-segment-points opins (count text))
-        level (count tree-address)]
-    (into
-     []
-     (for [[start end] (partition 2 1 segpoints)
-           :let [id (str "lvl-" level "-pos-" end)
-                 excerpt-opinions
-                 (for [opin opins
-                       :let [[ostart oend] (:text-position opin)]
-                       :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
-                   (:iid opin))
-                 segtype (if (zero? (count excerpt-opinions))
-                           plain-segment
-                           (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
-       [segtype
-        :excerpt-opinions excerpt-opinions
-        :id id
-        :text (subs text start end)
-        :id-of-text current-id
-        :root-target-url root-target-url
-        :disable-popup? disable-popup?
-        :tree-address tree-address
-        :focus focus
-        :last-char-pos end
-        :sub-opin-component sub-opin-component]))))
+(let [current-id (if (empty? tree-address) root-target-url (last tree-address))
+          ;;FIXME: This won't handle alternate texts! Recalc-text-position counts on the text
+          ;; being the one specified as proper in the database :text-store. Reengineering needed
+          ;; if we ever want to display anything else!
+          opins
+          (for [iid opids
+                tpos (excerpts/recalc-text-position db iid)
+                :let [opinion (get-in db [:opinion-store iid])]
+                :when tpos]
+            (if (= tpos :original)
+              opinion
+              (assoc opinion :text-position tpos)))
+          ;;Should be pre-trimmed, but....
+          text (string/trim (subs/proper-text db key))
+          segpoints (excerpts/excerpt-segment-points opins (count text))
+          level (count tree-address)]
+      (into
+       []
+       (for [[start end] (partition 2 1 segpoints)
+             :let [id (str "lvl-" level "-pos-" end)
+                   excerpt-opinions
+                   (for [opin opins
+                         :let [[ostart oend] (:text-position opin)]
+                         :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
+                     (:iid opin))
+                   segtype (if (zero? (count excerpt-opinions))
+                             plain-segment
+                             (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
+         [segtype
+          :excerpt-opinions excerpt-opinions
+          :id id
+          :text (subs text start end)
+          :id-of-text current-id
+          :root-target-url root-target-url
+          :disable-popup? disable-popup?
+          :tree-address tree-address
+          :focus focus
+          :last-char-pos end
+          :sub-opin-component sub-opin-component]))))
 
 (defn hilited-text-core [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
                         excerpt offset grey? sub-opin-component]}]
   (let [text (or text (:text @(rf/subscribe [:text-store text-key])))
         id (str "hilited-text-" (gensym))
-        opstore @(rf/subscribe [:opinion-store])
+        coredb @(rf/subscribe [:core-db])
         opids @(rf/subscribe [:immediate-children (or root-target-url (last tree-address))])
         selection-change
         (fn []
@@ -182,7 +195,7 @@
               :on-mouse-up selection-change
               :on-key-press selection-change}]
             ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
-            (make-segments (string/trim text) opstore opids :tree-address tree-address :focus focus
+            (make-segments text-key coredb opids :tree-address tree-address :focus focus
                            :root-target-url root-target-url :disable-popup? disable-popup?
                            :sub-opin-component sub-opin-component))
       [misc/loading-indicator])))
