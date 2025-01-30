@@ -126,7 +126,6 @@
 (defn excerpt-segment-points
   "End is the length of the text"
   [opset end]
-
   (sort - (reduce into #{0 (+ 1 end)}
                   (for [itm opset
                         :let [[start end] (:text-position itm)]]
@@ -153,7 +152,7 @@
               :original
               (find-excerpt-position
                (create-textdata (subs/proper-text db target))
-                excerpt :offset offset))))))))
+               excerpt :offset offset))))))))
 
 (rf/reg-sub
  :text-position-recalc
