@@ -294,6 +294,20 @@
   []
   @re-frame.db/app-db)
 
+(defn last-target []
+  (let [{:keys [server-parameters]} (reframe-db)
+        {:keys [rooturl focus]} (:default server-parameters)]
+    (or (last focus) rooturl)))
+
+(defn core-db-report [key]
+  (let [places [:warstats-store :text-store :title-store :opinion-store :opinion-tree-store
+                :references :refd]
+        db (reframe-db)]
+    (filter #(get (get db %) key) places)))
+
+(defn target-record [place & key]
+  (get-in (reframe-db) [place (or key (last-target))]))
+
 ;;Re-frame tools
 
 (defn append-dispatch [fx & dispatches]
