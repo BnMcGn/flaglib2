@@ -169,8 +169,8 @@
  (fn [db _]
    (let [params (get-in db [:server-parameters :default])
          tt (first
-             (set/intersection
-              (set (keys params))
-              #{:suggest-target-title :suggest-target-text :target-title :target-text}))]
+             (filter
+              #(% params)
+              [:suggest-target-title :suggest-target-text :target-title :target-text]))]
      (when tt (assoc db ::comment (posters/stick-dirc-on-text (name tt) ""))))))
 
