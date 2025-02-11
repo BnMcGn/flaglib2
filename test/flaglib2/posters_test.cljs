@@ -14,12 +14,12 @@
 
 (deftest ttify-opinion
   (let [topin (posters/ttify-opinion {:comment "Replacement"} "title" true)]
-    (is (string/starts-with? "#(suggest-target-title)" (:comment topin)))
+    (is (string/starts-with? (:comment topin) "#(suggest-target-title)"))
     (is (= :custodial-blank (:flag topin))))
   (is (thrown? js/Error
                (posters/ttify-opinion {:flag :negative-disagree} "text" false)))
   (is (thrown? js/Error
-               (posters/ttify-opinion) {:comment "#(target-text)"} "something" true)))
+               (posters/ttify-opinion {:comment "#(target-text)"} "something" true))))
 
 (deftest post-opinion
   (let [db {::posters/opinion-status {:success :non-failed}}
@@ -34,5 +34,5 @@
     (is evt)
     (is xhrio)
     (is "http://google.com/" (get-in xhrio [:params :target]))
-    (is (= [::posters/posted-opinion-to-server ::posters/alternate-status]
+    (is (= [::posters/posted-opinion-to-server [::posters/alternate-status]]
            (:on-success xhrio)))))
