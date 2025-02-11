@@ -8,6 +8,7 @@
    [flaglib2.misc-test]
    [flaglib2.mood-test]
    [flaglib2.hixer-test]
+   [flaglib2.posters-test]
 
    [figwheel.main.testing :refer [run-tests-async]]
    [cljs-test-display.core]))

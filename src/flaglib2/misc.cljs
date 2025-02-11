@@ -294,6 +294,12 @@
   []
   @re-frame.db/app-db)
 
+(defn fake-event [evt db]
+  (let [ename (first evt)
+        entry (re-frame.registrar/get-handler :event ename)
+        interceptor (:before (last entry))]
+    (:effects (interceptor {:coeffects {:event evt :db db}}))))
+
 (defn last-target []
   (let [{:keys [server-parameters]} (reframe-db)
         {:keys [rooturl focus]} (:default server-parameters)]
