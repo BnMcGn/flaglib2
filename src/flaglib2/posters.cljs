@@ -104,8 +104,8 @@
 ;;FIXME: should check for previous failed before posting both opin and alt.
 (rf/reg-event-fx
  :post-opinion
- (fn [{:keys [db]} [_ opinion]]
-   (let [{:keys [alternate alt-title]} opinion
+ (fn [{:keys [db]} [_ current-opinion]]
+   (let [{:keys [alternate alt-title opinion]} current-opinion
          tg (:target opinion)
          altop (when (and (string? alternate) (not-empty alternate))
                  (ttify-opinion {:comment alternate :target tg} "text" true))
@@ -161,7 +161,7 @@
   (let [qstatus @(rf/subscribe [::quick-status])
         flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
         text (if (some #(= :failed %) qstatus) "Retry" "Post")
-        opinion @(rf/subscribe [:current-opinion])]
+        copinion @(rf/subscribe [:current-opinion])]
     [step/button-box
      (step/button-spacer
       nil
@@ -169,7 +169,7 @@
          [rc/button
           :label text
           :class (tw-btn-primary)
-          :on-click #(rf/dispatch [:post-opinion opinion])]
+          :on-click #(rf/dispatch [:post-opinion copinion])]
          [rc/button
           :label text
           :class (tw-btn-default-disabled)
