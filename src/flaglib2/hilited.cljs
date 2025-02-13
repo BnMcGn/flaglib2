@@ -168,7 +168,7 @@
                         excerpt offset grey? sub-opin-component]}]
   (let [key (or root-target-url (last tree-address))
         text-key (or text-key key)
-        text (or text (:text @(rf/subscribe [:proper-text text-key])))
+        text (or text @(rf/subscribe [:proper-text text-key]))
         id (str "hilited-text-" (gensym))
         coredb @(rf/subscribe [:core-db])
         opids @(rf/subscribe [:immediate-children key])

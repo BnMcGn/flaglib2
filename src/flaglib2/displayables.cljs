@@ -219,7 +219,7 @@
         {:keys [text-position excerpt offset]} opinion
         {:keys [leading trailing excerpt]}
         (cond (= tpos :original) opinion
-              tpos (excerpts/excerpt-context text (first tpos) (second tpos))
+              (and tpos text) (excerpts/excerpt-context text (first tpos) (second tpos))
               :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
