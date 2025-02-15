@@ -5,6 +5,8 @@
      [clojure.string :as string]
 
      [flaglib2.excerpts :as excerpts]
+     [flaglib2.hilited :as hilited]
+     [flaglib2.misc :as misc]
      ))
 
 
@@ -19,7 +21,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
 
 (deftest find-excerpt-position
   (let [[start plus] (excerpts/find-excerpt-position tdat1 "the beginning" :offset 1)]
-    (is (= 12 plus))
+    (is (= 13 plus))
     (is (= 96 start))))
 
 (deftest find-excerpt-position-bad-offset
@@ -133,3 +135,16 @@ And the light shineth in darkness; and the darkness comprehended it not.")
     (is (= 0 (count ends)))))
 
 
+(deftest make-segments
+  (let [rootkey "http://fake.fake/"
+        iid "pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeeeb"
+        db {:opinion-store {iid
+                            {:excerpt "the"
+                             :target rootkey}}
+            :text-store {rootkey {:text text1}}}
+        res (hilited/make-segments rootkey db [iid])
+        [seg1 seg2 seg3] res
+        [_ [_ text1]] (misc/part-on-true (partial = :text) seg1)
+        [_ [_ text2]] (misc/part-on-true (partial = :text) seg2)]
+    (is (= text1 "In "))
+    (is (= text2 "the"))))

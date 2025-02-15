@@ -118,11 +118,11 @@
         bg (if focussed "bg-white" "bg-neutral-400")]
     [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(defn- make-segments [key
-                      db
-                      opids
-                      & {:keys [tree-address focus root-target-url
-                                disable-popup? sub-opin-component]}]
+(defn make-segments [key
+                     db
+                     opids
+                     & {:keys [tree-address focus root-target-url
+                               disable-popup? sub-opin-component]}]
   (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
         ;;FIXME: This won't handle alternate texts! Recalc-text-position counts on the text
         ;; being the one specified as proper in the database :text-store. Reengineering needed
@@ -201,5 +201,3 @@
                            :root-target-url root-target-url :disable-popup? disable-popup?
                            :sub-opin-component sub-opin-component))
       [misc/loading-indicator])))
-
-

@@ -231,7 +231,7 @@
   (first (keep-indexed #(when (test %2 itm) %1) coll)))
 
 (defn part-on-index [coll index]
-  (if (and (integer? index) (>= 0 index))
+  (if (and (integer? index) (<= 0 index))
     (let [tail (nthrest coll index)]
       (if (empty? tail)
         [coll]
@@ -239,7 +239,7 @@
     [coll]))
 
 (defn part-on-true [predicate coll]
-  (part-on-index coll (first (keep-indexed predicate coll))))
+  (part-on-index coll (first (keep-indexed #(when (predicate %2) %1) coll))))
 
 (defn class-string [& colls]
   (string/join " " (flatten colls)))

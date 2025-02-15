@@ -69,8 +69,8 @@
   (let [res (some-excerpt-here? tdat excerpt index)]
     (if res
       (if (= 0 (:remaining res))
-       (:end-index res)
-       false)
+        (+ 1 (:end-index res))
+        false)
       false)))
 
 (defn find-excerpt-position [tdat excerpt & {:keys [offset] :or {offset 0}}]
@@ -108,7 +108,7 @@
 (defn excerpt-context2 [tdat excerpt offset]
   (let [[p1 p2] (find-excerpt-position tdat excerpt :offset offset)]
     (if p1
-      (excerpt-context (:text tdat) p1 (inc p2))
+      (excerpt-context (:text tdat) p1 p2)
       (throw (js/Error. "No excerpt found")))))
 
 (defn rebreak [text]
@@ -377,6 +377,6 @@ Decide before calling where the start has ended. Will return some-excerpt-here? 
 (defn excerpt-offset->start [tdat excerpt offset]
   (let [res (find-excerpt-position tdat excerpt :offset offset)]
     (when res
-      {:start-index (res 0) :end-index (+ (res 0) (res 1)) :remaining 0})))
+      {:start-index (res 0) :end-index (+ (res 0) (res 1) -1) :remaining 0})))
 
 
