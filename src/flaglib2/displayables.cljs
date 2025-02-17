@@ -367,71 +367,69 @@
      (when (:question warstats) [question-info opid])]))
 
 (defn thread-opinion [& {:keys [opid text children no-tree-address substitutes style]}]
-  (let [excerpt (r/atom "")
-        offset (r/atom nil)]
-    (fn [& _]
-      (let
-          [opinion @(rf/subscribe [:opinion-store opid])
-           warstats @(rf/subscribe [:warstats-store opid])]
-        (when opinion
-          (let [tree-address (:tree-address opinion)
-                parid (when (< 1 (count tree-address))
-                        (nth tree-address (- (count tree-address) 2)))
-                parent (when parid
-                         @(rf/subscribe [:opinion-store parid]))
-                text (if parent
-                       (or (:clean-comment parent) "")
-                       text)
-                small  @(rf/subscribe [:window-small?])
-                tbar (if small
-                       [:<>
-                        [tb/author-long opinion]
-                        children
-                        [tb/display-warstats :warstats warstats]]
-                       [:<>
-                        [tb/flag-name opinion]
-                        [tb/date-stamp opinion]
-                        [tb/author-long opinion]
-                        children
-                        [tb/display-warstats :warstats warstats]
-                        ;;FIXME: should handle excerpts, could use iid instead of url?
-                        #_[tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset]])
-                main-style
-                (if
-                  small
-                  {:width "100%"}
-                  {:margin-left (deco/thread-opinion-indent (dec (count tree-address)))
-                   :width "80%"})]
-            [(if small opinion-container-mobile opinion-container)
-             {:class "mb-6 sm:break-normal break-all sm:break-words relative"
-              :style (merge main-style style)
-              ;;Was causing trouble for sub component clicks. Don't actually need.
-              ;;To re-enable will need to constrain what clicks are accepted.
-              ;;:on-click (fn [e]
-              ;;            (set! (. js/window -location) (misc/make-opinion-url opinion))
-              ;;            (.stopPropagation e))
-              }
-             :iconid opid
-             :icon-layout (when small (if no-tree-address :icon :tree-address))
-             :opinion opinion
-             :substitutes substitutes
-             :titlebar tbar
-             :body
-             [:<>
-              [:div
-               {:class "m-4 mt-1"}
-               ;; {:overflow "overlay"} ??
-               (when (excerpts/has-excerpt? opinion)
-                 [thread-excerpt :opinionid opid :text text])
-               (when (:clean-comment opinion)
-                 [hilited-text
-                  :text (:clean-comment opinion)
-                  :tree-address tree-address
-                  :focus nil
-                  :disable-popup? true
-                  :excerpt excerpt
-                  :offset offset])]
-              [opinion-extras opid]]]))))))
+  (let
+      [opinion @(rf/subscribe [:opinion-store opid])
+       warstats @(rf/subscribe [:warstats-store opid])]
+    (when opinion
+      (let [tree-address (:tree-address opinion)
+            parid (when (< 1 (count tree-address))
+                    (nth tree-address (- (count tree-address) 2)))
+            parent (when parid
+                     @(rf/subscribe [:opinion-store parid]))
+            text (if parent
+                   (or (:clean-comment parent) "")
+                   text)
+            small  @(rf/subscribe [:window-small?])
+            tbar (if small
+                   [:<>
+                    [tb/author-long opinion]
+                    children
+                    [tb/display-warstats :warstats warstats]]
+                   [:<>
+                    [tb/flag-name opinion]
+                    [tb/date-stamp opinion]
+                    [tb/author-long opinion]
+                    children
+                    [tb/display-warstats :warstats warstats]
+                    ;;FIXME: should handle excerpts, could use iid instead of url?
+                    #_[tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset]])
+            main-style
+            (if
+                small
+              {:width "100%"}
+              {:margin-left (deco/thread-opinion-indent (dec (count tree-address)))
+               :width "80%"})]
+        [(if small opinion-container-mobile opinion-container)
+         {:class "mb-6 sm:break-normal break-all sm:break-words relative"
+          :style (merge main-style style)
+          ;;Was causing trouble for sub component clicks. Don't actually need.
+          ;;To re-enable will need to constrain what clicks are accepted.
+          ;;:on-click (fn [e]
+          ;;            (set! (. js/window -location) (misc/make-opinion-url opinion))
+          ;;            (.stopPropagation e))
+          }
+         :iconid opid
+         :icon-layout (when small (if no-tree-address :icon :tree-address))
+         :opinion opinion
+         :substitutes substitutes
+         :titlebar tbar
+         :body
+         [:<>
+          [:div
+           {:class "m-4 mt-1"}
+           ;; {:overflow "overlay"} ??
+           (when (excerpts/has-excerpt? opinion)
+             [thread-excerpt :opinionid opid :text text])
+           (when (:clean-comment opinion)
+             [hilited-text
+              :text (:clean-comment opinion)
+              :tree-address tree-address
+              :focus nil
+              :disable-popup? true
+              ;;FIXME: Have we lost reply links?
+              :excerpt nil
+              :offset nil])]
+          [opinion-extras opid]]]))))
 
 (defn excerptless-opinions [target-id]
   (let [opstore @(rf/subscribe [:opinion-store])
