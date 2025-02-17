@@ -129,10 +129,15 @@
 
 (rf/reg-sub :sub-tree misc/get-sub-tree)
 
+;; :immediate-children now only returns non-tt opinions. Might need to fix this when
+;; implementing title/text discussions beyond supply. YAGNI for now
+
 (rf/reg-sub
  :immediate-children
  (fn [db [_ key]]
-   (map first (misc/get-sub-tree db [nil key]))))
+   (filter
+    #(misc/opinion-not-tt? (get-in db [:opinion-store %1]))
+    (map first (misc/get-sub-tree db [nil key])))))
 
 (rf/reg-sub
  :text-tree
