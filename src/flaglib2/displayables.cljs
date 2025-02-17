@@ -220,6 +220,8 @@
         {:keys [leading trailing excerpt]}
         (cond (= tpos :original) opinion
               (and tpos text) (excerpts/excerpt-context text (first tpos) (second tpos))
+              tpos (let [text @(rf/subscribe [:proper-text (:target opinion)])]
+                     (excerpts/excerpt-context text (first tpos) (second tpos)))
               :else opinion)]
     [thread-excerpt-display
      :leading-context leading :trailing-context trailing :excerpt excerpt
