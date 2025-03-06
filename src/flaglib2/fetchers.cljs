@@ -8,6 +8,63 @@
 
 
 
+(deftype RetryRequest [])
+
+(defn retry []
+  (throw (RetryRequest.)))
+
+(defn generic-fetcher-events-generator
+  [name
+   url
+   success-func
+   failure-func
+   &
+   {:keys [timeout response-format attempts go? method]
+    :or {timeout 6000 attempts nil method :get}}]
+  (let [req-key (keyword 'flaglib2.fetchers (str "request-for-" name))
+        succ-key (keyword 'flaglib2.fetchers (str "success-for-" name))
+        fail-key (keyword 'flaglib2.fetchers (str "failure-for-" name))
+        bundle {:name name
+                :url url}]
+
+    (rf/reg-event-fx
+     name
+     (fn [{:keys [db]} [_ & params]]
+       (let [bundle (assoc bundle :params params)]
+         (if (or (not go?) (go? db bundle))
+           {:db db
+            :fx [ [:dispatch [req-key bundle :attempts attempts]]]}))))
+
+    (rf/reg-event-fx
+     req-key
+     (fn [_ [_ bundle attempts & {:keys [attempts]}]]
+       {:http-xhrio {:method method
+                     :uri url
+                     :timeout timeout
+                     :response-format response-format
+                     :on-success [succ-key bundle attempts]
+                     :on-failure [fail-key bundle attempts]}}))
+
+    (rf/reg-event-fx
+     succ-key
+     (fn [{:keys [db] :as cofx} [ename bundle attempts]]
+       (try
+         (success-func cofx [ename bundle])
+         (catch RetryRequest _
+           (when (and attempts (< 0 attempts))
+             {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))
+
+    (rf/reg-event-fx
+     fail-key
+     (fn [{:keys [db] :as cofx} [ename bundle attempts]]
+       (try
+         (failure-func cofx [ename bundle])
+         (catch RetryRequest _
+           (when (and attempts (< 0 attempts))
+             {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))))
+
+
+
 ;;FIXME: Should check if already loaded?
 (rf/reg-event-fx
  ::load-author-urls

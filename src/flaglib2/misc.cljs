@@ -253,6 +253,13 @@
       label
       (str label "s"))))
 
+(defn pairify [listish]
+  (loop [input listish
+         stor []]
+    (if (empty? input)
+      stor
+      (recur (drop 2 input) (conj stor [(first input) (second input)])))))
+
 ;;Debugging tools
 
 (defn say [itm]
