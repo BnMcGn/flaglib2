@@ -148,6 +148,7 @@
  ::received-opinion-tree
  (fn [{:keys [db]} [_ key result]]
    (let [result (cljs.reader/read-string result)
+         result (or result '())
          focus (:focus-id db)
          db (assoc-in db [:opinion-tree-store key] result)
          loadables (if focus (misc/get-sub-tree db [nil focus]) result)]
