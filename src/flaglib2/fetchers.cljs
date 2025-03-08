@@ -4,7 +4,9 @@
    [day8.re-frame.http-fx]
    [ajax.core :as ajax]
    [clojure.walk :as walk]
-   [flaglib2.misc :as misc]))
+   [flaglib2.misc :as misc]
+
+   [flaglib2.macros :as macros]))
 
 
 
@@ -14,22 +16,23 @@
   (throw (RetryRequest.)))
 
 (defn generic-fetcher-events-generator
-  [name
+  [fname
    url
    success-func
    failure-func
    &
    {:keys [timeout response-format attempts go? method]
     :or {timeout 6000 attempts nil method :get}}]
-  (let [req-key (keyword 'flaglib2.fetchers (str "request-for-" name))
-        succ-key (keyword 'flaglib2.fetchers (str "success-for-" name))
-        fail-key (keyword 'flaglib2.fetchers (str "failure-for-" name))
-        bundle {:name name
+  (let [nspace (or (namespace fname) 'flaglib2.fetchers)
+        req-key (keyword nspace (str "request-for-" (name fname)))
+        succ-key (keyword nspace (str "success-for-" (name fname)))
+        fail-key (keyword nspace (str "failure-for-" (name fname)))
+        bundle {:name fname
                 :url url}]
 
     (rf/reg-event-fx
-     name
-     (fn [{:keys [db]} [_ & params]]
+     fname
+     (fn [{:keys [db]} [_ & {:as params}]]
        (let [bundle (assoc bundle :params params)]
          (if (or (not go?) (go? db bundle))
            {:db db
@@ -37,28 +40,30 @@
 
     (rf/reg-event-fx
      req-key
-     (fn [_ [_ bundle attempts & {:keys [attempts]}]]
+     (fn [_ [_ bundle & {:keys [attempts]}]]
        {:http-xhrio {:method method
                      :uri url
                      :timeout timeout
+                     :params (:params bundle)
+                     :format (ajax/url-request-format)
                      :response-format response-format
                      :on-success [succ-key bundle attempts]
                      :on-failure [fail-key bundle attempts]}}))
 
     (rf/reg-event-fx
      succ-key
-     (fn [{:keys [db] :as cofx} [ename bundle attempts]]
+     (fn [{:keys [db] :as cofx} [ename bundle attempts result]]
        (try
-         (success-func cofx [ename bundle])
+         (success-func result (assoc bundle :db db))
          (catch RetryRequest _
            (when (and attempts (< 0 attempts))
              {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))
 
     (rf/reg-event-fx
      fail-key
-     (fn [{:keys [db] :as cofx} [ename bundle attempts]]
+     (fn [{:keys [db] :as cofx} [ename bundle attempts result]]
        (try
-         (failure-func cofx [ename bundle])
+         (failure-func result (assoc bundle :db db))
          (catch RetryRequest _
            (when (and attempts (< 0 attempts))
              {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))))
@@ -85,6 +90,15 @@
    (assoc db ::author-urls (walk/keywordize-keys result))))
 
 
+;;;TEST
+
+(macros/reg-json-fetch
+ [:test-grabber
+  "/text-server/"]
+ ([stuff]
+  (println "in success")
+  (println stuff))
+ nil)
 
 ;; Text server
 
