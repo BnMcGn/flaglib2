@@ -22,6 +22,7 @@
    [flaglib2.things :as things]
    [flaglib2.hixer :as hixer]
    [flaglib2.social-card :as scard]
+   [flaglib2.userfig :as userfig]
    [cljs.reader]))
 
 

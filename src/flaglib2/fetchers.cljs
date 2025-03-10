@@ -96,16 +96,6 @@
    (assoc db ::author-urls (walk/keywordize-keys result))))
 
 
-;;;TEST
-
-(macros/reg-json-fetch
- [:test-grabber
-  "/text-server/"]
- ([stuff]
-  (println "in success")
-  (println stuff))
- nil)
-
 ;; Text server
 
 (rf/reg-event-fx
