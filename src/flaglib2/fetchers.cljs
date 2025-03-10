@@ -15,6 +15,10 @@
 (defn retry []
   (throw (RetryRequest.)))
 
+(def ^:dynamic *db*)
+
+(defn db [] *db*)
+
 (defn generic-fetcher-events-generator
   [fname
    url
@@ -53,20 +57,22 @@
     (rf/reg-event-fx
      succ-key
      (fn [{:keys [db] :as cofx} [ename bundle attempts result]]
-       (try
-         (success-func result (assoc bundle :db db))
-         (catch RetryRequest _
-           (when (and attempts (< 0 attempts))
-             {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))
+       (binding [*db* db]
+         (try
+           (success-func result (assoc bundle :db db))
+           (catch RetryRequest _
+             (when (and attempts (< 0 attempts))
+               {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]}))))))
 
     (rf/reg-event-fx
      fail-key
      (fn [{:keys [db] :as cofx} [ename bundle attempts result]]
-       (try
-         (failure-func result (assoc bundle :db db))
-         (catch RetryRequest _
-           (when (and attempts (< 0 attempts))
-             {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]})))))))
+       (binding [*db* db]
+         (try
+           (failure-func result (assoc bundle :db db))
+           (catch RetryRequest _
+             (when (and attempts (< 0 attempts))
+               {:fx [[:dispatch [req-key bundle :attempts (- attempts 1)]]]}))))))))
 
 
 
