@@ -9,9 +9,11 @@
    [re-frame.db]
    [clojure.string :as string]
    [clojure.set :as set]
+   [clojure.walk :as walk]
    [goog.string :as gstring]
    [goog.object :as go]
-   [goog.Uri :as uri]))
+   [goog.Uri :as uri]
+   [camel-snake-kebab.core :as csk]))
 
 ;; Opinion url recognizer
 
@@ -259,6 +261,16 @@
     (if (empty? input)
       stor
       (recur (drop 2 input) (conj stor [(first input) (second input)])))))
+
+(defn map-keys [func tree]
+  (let [f (fn [[k v]] [(func k) v])]
+    (walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) tree)))
+
+(defn kebabikey [m]
+  (map-keys (fn [k] (if (string? k) (csk/->kebab-case-keyword k) k)) m))
+
+(defn decapikey [tree]
+  (map-keys (fn [k] (if (string? k) (keyword (string/lower-case k)) k)) tree))
 
 ;;Debugging tools
 

@@ -16,7 +16,7 @@
  [:get-user-info
   "/userfig/get-user-info/"]
  ([result]
-  {:db (assoc (fetch/db) ::user-info result)})
+  {:db (assoc (fetch/db) ::user-info (misc/decapikey result))})
  nil)
 
 (rf/reg-sub ::user-info :-> ::user-info)
