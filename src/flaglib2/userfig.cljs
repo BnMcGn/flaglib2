@@ -14,7 +14,7 @@
 
 (macros/reg-json-fetch
  [:get-user-info
-  "/get-user-info/"]
+  "/userfig/get-user-info/"]
  ([result]
   {:db (assoc (fetch/db) ::user-info result)})
  nil)
@@ -70,5 +70,5 @@
          fieldspecs (proc-fieldspecs fieldspecs)
          db (assoc db :root-element userfig-form ::fieldspecs fieldspecs)]
      {:db db
-      :fx [ [:dispatch [:get-userfig-settings]]
+      :fx [ [:dispatch [:get-user-info]]
             [:dispatch [:mount-registered]]]})))
