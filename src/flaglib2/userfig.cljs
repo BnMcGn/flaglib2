@@ -60,30 +60,37 @@
 (defn ww-picksome [name value dispatch])
 (defn ww-pickone-long [name value dispatch])
 (defn ww-textentry [name value dispatch])
-(defn ww-date [name value dispatch])
+
+(defn ww-date [value dispatch & {:keys [name editable options]}]
+  [rc/datepicker
+   :model value
+   :disabled? (not editable)
+   :on-change (fn [new-value] (rf/dispatch (into dispatch new-value)))])
 
 (def widget-map
   {:string ww-simple :integer ww-simple :boolean ww-yesno :pickone ww-pickone
    :picksome ww-picksome :pickone-long ww-pickone-long :yesno ww-yesno
-   :textentry ww-textentry})
+   :textentry ww-textentry :date ww-date})
 
 (defn widget [id]
-  (let [initial @(rf/subscribe [::user-info id])
-        model (r/atom initial)]
-    (fn []
-      (let [fs @(rf/subscribe [::fieldspecs id])
-            {:keys [widget editable options description type nullok]} fs
-            err @(rf/subscribe [::errors id])
-            label (or description (string/capitalize (name id)))]
-        [:div
-         [:span label
-          (if-not nullok
-            [:span :class "text-red-900" (misc/entities " *")])]
-         [(widget-map (or widget type)) model [:DISOATCAREAR!!!!!]
-          :name id
-          :editable editable]
-         (when err
-           (deco/error-msg err))]))))
+  (let [initial @(rf/subscribe [::user-info])
+        model (r/atom nil)]
+    (when initial
+      (reset! model (get initial id))
+      (fn []
+        (let [fs @(rf/subscribe [::fieldspecs id])
+              {:keys [widget editable options description type nullok]} fs
+              err @(rf/subscribe [::errors id])
+              label (or description (string/capitalize (name id)))]
+          [:div
+           [:span label
+            (if-not nullok
+              [:span :class "text-red-900" (misc/entities " *")])]
+           [(widget-map (or widget type)) model [:DISOATCAREAR!!!!!]
+            :name id
+            :editable editable]
+           (when err
+             (deco/error-msg err))])))))
 
 (defn simple-form [dispatch children]
   [:form
