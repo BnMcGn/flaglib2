@@ -82,7 +82,7 @@
               {:keys [widget editable options description type nullok]} fs
               err @(rf/subscribe [::errors id])
               label (or description (string/capitalize (name id)))]
-          [:div
+          [:div {:class "mb-2"}
            [:span label
             (if-not nullok
               [:span :class "text-red-900" (misc/entities " *")])]
@@ -93,11 +93,11 @@
              (deco/error-msg err))])))))
 
 (defn simple-form [dispatch children]
-  [:form
+  [:form {:class "border-solid border-8 rounded-lg m-2 p-2 border-blue-200"}
    children
-   [:input {:type "button"
-            :value "Submit"
-            :on-click (fn [] (rf/dispatch dispatch))}]])
+   [rc/button
+    :label "Submit"
+    :on-click (fn [] (rf/dispatch dispatch))]])
 
 (defn userfig-form []
   (let [fieldspecs @(rf/subscribe [::fieldspecs])
