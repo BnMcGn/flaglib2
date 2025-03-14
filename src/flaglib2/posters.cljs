@@ -128,7 +128,7 @@
     (post-status alt [])
     (post-status tit [])]))
 
-(defn- msg-format [status text1 text2]
+(defn msg-format [status text1 text2]
   (let [{:keys [response failure]} status]
    (if failure
      [(str text1 (:status-text failure))]

@@ -11,6 +11,7 @@
    [flaglib2.deco :as deco]
    [flaglib2.fetchers :as fetch]
    [flaglib2.macros :as macros]
+   [flaglib2.posters :as posters]
 
    ))
 
@@ -48,13 +49,17 @@
   [rc/input-text
    :model value
    :disabled? (not editable)
-   :on-change (fn [new-value] (rf/dispatch (into dispatch new-value)))])
+   :on-change (fn [new-value]
+                (reset! value new-value)
+                (rf/dispatch (into dispatch new-value)))])
 
 (defn ww-yesno [value dispatch & {:keys [name editable options]}]
   [rc/checkbox
    :model value
    :disabled? (not editable)
-   :on-change (fn [new-value] (rf/dispatch (into dispatch new-value)))])
+   :on-change (fn [new-value]
+                (reset! value new-value)
+                (rf/dispatch (into dispatch new-value)))])
 
 (defn ww-pickone [name value dispatch])
 (defn ww-picksome [name value dispatch])
@@ -65,12 +70,37 @@
   [rc/datepicker
    :model value
    :disabled? (not editable)
-   :on-change (fn [new-value] (rf/dispatch (into dispatch new-value)))])
+   :on-change (fn [new-value]
+                (reset! value new-value)
+                (rf/dispatch (into dispatch new-value)))])
+
 
 (def widget-map
   {:string ww-simple :integer ww-simple :boolean ww-yesno :pickone ww-pickone
    :picksome ww-picksome :pickone-long ww-pickone-long :yesno ww-yesno
    :textentry ww-textentry :date ww-date})
+
+(rf/reg-event-db
+ ::save-form-item
+ (fn [db [_ key val]]
+   (assoc-in db [::form-items key] val)))
+
+(macros/reg-json-fetch
+ [::save-user-info
+  "/userfig/save-user-info/"]
+ ([result]
+  (println "in ::save-user-info response")
+  (println result)
+  (assoc (fetch/db) ::status {:response (misc/kebabikey result) :failure nil}))
+ ([failure]
+  (assoc (fetch/db) ::status {:response nil :failure (misc/kebabikey failure)})))
+
+(rf/reg-sub ::status :-> ::status)
+(rf/reg-sub
+ ::userfig-post-messages
+ :<- [::status]
+ (fn [status]
+   (posters/msg-format status "Unable to save settings: " "Settings saved")))
 
 (defn widget [id]
   (let [initial @(rf/subscribe [::user-info])
@@ -86,7 +116,7 @@
            [:span label
             (if-not nullok
               [:span :class "text-red-900" (misc/entities " *")])]
-           [(widget-map (or widget type)) model [:DISOATCAREAR!!!!!]
+           [(widget-map (or widget type)) model [::save-form-item id]
             :name id
             :editable editable]
            (when err
@@ -101,12 +131,18 @@
 
 (defn userfig-form []
   (let [fieldspecs @(rf/subscribe [::fieldspecs])
-        initial-info @(rf/subscribe [::user-info])]
-    [simple-form
-     nil
-     (into [:<>]
-           (for [[key _] fieldspecs]
-             [widget key]))]))
+        initial-info @(rf/subscribe [::user-info])
+        messages @(rf/subscribe [::userfig-post-messages])]
+    [:div
+     [simple-form
+      nil
+      (into [:<>]
+            (for [[key _] fieldspecs]
+              [widget key]))]
+     [:div
+      (into [:<>]
+            (for [m messages] [:div m]))]]
+    ))
 
 (defn normalize-fieldspec [[k v]]
   [k
