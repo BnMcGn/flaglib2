@@ -51,7 +51,7 @@
    :disabled? (not editable)
    :on-change (fn [new-value]
                 (reset! value new-value)
-                (rf/dispatch (into dispatch new-value)))])
+                (rf/dispatch (conj dispatch new-value)))])
 
 (defn ww-yesno [value dispatch & {:keys [name editable options]}]
   [rc/checkbox
@@ -59,7 +59,7 @@
    :disabled? (not editable)
    :on-change (fn [new-value]
                 (reset! value new-value)
-                (rf/dispatch (into dispatch new-value)))])
+                (rf/dispatch (conj dispatch new-value)))])
 
 (defn ww-pickone [name value dispatch])
 (defn ww-picksome [name value dispatch])
@@ -80,6 +80,7 @@
    :picksome ww-picksome :pickone-long ww-pickone-long :yesno ww-yesno
    :textentry ww-textentry :date ww-date})
 
+(rf/reg-sub ::form-items :-> ::form-items)
 (rf/reg-event-db
  ::save-form-item
  (fn [db [_ key val]]
@@ -87,10 +88,9 @@
 
 (macros/reg-json-fetch
  [::save-user-info
-  "/userfig/save-user-info/"]
+  "/userfig/set-user-info/"
+  :method :post]
  ([result]
-  (println "in ::save-user-info response")
-  (println result)
   (assoc (fetch/db) ::status {:response (misc/kebabikey result) :failure nil}))
  ([failure]
   (assoc (fetch/db) ::status {:response nil :failure (misc/kebabikey failure)})))
@@ -132,17 +132,17 @@
 (defn userfig-form []
   (let [fieldspecs @(rf/subscribe [::fieldspecs])
         initial-info @(rf/subscribe [::user-info])
-        messages @(rf/subscribe [::userfig-post-messages])]
+        messages @(rf/subscribe [::userfig-post-messages])
+        data @(rf/subscribe [::form-items])]
     [:div
      [simple-form
-      nil
+      [::save-user-info data]
       (into [:<>]
             (for [[key _] fieldspecs]
               [widget key]))]
      [:div
       (into [:<>]
-            (for [m messages] [:div m]))]]
-    ))
+            (for [m messages] [:div m]))]]))
 
 (defn normalize-fieldspec [[k v]]
   [k
