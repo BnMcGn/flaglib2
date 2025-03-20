@@ -4,7 +4,9 @@
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
    [flaglib2.subscriptions]
-   [flaglib2.misc :as misc]))
+   [flaglib2.misc :as misc]
+
+   [day8.re-frame-10x :as tenx]))
 
 (rf/reg-event-fx
  ::store-server-parameters
@@ -63,3 +65,10 @@
    {:db (assoc db :local fetch-local-store)}))
 
 (def save-to-local [(rf/path :local) (rf/after do-save-to-local)])
+
+(defn start-10x []
+  (tenx/patch!)
+  (rf/dispatch-sync [:day8.re-frame-10x.events/init tenx/project-config])
+  ;(rf/clear-subscription-cache!)
+  (def sroot (tenx/create-shadow-root nil))
+  (rdom/render (tenx/create-style-container sroot) sroot))
