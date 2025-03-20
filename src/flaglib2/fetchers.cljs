@@ -45,7 +45,7 @@
 
     (rf/reg-event-fx
      req-key
-     (fn [_ [_ bundle & {:keys [attempts]}]]
+     (fn [{:keys [db]} [_ bundle & {:keys [attempts]}]]
        (binding [*db* db]
          {:http-xhrio {:method method
                        :uri url
