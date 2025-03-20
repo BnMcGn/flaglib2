@@ -89,11 +89,14 @@
 (macros/reg-json-fetch
  [::save-user-info
   "/userfig/set-user-info/"
-  :method :post]
+  :method :post
+  :params-func
+  (fn [_]
+    (::form-items (fetch/db)))]
  ([result]
-  (assoc (fetch/db) ::status {:response (misc/kebabikey result) :failure nil}))
+  {:db (assoc (fetch/db) ::status {:response (misc/kebabikey result) :failure nil})})
  ([failure]
-  (assoc (fetch/db) ::status {:response nil :failure (misc/kebabikey failure)})))
+  {:db (assoc (fetch/db) ::status {:response nil :failure (misc/kebabikey failure)})}))
 
 (rf/reg-sub ::status :-> ::status)
 (rf/reg-sub
@@ -123,7 +126,7 @@
              (deco/error-msg err))])))))
 
 (defn simple-form [dispatch children]
-  [:form {:class "border-solid border-8 rounded-lg m-2 p-2 border-blue-200"}
+  [:div {:class "border-solid border-8 rounded-lg m-2 p-2 border-blue-200"}
    children
    [rc/button
     :label "Submit"
@@ -132,11 +135,10 @@
 (defn userfig-form []
   (let [fieldspecs @(rf/subscribe [::fieldspecs])
         initial-info @(rf/subscribe [::user-info])
-        messages @(rf/subscribe [::userfig-post-messages])
-        data @(rf/subscribe [::form-items])]
+        messages @(rf/subscribe [::userfig-post-messages])]
     [:div
      [simple-form
-      [::save-user-info data]
+      [::save-user-info]
       (into [:<>]
             (for [[key _] fieldspecs]
               [widget key]))]

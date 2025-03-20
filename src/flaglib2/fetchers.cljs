@@ -25,8 +25,9 @@
    success-func
    failure-func
    &
-   {:keys [timeout response-format attempts go? method]
-    :or {timeout 6000 attempts nil method :get}}]
+   {:keys [timeout response-format attempts go? method params-func]
+    :or {timeout 6000 attempts nil method :get
+         params-func :params}}]
   (let [nspace (or (namespace fname) 'flaglib2.fetchers)
         req-key (keyword nspace (str "request-for-" (name fname)))
         succ-key (keyword nspace (str "success-for-" (name fname)))
@@ -45,14 +46,15 @@
     (rf/reg-event-fx
      req-key
      (fn [_ [_ bundle & {:keys [attempts]}]]
-       {:http-xhrio {:method method
-                     :uri url
-                     :timeout timeout
-                     :params (:params bundle)
-                     :format (ajax/url-request-format)
-                     :response-format response-format
-                     :on-success [succ-key bundle attempts]
-                     :on-failure [fail-key bundle attempts]}}))
+       (binding [*db* db]
+         {:http-xhrio {:method method
+                       :uri url
+                       :timeout timeout
+                       :params (params-func bundle)
+                       :format (ajax/url-request-format)
+                       :response-format response-format
+                       :on-success [succ-key bundle attempts]
+                       :on-failure [fail-key bundle attempts]}})))
 
     (rf/reg-event-fx
      succ-key

@@ -2,7 +2,7 @@
 
 (defmacro reg-json-fetch
   [[name-key url &
-    {:keys [timeout attempts method proceed-test]}]
+    {:keys [timeout attempts method proceed-test params-func]}]
    success-clause
    failure-clause]
   `(flaglib2.fetchers/generic-fetcher-events-generator
@@ -18,6 +18,7 @@
           (println result)))
     :response-format (ajax.core/json-response-format)
     ~@(when proceed-test `(:go? ~proceed-test))
+    ~@(when params-func `(:params-func ~params-func))
     ~@(when timeout `(:timeout ~timeout))
     ~@(when attempts `(:attempts ~attempts))
     ~@(when method `(:method ~method))))
