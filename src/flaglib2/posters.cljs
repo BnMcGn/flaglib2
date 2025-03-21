@@ -133,7 +133,9 @@
    (if failure
      [(str text1 (:status-text failure))]
      (if-let [errors (:errors response)]
-       (map (fn [[k v]] (str k ": " v)) errors)
+       (map (fn [[k v]]
+              (str (if (keyword? k) (name k) k) ": " v))
+            errors)
        (when (:success response)
          [text2])))))
 
