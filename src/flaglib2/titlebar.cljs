@@ -173,33 +173,36 @@
                  flag (assoc :flag flag))]
     (uri/appendParamsFromMap base (clj->js params))))
 
+;;FIXME: hard coded
+(def reply-link-style {:color "black" :margin-left "3em" :margin-right "0em"})
+
 (defn reply-link [& {:keys [target excerpt offset]}]
   [reply-link-menu
    [:div
     [:div [:a
            {:class "text-black"
-            :style {:color "black"}
+            :style reply-link-style
             :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :positive-like)}
            "Upvote"]]
     [:div [:a
            {:class "text-black"
-            :style {:color "black"}
+            :style reply-link-style
             :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :negative-dislike)}
            "Downvote"]]
     [:div [:a
            {:class "text-black"
-            :style {:color "black"}
+            :style reply-link-style
             :href (target-link-url
                    :target target :excerpt excerpt :offset offset
                    :flag :custodial-blank)}
            "Comment"]]
     [:div [:a
            {:class "text-black"
-            :style {:color "black"}
+            :style reply-link-style
             :href (target-link-url
                    :target target :excerpt excerpt :offset offset)}
            "Other..."]]]
@@ -210,27 +213,27 @@
   [reply-link-menu
    [:div
     [:div [:a
-           {:style {:color "black"}
+           {:style reply-link-style
             :href (target-link-url
                    :flag :custodial-blank
                    :target target :title-or-text :title)}
            "Comment on title"]]
     (when-not hide-text
       [:div [:a
-             {:style {:color "black"}
+             {:style reply-link-style
               :href (target-link-url
                      :flag :custodial-blank
                      :target target :title-or-text :text)}
              "Comment on text"]])
     [:div [:a
-           {:style {:color "black"}
+           {:style reply-link-style
             :href (target-link-url
                    :flag :custodial-blank
                    :target target :title-or-text :title :suggest true)}
            "Supply article title"]]
     (when-not hide-text
       [:div [:a
-             {:style {:color "black"}
+             {:style reply-link-style
               :href (target-link-url
                      :flag :custodial-blank
                      :target target :title-or-text :text :suggest true)}
