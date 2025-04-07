@@ -13,6 +13,11 @@
  (fn [{:keys [db]} [_ key params]]
    {:db (assoc-in db [:server-parameters (or key :default)] params)}))
 
+(rf/reg-event-db
+ ::store-userfig-settings
+ (fn [db [_ settings]]
+   (assoc db :userfig (misc/kebabikey (js->clj settings)))))
+
 (rf/reg-fx
  :do-mount
  (fn [{:keys [mount-point element key]}]
