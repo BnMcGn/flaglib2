@@ -113,13 +113,14 @@
         current (r/atom (if-let [tmode (:tmode params)]
                           (keyword tmode)
                           :article))
+        advanced @(rf/subscribe [:advanced-options])
         small @(rf/subscribe [:window-small?])]
     [:<> [(if small rc/vertical-bar-tabs rc/horizontal-tabs)
           :model current
           :tabs [{:id :article :label "Article View"}
                  {:id :comment :label "Comment View"}
                  {:id :summary :label "Summary"}
-                 {:id :tt :label "Title/Text"}]
+                 (when advanced {:id :tt :label "Title/Text"})]
           :parts {:wrapper {:class "mt-2"}
                   :anchor {:style {:color "#777"}}}
           :on-change #(set! js/window.location.href

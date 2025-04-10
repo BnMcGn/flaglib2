@@ -162,7 +162,7 @@
             fspec (second fspecs)
             fields (into {} (map normalize-fieldspec (misc/pairify fspec)))
             fields (assoc fields :name k)
-            splut (string/split (name k) #":" 2)
+            splut (string/split (name k) #"::*" 2)
             k (keyword (or (second splut) (first splut)))]
         (recur (drop 2 fspecs) (conj stor [k fields]))))))
 

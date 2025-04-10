@@ -24,7 +24,7 @@
 (rf/reg-sub
  :advanced-options
  (fn [db _]
-   (get-in db [:local :advanced])))
+   (get-in db [:userfig :advanced])))
 
 
 (rf/reg-sub

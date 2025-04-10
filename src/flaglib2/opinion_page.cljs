@@ -26,7 +26,10 @@
       :hide-warstats small
       :intro-text "Root Target: "
       :display-depth 0]
-     [disp/hilited-text
+     ;;Disabling root text display. Not displaying the excerpt correctly, and displaying
+     ;; root text needs to be thought through. Maybe should be implemented as an excerpt
+     ;; display. For now just disable.
+     #_[disp/hilited-text
       :focus focus
       :text-key rooturl
       :grey? true
