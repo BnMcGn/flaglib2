@@ -57,7 +57,6 @@
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
   (rf/clear-subscription-cache!)
-  (rf/dispatch [::init/store-userfig-settings (go/get js/window "USERFIGDATA")])
   (rf/dispatch-sync [:remount-registered])
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application

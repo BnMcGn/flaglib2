@@ -1,6 +1,7 @@
 (ns ^:export flaglib2.init
   (:require
    [goog.dom :as gdom]
+   [goog.object :as go]
    [reagent.dom :as rdom]
    [re-frame.core :as rf]
    [flaglib2.subscriptions]
@@ -48,6 +49,7 @@
 (defn ^:export server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
+    (rf/dispatch [::store-userfig-settings (go/get js/window "USERFIGDATA")])
     (rf/dispatch [(keyword (:entry-point config)) key])))
 
 (def local-store-keys ["advanced"])
