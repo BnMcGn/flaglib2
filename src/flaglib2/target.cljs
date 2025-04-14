@@ -36,32 +36,46 @@
        :offset offset]
       [disp/excerptless-opinions rooturl]])))
 
-(defn text-missing []
+(defn text-missing-report []
   (let [{:keys [rooturl touched-p refd]} @(rf/subscribe [:server-parameters])
+        uname (misc/username)
         {:keys [initial-message initial-status]}
         (if touched-p
           @(rf/subscribe [:text-store rooturl])
           {})
+        advanced @(rf/subscribe [:advanced-options])
         reason (if touched-p
                  initial-message
                  "No discussion has been started on the article, so text extraction probably has not been attempted.")]
     [:div
      [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
      [deco/casual-heading
-      (str "Text from article at " (misc/url-domain rooturl) " is not currently available")]
-     [:h4 (str "Reason: " reason)]
+      (if advanced
+        (str "Text from article at " (misc/url-domain rooturl) " is not currently available")
+        (str "Discussion of article at " (misc/url-domain rooturl)
+             " has not been opened yet"))]
+     (when advanced
+       [:h4 (str "Reason: " reason)])
      [:ul
-      (when-not touched-p
-        [:li "Text extraction will be attempted by the system if you start a new post"])
-      [:li "You may still post flags on this article, though excerpts must be filled by hand"]
-      #_[:li "If the same text is available at another URL, please indicate the alternative with the SameThing flag."]
-      [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]]]))
+      (when (not-empty refd)
+        (let [ct (count refd)]
+          [:li (if (= 1 ct)
+                 "1 reference has been made to this URL"
+                 (str ct " references have been made to this URL"))
+           ]))
+      (when advanced
+        [:<>
+         (when-not touched-p
+           [:li "Text extraction will be attempted by the system if you start a new post"])
+         [:li "You may still post flags on this article, though excerpts must be filled by hand"]
+         [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]
+         ])]]))
 
 (defn target-root-article [& {:keys [rooturl]}]
   (let [text-info @(rf/subscribe [:text-store rooturl])]
     (if (and text-info (not-empty (:text text-info)))
       [target-root-article-core :rooturl rooturl]
-      [text-missing])))
+      [text-missing-report])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
   (let [optree @(rf/subscribe [:normal-tree rooturl])]
@@ -131,23 +145,6 @@
        :summary [tsum/target-stats :rooturl (:rooturl params)]
        :tt [text-title-thread :rooturl (:rooturl params)])]))
 
-(defn text-missing-userless []
-  (let [{:keys [rooturl touched-p refd]} @(rf/subscribe [:server-parameters])
-        ;;FIXME: Should be from subscription?
-        login-url (misc/make-login-url)]
-    [:div
-     [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
-     [deco/casual-heading
-      (str "Text from article at " (misc/url-domain rooturl) " is not currently available")]
-     [:h4 "Reason: No discussion has been started on the article, so text extraction probably has not been attempted."]
-     [:ul
-      (when (not-empty refd)
-        (let [ct (count refd)]
-          [:li (if (= 1 ct)
-                 "1 reference has been made to this URL"
-                 (str ct " references have been made to this URL"))]))
-      [:li [:a {:href login-url} "Log In"] " to start a discussion of this article"]]]))
-
 (defn target-page-title [rooturl db]
   (let [tinfo (ipfs/get-any-title db rooturl)
         title (misc/has-title? tinfo)
@@ -177,7 +174,7 @@
     ;;No? Nothing to do.
     (if (or uname touched-p)
       [target-root-core]
-      [text-missing-userless])))
+      [text-missing-report])))
 
 (rf/reg-event-fx
  :target
