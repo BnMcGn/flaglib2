@@ -12,7 +12,7 @@
                  [cljsjs/react "17.0.2-0"]
                  [cljsjs/react-dom "17.0.2-0"]
                  [reagent "1.1.1"]
-                 [re-frame "1.3.0-rc3"]
+                 [re-frame "1.4.5-SNAPSHOT"]
                  [day8.re-frame/http-fx "0.2.4"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [cljsjs/fuse "6.0.0-0"]

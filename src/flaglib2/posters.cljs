@@ -97,8 +97,9 @@
 ;;FIXME: should check for previous failed before posting both opin and alt.
 (rf/reg-event-fx
  :post-opinion
- (fn [{:keys [db]} [_ current-opinion]]
-   (let [{:keys [alternate alt-title opinion]} current-opinion
+ (fn [{:keys [db]} _]
+   (let [current-opinion (:current-opinion db)
+         {:keys [alternate alt-title opinion]} current-opinion
          tg (:target opinion)
          altop (when (and (string? alternate) (not-empty alternate))
                  (ttify-opinion {:comment alternate :target tg} "text" true))
@@ -110,8 +111,6 @@
              [:dispatch [:post-opinion-to-server titop [::alt-title-status]]])
            (when (not (= :posted (post-status db [::opinion-status])))
              [:dispatch [:post-opinion-to-server opinion [::opinion-status]]])]})))
-
-
 
 (rf/reg-sub ::opinion-status :-> ::opinion-status)
 (rf/reg-sub ::alternate-status :-> ::alternate-status)
@@ -155,8 +154,7 @@
 (defn opine-buttons []
   (let [qstatus @(rf/subscribe [::quick-status])
         flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
-        text (if (some #(= :failed %) qstatus) "Retry" "Post")
-        copinion @(rf/subscribe [:current-opinion])]
+        text (if (some #(= :failed %) qstatus) "Retry" "Post")]
     [step/button-box
      (step/button-spacer
       nil
@@ -164,7 +162,7 @@
          [rc/button
           :label text
           :class (tw-btn-primary)
-          :on-click #(rf/dispatch [:post-opinion copinion])]
+          :on-click #(rf/dispatch [:post-opinion])]
          [rc/button
           :label text
           :class (tw-btn-default-disabled)

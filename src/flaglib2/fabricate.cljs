@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [clojure.set :as set]
+   [re-frame.alpha :as rfa]
 
    [flaglib2.fetchers :as fetchers]
    [flaglib2.misc :as misc]
@@ -17,17 +18,29 @@
 
 (rf/reg-sub ::review-text :-> ::review-text)
 
-(rf/reg-sub
- ::existing-text
- (fn [db _]
-   (when-let [target (ug/selected-url-from-db [::specify-target] db)]
-     (subs/proper-text db target))))
+(rfa/reg-flow
+ {:id ::existing-text
+  :inputs [::specify-target ::specify-target
+           :opinion-store :opinion-store
+           :text-store :text-store]
+  :output
+  (fn [{:as db}]
+    (when-let [target (ug/selected-url-from-db [::specify-target] db)]
+      (subs/proper-text db target)))
+  :path [::existing-text]})
+(rf/reg-sub ::existing-text :-> ::existing-text)
 
-(rf/reg-sub
- ::existing-title
- (fn [db _]
-   (when-let [target (ug/selected-url-from-db [::specify-target] db)]
-     (subs/proper-title db target))))
+(rfa/reg-flow
+ {:id ::existing-title
+  :inputs [::specify-target ::specify-target
+           :opinion-store :opinion-store
+           :title-store :title-store]
+  :output
+  (fn [{:as db}]
+    (when-let [target (ug/selected-url-from-db [::specify-target] db)]
+      (subs/proper-title db target)))
+  :path [::existing-title]})
+(rf/reg-sub ::existing-title :-> ::existing-title)
 
 (rf/reg-sub
  ::active-text
@@ -44,21 +57,7 @@
    (when text (exc/create-textdata text))))
 
 (rf/reg-sub ::flag :-> ::flag)
-(rf/reg-sub
- ::flag-or-default
- :<- [::flag]
- :<- [:server-parameters]
- (fn [[flag params] _]
-   (or flag (:flag params))))
-
 (rf/reg-sub ::excerpt :-> ::excerpt)
-(rf/reg-sub
- ::excerpt-or-default
- :<- [::excerpt]
- :<- [:server-parameters]
- (fn [[excerpt params] _]
-   (or excerpt [(get params :excerpt "") (get params :offset nil)])))
-
 (rf/reg-sub ::excerpt-start :-> ::excerpt-start)
 (rf/reg-sub ::excerpt-search :-> ::excerpt-search)
 
@@ -102,28 +101,6 @@
 (rf/reg-sub ::supplied-text :-> ::supplied-text)
 (rf/reg-sub ::supplied-title :-> ::supplied-title)
 
-(rf/reg-sub
- ::text-supplied
- :<- [::supplied-text]
- :<- [::existing-text]
- (fn [[supplied existing] _]
-   (if (not-empty supplied)
-     (if (= supplied existing)
-       false
-       true)
-     false)))
-
-(rf/reg-sub
- ::title-supplied
- :<- [::supplied-title]
- :<- [::existing-title]
- (fn [[supplied existing] _]
-   (if (not-empty supplied)
-     (if (= supplied existing)
-       false
-       true)
-     false)))
-
 (rf/reg-event-db
  ::set-flag
  (fn [db [_ flag]]
@@ -141,27 +118,56 @@
 
 (rf/reg-sub ::comment :-> ::comment)
 
-(rf/reg-sub
- :current-opinion
- :<- [::flag-or-default]
- :<- [::excerpt-or-default]
- :<- [:selected-url [::specify-target]]
- :<- [:selected-url [::specify-reference]]
- :<- [::comment]
- :<- [::supplied-text]
- :<- [::supplied-title]
- :<- [::text-supplied]
- :<- [::title-supplied]
- (fn [[flag [excerpt offset] target reference comment supplied-text supplied-title text? title?] _]
-   (merge
-    {:opinion {:target target
-               :flag flag
-               :excerpt excerpt
-               :excerpt-offset offset
-               :reference reference
-               :comment comment}}
-    (when text? {:alternate supplied-text})
-    (when title? {:alt-title supplied-title}))))
+(rfa/reg-flow
+ {:id :flag-or-default
+  :inputs [:flag [::flag]
+           :params [:server-parameters]]
+  :output
+  (fn [{:keys [flag params]}]
+    (or flag (:flag params)))
+  :path [::flag-or-default]})
+(rf/reg-sub ::flag-or-default :-> ::flag-or-default)
+
+(rfa/reg-flow
+ {:id :excerpt-or-default
+  :inputs [:excerpt [::excerpt]
+           :params [:server-parameters]]
+  :output
+  (fn [{:keys [excerpt params]}]
+    (or excerpt [(get params :excerpt "") (get params :offset nil)]))
+  :path [::excerpt-or-default]})
+(rf/reg-sub ::excerpt-or-default :-> ::excerpt-or-default)
+
+(rfa/reg-flow
+ {:id :current-opinion
+  :inputs [:flag [::flag-or-default]
+           :excert-offset [::excerpt-or-default]
+           :target-loc [::specify-target]
+           :reference-loc [::specify-reference]
+           :comment [::comment]
+           :stext [::supplied-text]
+           :stitle [::supplied-title]
+           :etext [::existing-text]
+           :etitle [::existing-title]]
+  :output
+  (fn [{:keys [flag excerpt-offset target-loc reference-loc
+               comment stext stitle etext etitle]}]
+    (let [[excerpt offset] excerpt-offset
+          text? (if (not-empty stext) (if (= stext etext) false true) false)
+          title? (if (not-empty stitle) (if (= stitle etitle) false true) false)]
+      (merge
+       {:opinion {:target (ug/selected-url-from-db
+                           [::specify-target] {::specify-target target-loc})
+                  :flag flag
+                  :excerpt excerpt
+                  :excerpt-offset offset
+                  :reference (ug/selected-url-from-db
+                              [::specify-reference] {::specify-reference reference-loc})
+                  :comment comment}}
+       (when text? {:alternate stext})
+       (when title? {:alt-title stitle}))))
+  :path [:current-opinion]})
+(rf/reg-sub :current-opinion :-> :current-opinion)
 
 ;;Note: this is not much related to tt stuff above. Tt has been prechosen as primary target, not added on when we detect that the target URL is new.
 (rf/reg-event-db
