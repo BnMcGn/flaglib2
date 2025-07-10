@@ -20,9 +20,9 @@
 
 (rfa/reg-flow
  {:id ::existing-text
-  :inputs [::specify-target ::specify-target
-           :opinion-store :opinion-store
-           :text-store :text-store]
+  :inputs {::specify-target [::specify-target]
+           :opinion-store [:opinion-store]
+           :text-store [:text-store]}
   :output
   (fn [{:as db}]
     (when-let [target (ug/selected-url-from-db [::specify-target] db)]
@@ -32,9 +32,9 @@
 
 (rfa/reg-flow
  {:id ::existing-title
-  :inputs [::specify-target ::specify-target
-           :opinion-store :opinion-store
-           :title-store :title-store]
+  :inputs {::specify-target [::specify-target]
+           :opinion-store [:opinion-store]
+           :title-store [:title-store]}
   :output
   (fn [{:as db}]
     (when-let [target (ug/selected-url-from-db [::specify-target] db)]
@@ -120,8 +120,8 @@
 
 (rfa/reg-flow
  {:id :flag-or-default
-  :inputs [:flag [::flag]
-           :params [:server-parameters]]
+  :inputs {:flag [::flag]
+           :params [:server-parameters]}
   :output
   (fn [{:keys [flag params]}]
     (or flag (:flag params)))
@@ -130,8 +130,8 @@
 
 (rfa/reg-flow
  {:id :excerpt-or-default
-  :inputs [:excerpt [::excerpt]
-           :params [:server-parameters]]
+  :inputs {:excerpt [::excerpt]
+           :params [:server-parameters]}
   :output
   (fn [{:keys [excerpt params]}]
     (or excerpt [(get params :excerpt "") (get params :offset nil)]))
@@ -140,7 +140,7 @@
 
 (rfa/reg-flow
  {:id :current-opinion
-  :inputs [:flag [::flag-or-default]
+  :inputs {:flag [::flag-or-default]
            :excert-offset [::excerpt-or-default]
            :target-loc [::specify-target]
            :reference-loc [::specify-reference]
@@ -148,7 +148,7 @@
            :stext [::supplied-text]
            :stitle [::supplied-title]
            :etext [::existing-text]
-           :etitle [::existing-title]]
+           :etitle [::existing-title]}
   :output
   (fn [{:keys [flag excerpt-offset target-loc reference-loc
                comment stext stitle etext etitle]}]

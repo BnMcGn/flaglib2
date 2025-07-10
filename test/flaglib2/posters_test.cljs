@@ -22,10 +22,11 @@
                (posters/ttify-opinion {:comment "#(target-text)"} "something" true))))
 
 (deftest post-opinion
-  (let [db {::posters/opinion-status {:success :non-failed}}
+  (let [db {::posters/opinion-status {:success :non-failed}
+            :current-opinion {:alternate "other" :target "http://google.com/"
+                              :flag :positive-like}}
         effects (misc/fake-event
-                 [:post-opinion {:alternate "other" :target "http://google.com/"
-                                 :flag :positive-like}]
+                 [:post-opinion ]
                  db)
         evt (second (first (filter identity (:fx effects))))
 
