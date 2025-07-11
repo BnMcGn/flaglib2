@@ -140,15 +140,15 @@
 
 (rfa/reg-flow
  {:id :current-opinion
-  :inputs {:flag [::flag-or-default]
-           :excert-offset [::excerpt-or-default]
+  :inputs {:flag (rfa/flow<- ::flag-or-default)
+           :excert-offset (rfa/flow<- ::excerpt-or-default)
            :target-loc [::specify-target]
            :reference-loc [::specify-reference]
            :comment [::comment]
            :stext [::supplied-text]
            :stitle [::supplied-title]
-           :etext [::existing-text]
-           :etitle [::existing-title]}
+           :etext (rfa/flow<- ::existing-text)
+           :etitle (rfa/flow<- ::existing-title)}
   :output
   (fn [{:keys [flag excerpt-offset target-loc reference-loc
                comment stext stitle etext etitle]}]
