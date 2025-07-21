@@ -1,7 +1,7 @@
 (ns flaglib2.excerpt-search
   (:require
    [re-com-tailwind.core :as rc]
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as reagent]
 
    [re-com-tailwind.functions :refer [tw-btn-primary]]

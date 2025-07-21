@@ -1,6 +1,6 @@
 (ns flaglib2.headlets
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [goog.object :as go]
 
    [flaglib2.misc :as misc]))

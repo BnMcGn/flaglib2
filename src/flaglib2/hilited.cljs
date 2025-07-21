@@ -1,6 +1,6 @@
 (ns flaglib2.hilited
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [clojure.string :as string]
 
    [cljsjs.rangy-textrange]

@@ -1,6 +1,6 @@
 (ns flaglib2.titlebar
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
    [goog.uri.utils :as uri]
    [clojure.set :as set]

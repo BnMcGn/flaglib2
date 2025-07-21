@@ -1,6 +1,6 @@
 (ns flaglib2.suggester
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [re-com-tailwind.core        :as rc]
    [goog.events.KeyCodes]))
 

@@ -1,6 +1,6 @@
 (ns flaglib2.grouped
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [re-com-tailwind.core :as rc]
    [clojure.string :as string]
 

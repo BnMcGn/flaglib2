@@ -1,8 +1,7 @@
 (ns flaglib2.fabricate
   (:require
-   [re-frame.core :as rf]
    [clojure.set :as set]
-   [re-frame.alpha :as rfa]
+   [re-frame.alpha :as rf]
 
    [flaglib2.fetchers :as fetchers]
    [flaglib2.misc :as misc]
@@ -18,7 +17,7 @@
 
 (rf/reg-sub ::review-text :-> ::review-text)
 
-(rfa/reg-flow
+(rf/reg-flow
  {:id ::existing-text
   :inputs {::specify-target [::specify-target]
            :opinion-store [:opinion-store]
@@ -30,7 +29,7 @@
   :path [::existing-text]})
 (rf/reg-sub ::existing-text :-> ::existing-text)
 
-(rfa/reg-flow
+(rf/reg-flow
  {:id ::existing-title
   :inputs {::specify-target [::specify-target]
            :opinion-store [:opinion-store]
@@ -118,8 +117,8 @@
 
 (rf/reg-sub ::comment :-> ::comment)
 
-(rfa/reg-flow
- {:id :flag-or-default
+(rf/reg-flow
+ {:id ::flag-or-default
   :inputs {:flag [::flag]
            :params [:server-parameters]}
   :output
@@ -128,8 +127,8 @@
   :path [::flag-or-default]})
 (rf/reg-sub ::flag-or-default :-> ::flag-or-default)
 
-(rfa/reg-flow
- {:id :excerpt-or-default
+(rf/reg-flow
+ {:id ::excerpt-or-default
   :inputs {:excerpt [::excerpt]
            :params [:server-parameters]}
   :output
@@ -138,17 +137,17 @@
   :path [::excerpt-or-default]})
 (rf/reg-sub ::excerpt-or-default :-> ::excerpt-or-default)
 
-(rfa/reg-flow
+(rf/reg-flow
  {:id :current-opinion
-  :inputs {:flag (rfa/flow<- ::flag-or-default)
-           :excert-offset (rfa/flow<- ::excerpt-or-default)
+  :inputs {:flag (rf/flow<- ::flag-or-default)
+           :excert-offset (rf/flow<- ::excerpt-or-default)
            :target-loc [::specify-target]
            :reference-loc [::specify-reference]
            :comment [::comment]
            :stext [::supplied-text]
            :stitle [::supplied-title]
-           :etext (rfa/flow<- ::existing-text)
-           :etitle (rfa/flow<- ::existing-title)}
+           :etext (rf/flow<- ::existing-text)
+           :etitle (rf/flow<- ::existing-title)}
   :output
   (fn [{:keys [flag excerpt-offset target-loc reference-loc
                comment stext stitle etext etitle]}]

@@ -1,6 +1,6 @@
 (ns flaglib2.posters
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [day8.re-frame.http-fx]
    [re-com-tailwind.core :as rc]
    [ajax.core :as ajax]

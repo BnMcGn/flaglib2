@@ -1,7 +1,7 @@
 (ns flaglib2.ipfs
   (:require
    [goog.object :as go]
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [day8.re-frame.http-fx]
    [ajax.core :as ajax]
    [clojure.string :as string]

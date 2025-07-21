@@ -1,6 +1,6 @@
 (ns flaglib2.opinion-page
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
    [goog.uri.utils :as uri]
 

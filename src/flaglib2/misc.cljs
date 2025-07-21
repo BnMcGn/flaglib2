@@ -5,7 +5,7 @@
    [cljs-time.core :as time]
    [reagent.dom.server :refer [render-to-string]]
    [re-frame.registrar]
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [re-frame.db]
    [clojure.string :as string]
    [clojure.set :as set]

@@ -3,7 +3,7 @@
    [goog.dom :as gdom]
    [goog.object :as go]
    [reagent.dom :as rdom]
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [flaglib2.subscriptions]
    [flaglib2.misc :as misc]
 

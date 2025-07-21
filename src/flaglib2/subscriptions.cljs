@@ -1,6 +1,6 @@
 (ns flaglib2.subscriptions
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [flaglib2.misc :as misc]
 
    [clojure.walk :as walk]))

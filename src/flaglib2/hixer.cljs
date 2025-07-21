@@ -1,6 +1,6 @@
 (ns flaglib2.hixer
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
    [cljs.reader]
    [ajax.core :as ajax]

@@ -1,6 +1,6 @@
 (ns flaglib2.mock-make
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
 
    [flaglib2.forms :as forms]
    [flaglib2.stepper :as step]

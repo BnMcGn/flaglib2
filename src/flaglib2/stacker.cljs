@@ -1,6 +1,6 @@
 (ns flaglib2.stacker
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [ajax.core :as ajax]
    [cljs-time.core :as tm]
    [goog.uri.utils :as uri]

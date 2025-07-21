@@ -1,6 +1,6 @@
 (ns flaglib2.social-card
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
 
    [re-com-tailwind.core :as rc]

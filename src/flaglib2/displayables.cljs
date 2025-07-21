@@ -1,6 +1,6 @@
 (ns flaglib2.displayables
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
    [clojure.set :as set]
 

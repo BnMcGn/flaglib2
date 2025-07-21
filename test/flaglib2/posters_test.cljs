@@ -4,6 +4,11 @@
 
      [clojure.string :as string]
 
+     [re-frame.alpha :as rf]
+     [re-frame.flow.alpha :as flow]
+
+     [flaglib2.fabricate :as fab]
+     [flaglib2.urlgrab :as ug]
      [flaglib2.misc :as misc]
      [flaglib2.posters :as posters]))
 
@@ -23,8 +28,12 @@
 
 (deftest post-opinion
   (let [db {::posters/opinion-status {:success :non-failed}
-            :current-opinion {:alternate "other" :target "http://google.com/"
-                              :flag :positive-like}}
+            ::fab/specify-target
+            {::ug/modified-selection "http://google.com/"}
+            ::fab/flag :positive-like
+            ::fab/supplied-text "other"}
+        ctx (reduce flow/run {:effects {:db db}} (flow/topsort @flow/flows))
+        db (get-in ctx [:effects :db])
         effects (misc/fake-event
                  [:post-opinion ]
                  db)

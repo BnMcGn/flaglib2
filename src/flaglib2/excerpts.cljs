@@ -3,7 +3,7 @@
    [clojure.string :as string]
    [clojure.set :as set]
 
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
 
    [flaglib2.misc :as misc]
    [flaglib2.subscriptions :as subs]))

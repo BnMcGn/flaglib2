@@ -1,6 +1,6 @@
 (ns flaglib2.fetchers
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [day8.re-frame.http-fx]
    [ajax.core :as ajax]
    [clojure.walk :as walk]

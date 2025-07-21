@@ -1,6 +1,6 @@
 (ns flaglib2.userfig
   (:require
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [reagent.core :as r]
    [clojure.string :as string]
 

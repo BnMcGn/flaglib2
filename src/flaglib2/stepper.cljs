@@ -1,7 +1,7 @@
 (ns flaglib2.stepper
   (:require
    [clojure.string :as string]
-   [re-frame.core :as rf]
+   [re-frame.alpha :as rf]
    [flaglib2.misc :as misc]
    [flaglib2.deco :as deco]
 
