@@ -259,7 +259,7 @@
         :class (misc/class-string (tw-btn-danger))])]))
 
 (defn specify-reference []
-  [ug/url-search [::specify-reference]
+  [ug/url-search [::fab/specify-reference]
    ;;FIXME: omit target URL
    :placeholder "Reference URL or search terms"])
 
@@ -350,7 +350,7 @@
     :grouped true
     :buttons [reference-buttons]
     :label [specify-reference-summary]
-    :once [:initialize-url-search [::specify-reference]]}
+    :once [:initialize-url-search [::fab/specify-reference]]}
    {:id :opine
     :label [opine]
     :grouped true
