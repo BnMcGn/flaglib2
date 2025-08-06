@@ -233,16 +233,16 @@ the Internet.
               :server-parameters {:default params}})
          summaries (for [step (get summary-settings section-name)]
                      [:dispatch [:flaglib2.stepper/set-summary step]])
-         [steps _] (forms/what-opin-form? db)]
+         [steps _] (forms/what-opin-form? db)
+         step (get section-step section-name)]
      (when-not section (throw (js/Error. "Mockable not found")))
      {:db db
       :fx (into
            [
             ;;[:dispatch [:add-after-hooks fabricate-hooks]]
-            [:dispatch [:flaglib2.stepper/initialize steps]]
-            (when-let [step (get section-step section-name)]
+            [:dispatch [:flaglib2.stepper/initialize steps {:active step}]]
+            (when step
               [:dispatch [:flaglib2.stepper/goto step]])
-
             [:dispatch [:mount-registered]]]
            summaries)})))
 

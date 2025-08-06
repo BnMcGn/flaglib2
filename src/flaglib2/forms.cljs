@@ -82,7 +82,6 @@
    :label "Supply Text"
    :on-click (fn [] (rf/dispatch [::step/goto :supply-text]))])
 
-
 (defn target-decision []
   (let [selection @(rf/subscribe [:selected-url [::fab/specify-target]])
         factors (and selection @(rf/subscribe [:target-decision selection]))]

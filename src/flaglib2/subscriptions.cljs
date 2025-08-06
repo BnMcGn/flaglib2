@@ -160,9 +160,11 @@
    (let [subtree (misc/get-sub-tree db [nil key])]
      (filter #(misc/opinion-not-tt? (get-in db [:opinion-store (first %1)])) subtree))))
 
-
-(defn target-decision-core [[warstat text status] _]
-  (let [have-text (and text (:text text))
+(defn target-decision [{:keys [warstats-store text-store text-status]} target]
+  (let [text (get text-store target)
+        status (get text-status target)
+        warstat (get warstats-store target)
+        have-text (and text (:text text))
         responses (and warstat (not (zero? (:replies-total warstat))))]
     {:status (cond (and responses have-text) :reviewed
                    have-text :available
@@ -171,20 +173,10 @@
                    :else (or (keyword (walk/keywordize-keys (:status status))) :wait))
      :message (and status (:message status))}))
 
-(defn target-decision [db target]
-  (target-decision-core
-   [(get-in db [:warstats-store target])
-    (get-in db [:text-store target])
-    (get-in db [:text-status target])]
-   nil))
-
 (rf/reg-sub
  :target-decision
- (fn [[_ target]]
-   [(rf/subscribe [:warstats-store target])
-    (rf/subscribe [:text-store target])
-    (rf/subscribe [:text-status target])])
- target-decision-core)
+ (fn [db [_ target]]
+   (target-decision db target)))
 
 (rf/reg-sub :window-size :-> :window-size)
 
