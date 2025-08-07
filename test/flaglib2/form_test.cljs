@@ -13,6 +13,47 @@
      [re-frame.alpha :as rf]
      ))
 
+(deftest opine
+  (rf-test/run-test-sync
+   (rf/dispatch [::init/store-server-parameters nil {:section "opine"}])
+   (rf/dispatch [:mock-make])
+   (let [el (js/document.createElement "div")
+         _ (rdom/render [step/wf-stepper] el)
+         text (. el -innerHTML)]
+     (is (string/index-of text "Choose an Excerpt"))
+     (is (string/index-of text "Set a Reference"))
+     (is (string/index-of text "Post")))))
+
+(deftest decision-reviewed
+  (rf-test/run-test-sync
+   (rf/dispatch [::init/store-server-parameters nil {:section "decision-reviewed"}])
+   (rf/dispatch [:mock-make])
+   (let [el (js/document.createElement "div")
+         _ (rdom/render [step/wf-stepper] el)
+         text (. el -innerHTML)]
+     (is (string/index-of text "Next</button")))))
+
+(deftest decision-available
+  (rf-test/run-test-sync
+   (rf/dispatch [::init/store-server-parameters nil {:section "decision-available"}])
+   (rf/dispatch [:mock-make])
+   (let [el (js/document.createElement "div")
+         _ (rdom/render [step/wf-stepper] el)
+         text (. el -innerHTML)]
+     (is (string/index-of text "not yet been reviewed"))
+     (is (string/index-of text "Skip to Flagging"))
+     (is (string/index-of text "Review Text")))))
+
+(deftest decision-wait
+  (rf-test/run-test-sync
+   (rf/dispatch [::init/store-server-parameters nil {:section "decision-wait"}])
+   (rf/dispatch [:mock-make])
+   (let [el (js/document.createElement "div")
+         _ (rdom/render [step/wf-stepper] el)
+         text (. el -innerHTML)]
+     (is (string/index-of text "Waiting for text extraction"))
+     (is (string/index-of text "Supply Text")))))
+
 (deftest decision-failure
   (rf-test/run-test-sync
    (rf/dispatch [::init/store-server-parameters nil {:section "decision-failure"}])
