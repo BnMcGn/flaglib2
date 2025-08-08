@@ -123,7 +123,7 @@
            :params [:server-parameters]}
   :output
   (fn [{:keys [flag params]}]
-    (or flag (:flag params)))
+    (or flag (get-in params [:default :flag])))
   :path [::flag-or-default]})
 (rf/reg-sub ::flag-or-default :-> ::flag-or-default)
 
@@ -133,7 +133,8 @@
            :params [:server-parameters]}
   :output
   (fn [{:keys [excerpt params]}]
-    (or excerpt [(get params :excerpt "") (get params :offset nil)]))
+    (or excerpt [(get-in params [:default :excerpt] "")
+                 (get-in params [:default :offset] nil)]))
   :path [::excerpt-or-default]})
 (rf/reg-sub ::excerpt-or-default :-> ::excerpt-or-default)
 
