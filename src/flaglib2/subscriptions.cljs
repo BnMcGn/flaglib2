@@ -82,6 +82,13 @@
      (:references db))))
 
 (rf/reg-sub
+ :reference-opinions
+ (fn [db [_ key]]
+   (if key
+     (get-in db [:reference-opinions key])
+     (:reference-opinions db))))
+
+(rf/reg-sub
  :refd
  (fn [db [_ key]]
    (if key

@@ -127,7 +127,8 @@
 (rf/reg-event-fx
  ::received-references
  (fn [{:keys [db]} [_ key result]]
-   (let [{:keys [references refd]} (into {} (map vec (partition 2 (cljs.reader/read-string result))))
+   (let [{:keys [references refd reference-opinions]}
+         (into {} (map vec (partition 2 (cljs.reader/read-string result))))
          iids (into (filter misc/iid? references) (filter misc/iid? refd))
          rooturls (remove misc/iid? references)
          dispatches (map #(vector :dispatch [:load-opinion %]) iids)
@@ -139,6 +140,7 @@
                             dispatches))]
      {:db (-> db
               (assoc-in [:references key] references)
+              (assoc-in [:reference-opinions key] reference-opinions)
               (assoc-in [:refd key] refd))
       ;;FIXME: Might want a way to disable auto load
       ;;NOTE: Might switch to warpaks...

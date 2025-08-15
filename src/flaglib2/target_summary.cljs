@@ -159,7 +159,7 @@
       [:span "As excerpts:"] [:span excerpts]]]))
 
 (defn references-summary [targetid]
-  (let [references @(rf/subscribe [:references targetid])
+  (let [references @(rf/subscribe [:reference-opinions targetid])
         opstore @(rf/subscribe [:opinion-store])]
     (when-not (empty? references)
       [:div
