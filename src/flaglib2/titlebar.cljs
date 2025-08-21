@@ -61,7 +61,8 @@
 ;;(defn opinion-icon-core [])
 
 (defn opinion-icon [opid & {:keys [class style title]}]
-  (let [opinion @(rf/subscribe [:opinion-store opid])]
+  (let [opinion @(rf/subscribe [:opinion-store opid])
+        opinion (or opinion {:iid opid})]
     [:a
      {:href (misc/make-opinion-url opinion)
       :class class
