@@ -141,7 +141,7 @@
 (rf/reg-flow
  {:id :current-opinion
   :inputs {:flag (rf/flow<- ::flag-or-default)
-           :excert-offset (rf/flow<- ::excerpt-or-default)
+           :excerpt-offset (rf/flow<- ::excerpt-or-default)
            :target-loc [::specify-target]
            :reference-loc [::specify-reference]
            :comment [::comment]

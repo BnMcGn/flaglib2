@@ -8,6 +8,7 @@
    [flaglib2.misc-test]
    [flaglib2.mood-test]
    [flaglib2.hixer-test]
+   [flaglib2.fabricate-test]
    [flaglib2.posters-test]
    [flaglib2.form-test]
 
