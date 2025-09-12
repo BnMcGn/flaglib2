@@ -204,8 +204,8 @@
          iid (second event)
          focus (get-in db [:server-parameters :default :focus])]
      (when (= iid (last focus))
-       {:set-page-title (opinion-page-title iid newdb)}
-       {:set-social-meta (opinion-social-meta iid newdb)}))))
+       {:set-page-title (opinion-page-title iid newdb)
+        :set-social-meta (opinion-social-meta iid newdb)}))))
 
 (rf/reg-event-fx
  :opinion-page
@@ -217,11 +217,12 @@
          db (assoc db :root-element opinion-page)]
      {:db db
       :fx [;;[:dispatch [:load-opinions focus]]
+           [:dispatch [:add-after-hooks
+                       {:flaglib2.ipfs/received-opinion
+                        [::set-opinion-page-headers :flaglib2.misc/context]
+                        :flaglib2.ipfs/received-title
+                        [::set-opinion-page-headers :flaglib2.misc/context]}]]
            [:dispatch [:load-rooturl rooturl]]
-           [:dispatch [:add-after-hooks {:flaglib2.ipfs/received-opinion
-                                         [::set-opinion-page-headers :flaglib2.misc/context]
-                                         :flaglib2.ipfs/received-title
-                                         [::set-opinion-page-headers :flaglib2.misc/context]}]]
            [:dispatch [:flaglib2.hixer/request-opinion-hiccup (last focus)]]
            [:dispatch [:flaglib2.ipfs/request-rooturl-item rooturl "opinion-tree"]]
            [:dispatch [:mount-registered]]]
