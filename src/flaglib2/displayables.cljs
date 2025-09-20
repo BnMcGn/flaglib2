@@ -214,7 +214,7 @@
   [& {:keys [opinion opinionid text]}]
   (let [opinion (or opinion
                     @(rf/subscribe [:opinion-store opinionid]))
-        opid (or opinionid (:id opinion))
+        opid (or opinionid (:iid opinion))
         tpos @(rf/subscribe [:text-position-recalc opid])
         {:keys [text-position excerpt offset]} opinion
         {:keys [leading trailing excerpt]}

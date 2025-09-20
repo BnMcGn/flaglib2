@@ -12,7 +12,8 @@
    [flaglib2.target-summary :as tsum]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.hixer :as-alias hixer]
-   [flaglib2.hixer :as hixer]))
+   [flaglib2.hixer :as hixer]
+   [flaglib2.excerpts :as excerpts]))
 
 (defn opinion-root [& {:keys [rooturl focus]}]
   (let [small @(rf/subscribe [:window-small?])]
@@ -71,6 +72,9 @@
         [:<>
          [:div
           {:class "m-4 mt-1"}
+          ;;FIXME: may be redundant. See how it looks.
+          (when (excerpts/has-excerpt? opinion)
+            [disp/thread-excerpt :opinion opinion])
           (when-let [comment (:clean-comment opinion)]
             [disp/hilited-text
              :text comment
