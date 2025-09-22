@@ -1,6 +1,6 @@
 (ns flaglib2.deco
   (:require
-   ))
+   [re-com-tailwind.functions :as tw]))
 
 
 ;; formerly aside
@@ -86,3 +86,6 @@
        color2 " 25%,"
        color2 " 50%,"
        color1 " 50%)"))
+
+(defn wf-btn-default-disabled []
+  ["border-stone-300" "bg-white" "text-zinc-400" "focus:border-stone-300" "focus:bg-white" "hover:border-stone-300" "hover:bg-white" "active:focus:bg-white" "active:focus:border-stone-300" "active:hover:bg-white" "active:hover:border-stone-300"])

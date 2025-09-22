@@ -9,7 +9,8 @@
 
    [flaglib2.flags :as flags]
    [flaglib2.misc :as misc]
-   [flaglib2.stepper :as step]))
+   [flaglib2.stepper :as step]
+   [flaglib2.deco :as deco]))
 
 
 (defn init []
@@ -165,5 +166,5 @@
           :on-click #(rf/dispatch [:post-opinion])]
          [rc/button
           :label text
-          :class (tw-btn-default-disabled)
+          :class (deco/wf-btn-default-disabled)
           :disabled? true])])]))
