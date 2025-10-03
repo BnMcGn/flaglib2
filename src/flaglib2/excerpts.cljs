@@ -117,7 +117,7 @@
    (butlast
     (reduce
      into
-     (map (fn [tx] [tx [:br]]) (string/split-lines text))))))
+     (map (fn [tx] [tx [:br]]) (string/split text #"\r?\n" -1))))))
 
 (defn overlap? [start1 end1 start2 end2]
   (not (or (> start1 end2) (> start2 end1))))

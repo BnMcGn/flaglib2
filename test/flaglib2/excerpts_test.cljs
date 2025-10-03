@@ -1,6 +1,7 @@
 (ns flaglib2.excerpts-test
     (:require
      [cljs.test :refer-macros [deftest is testing]]
+     [reagent.dom :as rdom]
 
      [clojure.string :as string]
 
@@ -148,3 +149,70 @@ And the light shineth in darkness; and the darkness comprehended it not.")
         [_ [_ text2]] (misc/part-on-true (partial = :text) seg2)]
     (is (= text1 "In "))
     (is (= text2 "the"))))
+
+(def text2
+  "This sentence contains\n\na double newline.")
+
+(defn segmentz [text excerpt]
+  (let [rootkey "http://fake.fake/"
+        iid "pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeeeb"
+        db {:opinion-store {iid
+                            {:excerpt excerpt
+                             :target rootkey}}
+            :text-store {rootkey {:text text}}}
+        res (hilited/make-segments rootkey db [iid])
+        el (js/document.createElement "div")]
+    (rdom/render (into [:div] res) el)
+    el))
+
+(defn el-children [elt]
+  (into [] (array-seq (. elt -children))))
+
+(defn get-range-at [node start end]
+  (let [range (.. rangy (createRange js/document))]
+    (. range (selectCharacters node start end))
+    range))
+
+(deftest select-excerpt-near-newline
+  (let [el (segmentz text2 "a double")]
+    (is (= "This sentence contains"
+           (-> el
+               el-children
+               first
+               el-children
+               first
+               (. -innerText))))
+    (is (= "BR"
+           (-> el
+               el-children
+               first
+               el-children
+               first
+               el-children
+               first
+               (. -tagName))))
+    (is (= "BR"
+           (-> el
+               el-children
+               first
+               el-children
+               first
+               el-children
+               second
+               (. -tagName))))
+    (is (= "a double"
+           (-> el
+               el-children
+               first
+               el-children
+               second
+               (. -innerText))))
+    (is (= " newline."
+           (-> el
+               el-children
+               first
+               el-children
+               (nth 2)
+               (. -innerText))))))
+
+
