@@ -169,7 +169,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
   (into [] (array-seq (. elt -children))))
 
 (defn get-range-at [node start end]
-  (let [range (.. rangy (createRange js/document))]
+  (let [range (.. js/rangy (createRange js/document))]
     (. range (selectCharacters node start end))
     range))
 
@@ -215,4 +215,24 @@ And the light shineth in darkness; and the darkness comprehended it not.")
                (nth 2)
                (. -innerText))))))
 
+(deftest select-excerpt-near-existing
+  ;;FIXME: don't know how to write these tests.
+  ;; We want to make sure that every possible "mouse strike" around existing excerpts will
+  ;;result in a coherent, correct excerpt. We don't know how to simulate all of those mouse
+  ;; strikes.
+  ;; Also, we might be getting incorrect spaces in the returned text around <br> tags.
+  ;; range->excerpt pipeline could use some testing
+  (let [el (segmentz text2 "a double")]
+    (is (= (subs text2 0 22) (. (get-range-at el 0 22) (toString)))) ; up to newlines
+    ;(is (= (subs text2 0 24) (. (get-range-at el 0 24) (toString)))) ; up to excerpt
+    (is (= (subs text2 24 32) (. (get-range-at el 24 32) (toString)))) ; overlap the excerpt
+    ;(is (= (subs text2 3 32) (. (get-range-at el 3 32) (toString)))) ; to end of excerpt
+    ;(is (= (subs text2 24 34) (. (get-range-at el 24 34) (toString)))) ; from start
+    ;(is (= (subs text2 22 32) (. (get-range-at el 22 32) (toString)))) ; from newlines
+    (is (= (subs text2 28 30) (. (get-range-at el 28 30) (toString)))) ; within
+    ;(is (= (subs text2 3 38) (. (get-range-at el 3 38) (toString)))) ; engulf
+    ;(is (= (subs text2 32 38) (. (get-range-at el 32 38) (toString)))) ; after
+    ;(is (= (subs text2 3 30) (. (get-range-at el 3 30) (toString)))) ; into
+    ;(is (= (subs text2 30 38) (. (get-range-at el 30 38) (toString)))) ; out of
+    ))
 
