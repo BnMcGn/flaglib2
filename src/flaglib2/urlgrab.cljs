@@ -77,7 +77,6 @@
             (when (and selection onsel)
               [:call-something [onsel selection]])]))))
 
-
 (defn suggest-button [location itm]
   [rc/button
    :class "sm:border-white hover:border-stone-300 w-full sm:whitespace-nowrapper whitespace-normaller"
@@ -86,6 +85,7 @@
            :url itm
            :hide-reply true
            :hide-external-link true
+           :headline-class "overflow-hidden"
            :no-main-link true
            :display-depth 0]
    :on-click (fn [] (rf/dispatch [::enter-search location itm :is-click? true]))])
@@ -102,14 +102,14 @@
                    :when (not (empty? items))]
                [(or [deco/casual-note-heading (get labels cat)] "")
                 (into [:ul {:class "ml-2 sm:list-inside sm:[list-style-image:url(/static/img/target-simple.svg)]"}]
-                      (for [itm items]
+                      (for [itm (take 20 items)]
                         [:li [suggest-button location itm]]))]))]))
 
 (defn display-searched-urls [location]
   (let [aurls @(rf/subscribe [:url-search-results location])]
     (when (not-empty aurls)
       (into [:ul {:class "ml-2 sm:list-inside sm:[list-style-image:url(/static/img/target-simple.svg)]"}]
-           (for [itm aurls
+           (for [itm (take 40 aurls)
                  :let [itm (:item itm)]]
              [:li [suggest-button location (:url itm)]])))))
 
