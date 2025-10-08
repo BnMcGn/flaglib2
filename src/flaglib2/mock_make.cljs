@@ -147,7 +147,9 @@ the Internet.
     :flaglib2.fabricate/comment "This might be a comment"}))
 
 (def server-success
-  {:flaglib2.posters/opinion-status {:response {:success true}}
+  {:flaglib2.posters/opinion-status
+   {:response {:success true}
+    :iid  "pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeeeb"}
    :flaglib2.posters/alternate-status {:response {:success true}}
    :flaglib2.posters/alt-title-status {:response {:success true}}})
 

@@ -283,7 +283,8 @@
       :children
       (into []
             (for [m messages]
-              [:div m]))]]))
+              [:div m]))]
+     [posters/navigation-after-post]]))
 
 (defn confirm []
   (let [opinion (:opinion @(rf/subscribe [:current-opinion]))

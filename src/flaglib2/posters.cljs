@@ -152,6 +152,15 @@
            (msg-format tit "Edited title failed to post: " "Alternate title posted")
            (msg-format op "Opinion failed to post: " "Opinion posted")]))))
 
+(defn navigation-after-post []
+  (let [status @(rf/subscribe [::opinion-status])
+        iid (get status :iid)]
+    (when iid
+      [rc/v-box
+       :children
+       [[:h3 "Destinations"]
+        [:div [:a {:href (misc/make-opinion-url {:iid iid})} "Go to your post"]]]])))
+
 (defn opine-buttons []
   (let [qstatus @(rf/subscribe [::quick-status])
         flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
