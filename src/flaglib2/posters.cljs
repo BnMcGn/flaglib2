@@ -154,12 +154,18 @@
 
 (defn navigation-after-post []
   (let [status @(rf/subscribe [::opinion-status])
-        iid (get status :iid)]
+        iid (get-in status [:response :iid])
+        copinion @(rf/subscribe [:current-opinion])
+        target (get-in copinion [:opinion :target])
+        turl (if (misc/iid? target)
+               (misc/make-opinion-url target)
+               (misc/make-target-url target))]
     (when iid
       [rc/v-box
        :children
        [[:h3 "Destinations"]
-        [:div [:a {:href (misc/make-opinion-url {:iid iid})} "Go to your post"]]]])))
+        [:div [:a {:href (misc/make-opinion-url {:iid iid})} "Go to your post"]]
+        [:div [:a {:href turl} "Return to the target"]]]])))
 
 (defn opine-buttons []
   (let [qstatus @(rf/subscribe [::quick-status])
