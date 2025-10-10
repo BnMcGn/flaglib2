@@ -170,11 +170,12 @@
 (defn opine-buttons []
   (let [qstatus @(rf/subscribe [::quick-status])
         flag @(rf/subscribe [:flaglib2.fabricate/flag-or-default])
+        posted (every? #({:posted :unposted} %) qstatus)
         text (if (some #(= :failed %) qstatus) "Retry" "Post")]
     [step/button-box
      (step/button-spacer
       nil
-      [(if flag
+      [(if (and flag (not posted))
          [rc/button
           :label text
           :class (tw-btn-primary)
