@@ -48,8 +48,8 @@
           ws (get-in db [:warstats-store opid])]
       (cond
         (significant (:controversy ws) (:effect ws)) :controv
-        (= "pro" (:direction ws)) :positive
-        (= "con" (:direction ws)) :negative
+        (= :pro (:direction ws)) :positive
+        (= :con (:direction ws)) :negative
         (contains? badflags (:flag opinion)) :negative
         (contains? goodflags (:flag opinion)) :positive
         :else :none)))
