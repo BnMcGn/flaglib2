@@ -28,10 +28,16 @@
          parent1
          (= parent1 (find-parent-hilited (. selection -focusNode))))))
 
-(defn segment-count [quantity]
-  (when (> quantity 1)
+(defn segment-count [quantity text]
+  (when (and (> quantity 1)
+             (cond ;; If text is too short to cover digits it will make a mess. Don't display.
+               (> quantity 999) (> (count text) 9)
+               (> quantity 99) (> (count text) 6)
+               (> quantity 9) (> (count text) 4)
+               :else (> (count text) 2))
+             (not (every? misc/whitespace-characters text)))
     [:span
-     {:class "absolute left-0 right-0 text-black opacity-40 text-center text-4xl top-[-0.65rem]"}
+     {:class "absolute left-0 right-0 text-black opacity-40 text-center text-4xl top-[-0.45rem]"}
      quantity]))
 
 (rf/reg-sub
@@ -87,7 +93,7 @@
                    {}
                    {:padding-top "0.14em" :padding-bottom "0.14em"})
           :on-click (when-not disable-popup? click-handler)}
-         [segment-count (count excerpt-opinions)]
+         [segment-count (count excerpt-opinions) text]
          (excerpts/rebreak text)]]
     (if disable-popup?
       textspan

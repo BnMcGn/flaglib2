@@ -128,6 +128,6 @@
 (defn opinion-hiccup [iid]
   (let [hic @(rf/subscribe [:hiccup-store iid])]
     (into [:div
-           {:class "m-1 mt-4 child-div:my-5"}]
+           {:class "m-1 mt-4 child-div:my-5 mb-8"}]
           ;;Drop initial :div
           (rest (process-hiccup hic)))))
