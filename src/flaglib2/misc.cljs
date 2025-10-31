@@ -169,6 +169,9 @@
        (sub-tree (:tree-address opinion) optree)))
     (get-in db [:opinion-tree-store key])))
 
+(defn opinion-has-comment? [opinion]
+  (and (:clean-comment opinion) (not (empty? (:clean-comment opinion)))))
+
 ;;; Time tools
 
 (def formatter (cljs-time.format/formatters :date-time-no-ms))
@@ -199,6 +202,9 @@
             (> diff (* 1 ms-second)) [(int (/ diff ms-second)) "second"])
           unit (if (> quantity 1) (str unit "s") unit)]
       [quantity unit])))
+
+(defn milliseconds-ago [timestamp]
+  (- (timec/to-long (time/now)) (timec/to-long timestamp)))
 
 (def whitespace-characters #{\space \newline \backspace \tab \formfeed \return})
 

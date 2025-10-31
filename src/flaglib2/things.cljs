@@ -7,6 +7,7 @@
    [flaglib2.misc :as misc]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.stacker :as stack]
+   [flaglib2.visibility :as vis]
    [flaglib2.titlebar :as tb]))
 
 (defn display-thing [tbstuff & {:keys [fields]}]
@@ -26,13 +27,18 @@
     [:div (into [:span {:class (misc/class-string (:bg-color tbstuff))}]
            (tb/assemble-bar-parts tbstuff fields))]))
 
+(defn display-warn-off [id]
+  [:div "Scary!"])
+
 (defn thing-displayer [things & {:keys [trim]}]
   (let [db @(rf/subscribe [:core-db])
         short (< trim 20)
         thing-element (if short display-thing-short display-thing)]
     (into [:<>]
-          (for [{:keys [id type hide-author]} things]
-            (case type
+          (for [{:keys [id type hide-author warn-off]} things]
+            (if warn-off
+              [display-warn-off id]
+              (case type
               :rooturl
               [thing-element
                (tb/root-tb-stuff id db)
@@ -62,7 +68,20 @@
               :author
               [thing-element
                (tb/author-tb-stuff id db)
-               :fields [:author-long]])))))
+               :fields [:author-long]]))
+            ))))
+
+(defn thing-visibility-wrapper [things & {:keys [trim]}]
+  (let [v @(rf/subscribe [:visibility])
+        things
+        (for [{:keys [id] :as thing} things
+              ;;FIXME: What is best policy on absent visibility data?
+              :let [{:keys [warn-off list-display]} (get id v)]
+              :when (not (#{:faded :text-title} list-display))]
+          (if warn-off
+            (assoc thing :warn-off warn-off)
+            thing))]
+    [thing-displayer things :trim trim]))
 
 (defn current-things [spec]
   (let [{:keys [filter things1 ::stack/stack things2]} spec]
@@ -72,7 +91,7 @@
 
 (defn thing-lister [key]
   (let [spec @(rf/subscribe [:thing-lister key])]
-    [thing-displayer (current-things spec) :trim (:trim spec)]))
+    [thing-visibility-wrapper (current-things spec) :trim (:trim spec)]))
 
 (defn process-things [things]
   (map #(update %1 :type keyword) things))

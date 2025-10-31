@@ -191,3 +191,8 @@ throw the discussion tree out of whack.")
                           (map #(apply vector %1) (partition 2 flag)))])))
 
 (def flaglist (map second flag-src))
+
+(def other-flags [:negative-inflammatory :negative-language-warning :negative-disturbing
+                  :negative-logical-fallacy :negative-out-of-bounds :positive-funny
+                  :positive-interesting :custodial-redundant :custodial-out-of-date
+                  :custodial-flag-abuse :custodial-offtopic :custodial-arcane])

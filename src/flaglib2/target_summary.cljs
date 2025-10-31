@@ -116,17 +116,12 @@
       word)]))
 
 (defn display-other-flags [targetid & {:keys [hide-inactive]}]
-  (let [warstats @(rf/subscribe [:warstats-store targetid])
-        flags
-        [:negative-inflammatory :negative-language-warning :negative-disturbing
-         :negative-logical-fallacy :negative-out-of-bounds :positive-funny
-         :positive-interesting :custodial-redundant :custodial-out-of-date
-         :custodial-flag-abuse :custodial-offtopic :custodial-arcane]]
+  (let [warstats @(rf/subscribe [:warstats-store targetid])]
     [:div [:h3 "Flags"]
      (when warstats
        (into [:div
              {:class "grid gap-1 grid-cols-2 sm:grid-cols-1 text-xs sm:text-sm"}]
-            (for [flag flags
+            (for [flag flags/other-flags
                   :let [flinfo (flags/flags flag)]
                   :when (not (and hide-inactive (not (warstats flag))))]
               [:div
