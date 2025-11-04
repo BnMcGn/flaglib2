@@ -8,6 +8,7 @@
    [flaglib2.ipfs :as ipfs]
    [flaglib2.stacker :as stack]
    [flaglib2.visibility :as vis]
+   [flaglib2.deco :as deco]
    [flaglib2.titlebar :as tb]))
 
 (defn display-thing [tbstuff & {:keys [fields]}]
@@ -71,17 +72,49 @@
                :fields [:author-long]]))
             ))))
 
+(defn hidden-things [things]
+  (when-not (empty? things)
+    (let [vis @(rf/subscribe [:visibility])
+          thing-causes (map #(get-in vis [(:id %) :list-display]) things)
+          mech (count (filter (partial = :mechanical) thing-causes))
+          tt (count (filter (partial = :text-title) thing-causes))
+          faded (count (filter (partial = :faded) thing-causes))]
+      ;;FIXME: add controls for override, perhaps only for logged-in
+      (deco/casual-note-heading
+       (str
+        "Opinions not shown: "
+        (when-not (zero? faded)
+          (str faded " below threshold "))
+        (when-not (zero? mech)
+          (str mech " non content "))
+        (when-not (zero? tt)
+          (str tt " text/title thread"))))
+      [:div
+       ])))
+
+(defn- split-things [things vis]
+  (loop [things things
+         shown []
+         hidden []]
+    (if (empty? things)
+      [shown hidden]
+      (let [itm (first things)
+            id (:id itm)
+            {:keys [warn-off list-display]} (get id vis)]
+        (if (#{:faded :text-title :mechanical} list-display)
+          (recur (rest things) shown (conj hidden itm))
+          (recur (rest things)
+                 (conj shown
+                       (if warn-off
+                         (assoc itm :warn-off warn-off)
+                         itm))
+                 hidden))))))
+
 (defn thing-visibility-wrapper [things & {:keys [trim]}]
   (let [v @(rf/subscribe [:visibility])
-        things
-        (for [{:keys [id] :as thing} things
-              ;;FIXME: What is best policy on absent visibility data?
-              :let [{:keys [warn-off list-display]} (get id v)]
-              :when (not (#{:faded :text-title} list-display))]
-          (if warn-off
-            (assoc thing :warn-off warn-off)
-            thing))]
-    [thing-displayer things :trim trim]))
+        [things hidden] (split-things things v)]
+    [thing-displayer things :trim trim]
+    [hidden-things hidden]))
 
 (defn current-things [spec]
   (let [{:keys [filter things1 ::stack/stack things2]} spec]
