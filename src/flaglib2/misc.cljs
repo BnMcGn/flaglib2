@@ -319,6 +319,21 @@
   []
   @re-frame.db/app-db)
 
+(defn iid-search [frag]
+  (filter #(string/includes? % frag) (keys (:opinion-store (reframe-db)))))
+
+(defn sid [frag]
+  (let [iids (iid-search frag)]
+    (when (= 1 (count iids))
+      (set! (. js/window -sid)
+            (into {:iid (first iids)}
+                  (for [x '(:opinion-store :warstats-store :refd :title-store
+                                           :references :visibility)
+                        :let [itm (get-in (reframe-db) [x (first iids)])]
+                        :when itm]
+                    [x itm]))))
+    iids))
+
 (defn fake-event [evt db]
   (let [ename (first evt)
         entry (re-frame.registrar/get-handler :event ename)
