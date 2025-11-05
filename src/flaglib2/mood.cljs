@@ -94,24 +94,28 @@
         {:keys [x-right x-wrong x-up x-down]} warstats
         goodcount (+ goodness x-right x-up)
         badcount (+ badness x-wrong x-down)
+        restricted? (fn []
+                      (let [{:keys [negative-spam negative-disturbing negative-out-of-bounds]}
+                            flags]
+                        (misc/significant-majority-of? (+ negative-spam
+                                                          negative-disturbing
+                                                          negative-out-of-bounds)
+                                                       badcount)))
         refd (and key db (get-in db [:refd key]))]
     (cond
       (misc/significant-majority? goodcount badcount)
       (if (empty? refd) :positive :significant)
-      (misc/significant-majority? badcount goodcount) :negative
+      (misc/significant-majority? badcount goodcount)
+      (if (restricted?) :restricted :negative)
       (< 0 (+ goodcount badcount))
       (cond
         ;;Is the badcount coming (mostly) from flags?
         (misc/significant-majority-of? badness badcount)
-        (let [{:keys [negative-spam negative-inflammatory negative-language-warning
-                      negative-disturbing negative-out-of-bounds custodial-redundant
+        (let [{:keys [negative-inflammatory negative-language-warning custodial-redundant
                       custodial-out-of-date custodial-retraction custodial-flag-abuse
                       custodial-arcane custodial-offtopic]} flags]
           (cond
-            (misc/significant-majority-of? (+ negative-spam
-                                              negative-disturbing
-                                              negative-out-of-bounds)
-                                           badcount) :restricted
+            (restricted?) :restricted
             (misc/significant-majority-of? (+ custodial-redundant
                                               custodial-out-of-date
                                               custodial-retraction

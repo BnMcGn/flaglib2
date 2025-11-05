@@ -88,9 +88,7 @@
         (when-not (zero? mech)
           (str mech " non content "))
         (when-not (zero? tt)
-          (str tt " text/title thread"))))
-      [:div
-       ])))
+          (str tt " text/title thread")))))))
 
 (defn- split-things [things vis]
   (loop [things things
@@ -100,7 +98,7 @@
       [shown hidden]
       (let [itm (first things)
             id (:id itm)
-            {:keys [warn-off list-display]} (get id vis)]
+            {:keys [warn-off list-display]} (get vis id)]
         (if (#{:faded :text-title :mechanical} list-display)
           (recur (rest things) shown (conj hidden itm))
           (recur (rest things)
@@ -113,8 +111,9 @@
 (defn thing-visibility-wrapper [things & {:keys [trim]}]
   (let [v @(rf/subscribe [:visibility])
         [things hidden] (split-things things v)]
-    [thing-displayer things :trim trim]
-    [hidden-things hidden]))
+    [:div
+     [thing-displayer things :trim trim]
+     [hidden-things hidden]]))
 
 (defn current-things [spec]
   (let [{:keys [filter things1 ::stack/stack things2]} spec]
