@@ -5,6 +5,7 @@
    [re-com-tailwind.core :as rc]
 
    [flaglib2.misc :as misc]
+   [flaglib2.flags :as flags]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.stacker :as stack]
    [flaglib2.visibility :as vis]
@@ -29,7 +30,19 @@
            (tb/assemble-bar-parts tbstuff fields))]))
 
 (defn display-warn-off [id]
-  [:div "Scary!"])
+  (let [vis @(rf/subscribe [:visibility id])
+        flag (first (first (:warn-off vis)))
+        flagfo (get flags/flags flag)
+        color (:color flagfo)]
+    [:a {:href (if (misc/iid? id)
+                 (misc/make-opinion-url {:iid id})
+                 (misc/make-target-url id))}
+     [:h3
+      {:style (merge (deco/warn-off-stripes flag)
+                     {:color "white"
+                      :border-color color})
+       :class "border-[3px] pl-6"}
+      (:label flagfo)]]))
 
 (defn thing-displayer [things & {:keys [trim]}]
   (let [db @(rf/subscribe [:core-db])

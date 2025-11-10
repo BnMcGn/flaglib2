@@ -395,7 +395,7 @@
                     #_[tb/reply-link :target (:iid opinion) :excerpt @excerpt :offset @offset]])
             main-style
             (if
-                small
+              small
               {:width "100%"}
               {:margin-left (deco/thread-opinion-indent (dec (count tree-address)))
                :width "80%"})]
