@@ -37,10 +37,10 @@
     [:a {:href (if (misc/iid? id)
                  (misc/make-opinion-url {:iid id})
                  (misc/make-target-url id))}
-     [:h3
+     [:h4
       {:style (merge (deco/warn-off-stripes flag)
                      {:color "white"
-                      :border-color color})
+                      :border-color "#444"})
        :class "border-[3px] pl-6"}
       (:label flagfo)]]))
 
