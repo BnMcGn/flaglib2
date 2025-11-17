@@ -167,6 +167,28 @@
    (let [subtree (misc/get-sub-tree db [nil key])]
      (filter #(misc/opinion-not-tt? (get-in db [:opinion-store (first %1)])) subtree))))
 
+(rf/reg-sub
+ :visible-tree
+ :<-[:core-db]
+ :<-[:visibility]
+ (fn [[db vis] [_ key]]
+   (let [subtree (misc/get-sub-tree db [nil key])]
+     (defun visible? [itm]
+       (let [v (get vis itm)]
+         (= :show (:list-display v))))
+     (walk/postwalk (fn [x] (if (string? x) (if (visible? x) x nil) x)) subtree))))
+
+(rf/reg-sub
+ :invisible-tree
+ :<-[:core-db]
+ :<-[:visibility]
+ (fn [[db vis] [_ key]]
+   (let [subtree (misc/get-sub-tree db [nil key])]
+     (defun visible? [itm]
+       (let [v (get vis itm)]
+         (= :show (:list-display v))))
+     (walk/postwalk (fn [x] (if (string? x) (if (visible? x) nil x) x)) subtree))))
+
 (defn target-decision [{:keys [warstats-store text-store text-status]} target]
   (let [text (get text-store target)
         status (get text-status target)

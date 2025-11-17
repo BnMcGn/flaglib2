@@ -5,7 +5,8 @@
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
-   [flaglib2.flags :as flags]))
+   [flaglib2.flags :as flags]
+   [flaglib2.deco :as deco]))
 
 ;; Mechanical: opinions that should optionally be omitted from some displays, such as lists,
 ;; because they don't have content. Votes, dircs, etc.
@@ -88,18 +89,47 @@
 ;; - usernames/avatars
 ;; - article texts (copyright)
 
+;; Find out if an ancestor has caused this portion of tree to be in a sidelined state
+(defn- sidelineage [vstore tree-address]
+  (loop [parents (reverse (butlast tree-address))]
+    (when-not (empty? parents)
+      (let [curr (first parents)
+            vis (get vstore curr)]
+        (if (= :sidelined (get vis :word))
+          curr
+          (recur (rest parents)))))))
+
+(defn update-ancestral-info [opinion-store visibility-store iid]
+  (if (misc/iid? iid)
+    (let [opinion (get opinion-store iid)
+          vis (get visibility-store iid)
+          ta (:tree-address opinion)]
+      (if (and vis ta)
+        (let [parid (:target opinion)
+              parvis (get visibility-store parid)
+              slin (sidelineage visibility-store ta)]
+          (cond-> vis
+            true (assoc :parent-list-display (:list-display parvis))
+            slin (assoc :sidelined-by slin)))
+        vis))
+    (get visibility-store iid)))
+
 (rf/reg-flow
  {:id :visibility
   :inputs {:wstore [:warstats-store]
            :ostore [:opinion-store]}
   :output
   (fn [{:keys [wstore ostore]}]
-    (let [db {:opinion-store ostore :warstats-store wstore}]
+    (let [db {:opinion-store ostore :warstats-store wstore}
+          vis (into {}
+                    (for [id (keys wstore)]
+                      [id
+                       {:list-display (list-display-policy db id)
+                        :warn-off (list-item-display-policy db id)
+                        :word (mood/in-a-word (get wstore id) :key id :db db)}]))]
       (into {}
-            (for [id (keys wstore)]
-              [id
-               {:list-display (list-display-policy db id)
-                :warn-off (list-item-display-policy db id)}]))))
+            (for [id (keys vis)]
+              [id (update-ancestral-info ostore vis id)]))))
   :path [:visibility]})
 
 (rf/reg-sub
@@ -108,3 +138,19 @@
    (if key
      (get-in db [:visibility key])
      (:visibility db))))
+
+
+(defn line-warn-off [id]
+  (let [vis @(rf/subscribe [:visibility id])
+        flag (first (first (:warn-off vis)))
+        flagfo (get flags/flags flag)
+        color (:color flagfo)]
+    [:a {:href (if (misc/iid? id)
+                 (misc/make-opinion-url {:iid id})
+                 (misc/make-target-url id))}
+     [:h4
+      {:style (merge (deco/warn-off-stripes flag)
+                     {:color "white"
+                      :border-color "#444"})
+       :class "border-[3px] pl-6"}
+      (:label flagfo)]]))

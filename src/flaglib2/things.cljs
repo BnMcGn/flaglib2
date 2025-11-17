@@ -29,21 +29,6 @@
     [:div (into [:span {:class (misc/class-string (:bg-color tbstuff))}]
            (tb/assemble-bar-parts tbstuff fields))]))
 
-(defn display-warn-off [id]
-  (let [vis @(rf/subscribe [:visibility id])
-        flag (first (first (:warn-off vis)))
-        flagfo (get flags/flags flag)
-        color (:color flagfo)]
-    [:a {:href (if (misc/iid? id)
-                 (misc/make-opinion-url {:iid id})
-                 (misc/make-target-url id))}
-     [:h4
-      {:style (merge (deco/warn-off-stripes flag)
-                     {:color "white"
-                      :border-color "#444"})
-       :class "border-[3px] pl-6"}
-      (:label flagfo)]]))
-
 (defn thing-displayer [things & {:keys [trim]}]
   (let [db @(rf/subscribe [:core-db])
         short (< trim 20)
@@ -51,7 +36,7 @@
     (into [:<>]
           (for [{:keys [id type hide-author warn-off]} things]
             (if warn-off
-              [display-warn-off id]
+              [vis/line-warn-off id]
               (case type
               :rooturl
               [thing-element
