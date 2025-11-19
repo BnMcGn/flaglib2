@@ -78,14 +78,16 @@
       [text-missing-report])))
 
 (defn target-root-thread [& {:keys [rooturl]}]
-  (let [optree @(rf/subscribe [:normal-tree rooturl])]
+  (let [optree @(rf/subscribe [:visible-tree rooturl])
+        offtree @(rf/subscribe [:invisible-tree rooturl])]
     [:div
      [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
      (when optree
        (into [:<>]
              (map (fn [opid]
-                    [disp/thread-opinion :opid opid])
-                  (flatten optree))))]))
+                    [vis/thread-opinion-selector opid])
+                  (keep identity (flatten optree)))))
+     [vis/hidden-items (keep identity (flatten offtree))]]))
 
 ;;FIXME: Add title excerpt support
 ;;FIXME: Display original title, maybe text?

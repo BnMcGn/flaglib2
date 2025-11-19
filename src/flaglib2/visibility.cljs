@@ -2,11 +2,15 @@
   (:require
    [cljs-time.core :as tm]
    [re-frame.alpha :as rf]
+   [clojure.string :as string]
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
-   [flaglib2.deco :as deco]))
+   [flaglib2.deco :as deco]
+
+   ;;FIXME: don't like this dependency
+   [flaglib2.displayables :as disp]))
 
 ;; Mechanical: opinions that should optionally be omitted from some displays, such as lists,
 ;; because they don't have content. Votes, dircs, etc.
@@ -139,6 +143,10 @@
      (get-in db [:visibility key])
      (:visibility db))))
 
+(defn warn-off-style [flag]
+  (merge (deco/warn-off-stripes flag)
+         {:color "white"
+          :border-color "#444"}))
 
 (defn line-warn-off [id]
   (let [vis @(rf/subscribe [:visibility id])
@@ -149,8 +157,47 @@
                  (misc/make-opinion-url {:iid id})
                  (misc/make-target-url id))}
      [:h4
-      {:style (merge (deco/warn-off-stripes flag)
-                     {:color "white"
-                      :border-color "#444"})
+      {:style (warn-off-style flag)
        :class "border-[3px] pl-6"}
       (:label flagfo)]]))
+
+(defn thread-opinion-warn-off [& {:keys [opid] :as params}]
+  (let [vis @(rf/subscribe [:visibility opid])
+        warnoffs (:warn-off vis)
+        _ (when (empty? warnoffs)
+            (throw (js/Error. "No warn-offs! Why are we here?")))
+        color (:color (get flags/flags (first (first warnoffs))))]
+    (into [disp/thread-opinion
+           :body-style (warn-off-style (first (first warnoffs)))
+           :body
+           [:h4
+            (str "Not displayed because: "
+                 (string/join (map (fn [[flag effect]]
+                                     (get-in flags/flags [flag :label]))
+                                   warnoffs)))]]
+          (mapcat vector params))))
+
+(defn thread-opinion-selector [iid]
+  (let [vis @(rf/subscribe [:visibility iid])]
+    (when vis
+      (if (empty? (:warn-off vis))
+                  [disp/thread-opinion :opid iid]
+                  [thread-opinion-warn-off :opid iid]))))
+
+(defn hidden-items [items]
+  (when-not (empty? items)
+    (let [vis @(rf/subscribe [:visibility])
+          causes (map #(get-in vis [(:id %) :list-display]) items)
+          mech (count (filter (partial = :mechanical) causes))
+          tt (count (filter (partial = :text-title) causes))
+          faded (count (filter (partial = :faded) causes))]
+      ;;FIXME: add controls for override, perhaps only for logged-in
+      (deco/casual-note-heading
+       (str
+        "Opinions not shown: "
+        (when-not (zero? faded)
+          (str faded " below threshold "))
+        (when-not (zero? mech)
+          (str mech " non content "))
+        (when-not (zero? tt)
+          (str tt " text/title thread")))))))

@@ -173,7 +173,7 @@
  :<-[:visibility]
  (fn [[db vis] [_ key]]
    (let [subtree (misc/get-sub-tree db [nil key])]
-     (defun visible? [itm]
+     (defn visible? [itm]
        (let [v (get vis itm)]
          (= :show (:list-display v))))
      (walk/postwalk (fn [x] (if (string? x) (if (visible? x) x nil) x)) subtree))))
@@ -184,7 +184,7 @@
  :<-[:visibility]
  (fn [[db vis] [_ key]]
    (let [subtree (misc/get-sub-tree db [nil key])]
-     (defun visible? [itm]
+     (defn visible? [itm]
        (let [v (get vis itm)]
          (= :show (:list-display v))))
      (walk/postwalk (fn [x] (if (string? x) (if (visible? x) nil x) x)) subtree))))

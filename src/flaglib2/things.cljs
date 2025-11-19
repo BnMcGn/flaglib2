@@ -71,22 +71,7 @@
             ))))
 
 (defn hidden-things [things]
-  (when-not (empty? things)
-    (let [vis @(rf/subscribe [:visibility])
-          thing-causes (map #(get-in vis [(:id %) :list-display]) things)
-          mech (count (filter (partial = :mechanical) thing-causes))
-          tt (count (filter (partial = :text-title) thing-causes))
-          faded (count (filter (partial = :faded) thing-causes))]
-      ;;FIXME: add controls for override, perhaps only for logged-in
-      (deco/casual-note-heading
-       (str
-        "Opinions not shown: "
-        (when-not (zero? faded)
-          (str faded " below threshold "))
-        (when-not (zero? mech)
-          (str mech " non content "))
-        (when-not (zero? tt)
-          (str tt " text/title thread")))))))
+  [vis/hidden-items (map :id things)])
 
 (defn- split-things [things vis]
   (loop [things things

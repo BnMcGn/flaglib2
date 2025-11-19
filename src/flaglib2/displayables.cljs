@@ -366,7 +366,9 @@
      (when (:reference opinion) [reference opinion])
      (when (:question warstats) [question-info opid])]))
 
-(defn thread-opinion [& {:keys [opid text children no-tree-address substitutes style]}]
+;;FIXME: adjust nomenclature for various style and body inserts
+(defn thread-opinion [& {:keys [opid text children no-tree-address substitutes style
+                                body-style body]}]
   (let
       [opinion @(rf/subscribe [:opinion-store opid])
        warstats @(rf/subscribe [:warstats-store opid])]
@@ -416,7 +418,9 @@
          :body
          [:<>
           [:div
-           {:class "m-4 mt-1"}
+           {:class "m-4 mt-1"
+            :style body-style}
+           (into [:<>] body)
            ;; {:overflow "overlay"} ??
            (when (excerpts/has-excerpt? opinion)
              [thread-excerpt :opinionid opid :text text])
