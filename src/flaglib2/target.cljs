@@ -11,6 +11,7 @@
    [flaglib2.ipfs :as ipfs]
    [flaglib2.deco :as deco]
    [flaglib2.displayables :as disp]
+   [flaglib2.visibility :as vis]
 
    [flaglib2.target-summary :as tsum]
    [flaglib2.titlebar :as tb]))

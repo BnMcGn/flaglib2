@@ -175,7 +175,7 @@
                  (string/join (map (fn [[flag effect]]
                                      (get-in flags/flags [flag :label]))
                                    warnoffs)))]]
-          (mapcat vector params))))
+          cat params)))
 
 (defn thread-opinion-selector [iid]
   (let [vis @(rf/subscribe [:visibility iid])]

@@ -2,6 +2,7 @@
   (:require
    [goog.dom :as gdom]
    [goog.object :as go]
+   [cljs-time.core :as time]
 
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]
@@ -18,6 +19,7 @@
    [flaglib2.posters :as posters]
    [flaglib2.grouped :as grouped]
    [flaglib2.mock-make :as mock]
+   [flaglib2.mock-vis :as mockvis]
    [flaglib2.stacker :as stacker]
    [flaglib2.things :as things]
    [flaglib2.hixer :as hixer]
@@ -25,7 +27,6 @@
    [flaglib2.userfig :as userfig]
    [flaglib2.visibility :as vis]
    [cljs.reader]))
-
 
 (defn window-size []
   (let [size (. js/window -innerWidth)]
@@ -51,9 +52,15 @@
       :hiccup-store {}
       :window-size (window-size)
       :ipns-host (go/get js/window "IPNSHOST")
-      }
+      :long-enough? false}
      (posters/init))
     :fx [[:dispatch [:initialize-local-store]]]}))
+
+;;Start displaying certain notices
+(rf/reg-event-db
+ :long-enough
+ (fn [db [_ val]]
+   (assoc db :long-enough? val)))
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
