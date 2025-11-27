@@ -8,6 +8,7 @@
    [flaglib2.flags :as flags]
    [flaglib2.ipfs :as ipfs]
    [flaglib2.stacker :as stack]
+   [flaglib2.displayables :as disp]
    [flaglib2.visibility :as vis]
    [flaglib2.deco :as deco]
    [flaglib2.titlebar :as tb]))
@@ -71,7 +72,7 @@
             ))))
 
 (defn hidden-things [things]
-  [vis/hidden-items (map :id things)])
+  [disp/hidden-items (map :id things)])
 
 (defn- split-things [things vis]
   (loop [things things

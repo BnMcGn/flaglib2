@@ -86,9 +86,9 @@
      (when optree
        (into [:<>]
              (map (fn [opid]
-                    [vis/thread-opinion-selector opid])
+                    [disp/thread-opinion-selector opid])
                   (keep identity (flatten optree)))))
-     [vis/hidden-items (keep identity (flatten offtree))]]))
+     [disp/hidden-items (keep identity (flatten offtree))]]))
 
 ;;FIXME: Add title excerpt support
 ;;FIXME: Display original title, maybe text?

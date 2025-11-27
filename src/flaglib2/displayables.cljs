@@ -3,15 +3,18 @@
    [re-frame.alpha :as rf]
    [reagent.core :as r]
    [clojure.set :as set]
+   [clojure.string :as string]
 
    [cljsjs.rangy-textrange]
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
+   [flaglib2.flags :as flags]
    [flaglib2.excerpts :as excerpts]
    [flaglib2.hilited :as hi]
    [flaglib2.titlebar :as tb]
+   [flaglib2.visibility :as vis]
    [re-com-tailwind.core :as rc]))
 
 (def rangy js/rangy)
@@ -454,4 +457,51 @@
                (str "opinion by " (:authorname opinion))
                "unknown opinion")]
     [:span text]))
+
+
+;; Visibility widgets and stuff
+
+(defn thread-opinion-warn-off [& {:keys [opid] :as params}]
+  (let [vis @(rf/subscribe [:visibility opid])
+        warnoffs (:warn-off vis)
+        _ (when (empty? warnoffs)
+            (throw (js/Error. "No warn-offs! Why are we here?")))
+        color (:color (get flags/flags (first (first warnoffs))))]
+    (into [thread-opinion
+           :body-style (assoc (vis/warn-off-style (first (first warnoffs)))
+                              :margin "0px"
+                              :padding "1rem")
+           :hidden-text true
+           :body
+           [:h4 {:style {:position "absolute"}}
+            (str "Not displayed because: "
+                 (string/join " " (map (fn [[flag effect]]
+                                         (get-in flags/flags [flag :label]))
+                                       warnoffs)))]]
+          cat params)))
+
+(defn thread-opinion-selector [iid]
+  (let [vis @(rf/subscribe [:visibility iid])]
+    (when vis
+      (if (empty? (:warn-off vis))
+                  [thread-opinion :opid iid]
+                  [thread-opinion-warn-off :opid iid]))))
+
+(defn hidden-items [items]
+  (when-not (empty? items)
+    (let [vis @(rf/subscribe [:visibility])
+          causes (map #(get-in vis [% :list-display]) items)
+          mech (count (filter (partial = :mechanical) causes))
+          tt (count (filter (partial = :text-title) causes))
+          faded (count (filter (partial = :faded) causes))]
+      ;;FIXME: add controls for override, perhaps only for logged-in
+      (deco/casual-note-heading
+       (str
+        "Opinions not shown: "
+        (when-not (zero? faded)
+          (str faded " below threshold "))
+        (when-not (zero? mech)
+          (str mech " non content "))
+        (when-not (zero? tt)
+          (str tt " text/title thread")))))))
 

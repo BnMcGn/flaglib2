@@ -8,9 +8,7 @@
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
    [flaglib2.deco :as deco]
-
-   ;;FIXME: don't like this dependency
-   [flaglib2.displayables :as disp]))
+   ))
 
 ;; Mechanical: opinions that should optionally be omitted from some displays, such as lists,
 ;; because they don't have content. Votes, dircs, etc.
@@ -148,6 +146,7 @@
          {:color "white"
           :border-color "#444"}))
 
+;;FIXME: Move to things?
 (defn line-warn-off [id]
   (let [vis @(rf/subscribe [:visibility id])
         flag (first (first (:warn-off vis)))
@@ -161,46 +160,3 @@
        :class "border-[3px] pl-6"}
       (:label flagfo)]]))
 
-(defn thread-opinion-warn-off [& {:keys [opid] :as params}]
-  (let [vis @(rf/subscribe [:visibility opid])
-        warnoffs (:warn-off vis)
-        _ (when (empty? warnoffs)
-            (throw (js/Error. "No warn-offs! Why are we here?")))
-        color (:color (get flags/flags (first (first warnoffs))))]
-    (into [disp/thread-opinion
-           :body-style (assoc (warn-off-style (first (first warnoffs)))
-                              :margin "0px"
-                              :padding "1rem")
-           :hidden-text true
-           :body
-           [:h4 {:style {:position "absolute"}}
-            (str "Not displayed because: "
-                 (string/join " " (map (fn [[flag effect]]
-                                         (get-in flags/flags [flag :label]))
-                                       warnoffs)))]]
-          cat params)))
-
-(defn thread-opinion-selector [iid]
-  (let [vis @(rf/subscribe [:visibility iid])]
-    (when vis
-      (if (empty? (:warn-off vis))
-                  [disp/thread-opinion :opid iid]
-                  [thread-opinion-warn-off :opid iid]))))
-
-(defn hidden-items [items]
-  (when-not (empty? items)
-    (let [vis @(rf/subscribe [:visibility])
-          causes (map #(get-in vis [% :list-display]) items)
-          mech (count (filter (partial = :mechanical) causes))
-          tt (count (filter (partial = :text-title) causes))
-          faded (count (filter (partial = :faded) causes))]
-      ;;FIXME: add controls for override, perhaps only for logged-in
-      (deco/casual-note-heading
-       (str
-        "Opinions not shown: "
-        (when-not (zero? faded)
-          (str faded " below threshold "))
-        (when-not (zero? mech)
-          (str mech " non content "))
-        (when-not (zero? tt)
-          (str tt " text/title thread")))))))
