@@ -179,7 +179,7 @@
 
 (defn hilited-text [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
-                        excerpt offset grey?]}]
+                        excerpt offset grey? hidden]}]
   [hi/hilited-text-core
    :text-key text-key
    :text text
@@ -190,6 +190,7 @@
    :excerpt excerpt
    :offset offset
    :grey? grey?
+   :hidden hidden
    :sub-opin-component sub-opinion-list])
 
 (defn quote-icon [& {:keys [found style]}]
@@ -368,7 +369,7 @@
 
 ;;FIXME: adjust nomenclature for various style and body inserts
 (defn thread-opinion [& {:keys [opid text children no-tree-address substitutes style
-                                body-style body]}]
+                                body-style body hidden-text]}]
   (let
       [opinion @(rf/subscribe [:opinion-store opid])
        warstats @(rf/subscribe [:warstats-store opid])]
@@ -420,7 +421,7 @@
           [:div
            {:class "m-4 mt-1"
             :style body-style}
-           (into [:<>] body)
+           body
            ;; {:overflow "overlay"} ??
            (when (excerpts/has-excerpt? opinion)
              [thread-excerpt :opinionid opid :text text])
@@ -429,6 +430,7 @@
               :text (:clean-comment opinion)
               :tree-address tree-address
               :focus nil
+              :hidden hidden-text
               :disable-popup? true
               ;;FIXME: Have we lost reply links?
               :excerpt nil

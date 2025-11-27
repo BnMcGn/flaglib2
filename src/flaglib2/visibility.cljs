@@ -168,13 +168,16 @@
             (throw (js/Error. "No warn-offs! Why are we here?")))
         color (:color (get flags/flags (first (first warnoffs))))]
     (into [disp/thread-opinion
-           :body-style (warn-off-style (first (first warnoffs)))
+           :body-style (assoc (warn-off-style (first (first warnoffs)))
+                              :margin "0px"
+                              :padding "1rem")
+           :hidden-text true
            :body
-           [:h4
+           [:h4 {:style {:position "absolute"}}
             (str "Not displayed because: "
-                 (string/join (map (fn [[flag effect]]
-                                     (get-in flags/flags [flag :label]))
-                                   warnoffs)))]]
+                 (string/join " " (map (fn [[flag effect]]
+                                         (get-in flags/flags [flag :label]))
+                                       warnoffs)))]]
           cat params)))
 
 (defn thread-opinion-selector [iid]
@@ -187,7 +190,7 @@
 (defn hidden-items [items]
   (when-not (empty? items)
     (let [vis @(rf/subscribe [:visibility])
-          causes (map #(get-in vis [(:id %) :list-display]) items)
+          causes (map #(get-in vis [% :list-display]) items)
           mech (count (filter (partial = :mechanical) causes))
           tt (count (filter (partial = :text-title) causes))
           faded (count (filter (partial = :faded) causes))]

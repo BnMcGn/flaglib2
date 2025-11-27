@@ -171,7 +171,7 @@
 
 (defn hilited-text-core [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
-                        excerpt offset grey? sub-opin-component]}]
+                        excerpt offset grey? sub-opin-component hidden]}]
   (let [key (or root-target-url (last tree-address))
         text-key (or text-key key)
         text (or text @(rf/subscribe [:proper-text text-key]))
@@ -197,7 +197,9 @@
     (if text
       (into [:div
              {:class "hilited" ;Don't remove. Needed for finding selection.
-              :style (when grey? {:background-color "#ccc"})
+              :style (cond-> {}
+                       grey? (assoc :background-color "#ccc")
+                       hidden (assoc :visibility "hidden"))
               :id id
               :on-click #(.stopPropagation %)
               :on-mouse-up selection-change
