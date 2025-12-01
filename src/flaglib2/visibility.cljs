@@ -71,9 +71,10 @@
                    :negative-disturbing 1.0
                    :negative-out-of-bounds 1.0})
 
-(defn warn-off? [flagset concealables]
+(defn warn-off? [flagset]
   (sort-by second >
            (for [[flag effect] (seq flagset)
+                 ;;FIXME: Concealables should be externally adjustable
                  :let [mult (get concealables flag)]
                  :when mult]
              [flag (* mult effect)])))
@@ -83,7 +84,7 @@
   (let [warstats (get-in db [:warstats-store id])
         word (mood/in-a-word warstats)]
     (when (#{:restricted :contested} word)
-      (warn-off? warstats concealables))))
+      (warn-off? warstats))))
 
 
 ;; Other categories where policies/warn-offs will be needed:

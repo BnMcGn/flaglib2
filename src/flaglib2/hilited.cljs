@@ -9,6 +9,7 @@
    [flaglib2.mood :as mood]
    [flaglib2.deco :as deco]
    [flaglib2.excerpts :as excerpts]
+   [flaglib2.visibility :as vis]
    [flaglib2.subscriptions :as subs]
    [re-com-tailwind.core :as rc]))
 
@@ -73,11 +74,34 @@
  (fn [db _]
    (assoc db ::active-popup nil)))
 
+(defn- hilited-segment-popover [& {:keys [id textspan popup-body]}]
+  (let [popup-visible? @(rf/subscribe [:popup-is-active? id])]
+    [rc/popover-anchor-wrapper
+     :showing? popup-visible?
+     :position :below-left
+     :style {:display "inline"}
+
+     :parts {:point-wrapper {:style {:display "inline"}}}
+     :anchor
+     textspan
+     :popover
+     [rc/popover-content-wrapper
+      :parts {:border
+              {:class "sm:w-[70rem]"
+               :style {:background-color "rgba(255, 255, 255, 0.7)"
+                       :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
+                       :border-radius "3px"}}}
+      :arrow-renderer deco/wf-arrow
+      :arrow-length 21
+      :body popup-body]]))
+
 (defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup? sub-opin-component]}]
-  (let [popup-visible? @(rf/subscribe [:popup-is-active? id])
-        db @(rf/subscribe [:core-db])
-        class1 "relative font-bold"
-        class2 (mood/flavor+freshness db excerpt-opinions)
+  (let [db @(rf/subscribe [:core-db])
+        warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))
+        warn? (not (empty? warns))
+        stylespec (if disable-popup?
+                    {}
+                    {:padding-top "0.14em" :padding-bottom "0.14em"})
         click-handler
         (fn []
           ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So
@@ -87,33 +111,26 @@
             (rf/dispatch [:toggle-active-popup id])
             (rf/dispatch [:reset-active-popup])))
         textspan
-        [:span
-         {:class (str class1 " " class2)
-          :style (if disable-popup?
-                   {}
-                   {:padding-top "0.14em" :padding-bottom "0.14em"})
-          :on-click (when-not disable-popup? click-handler)}
-         [segment-count (count excerpt-opinions) text]
-         (excerpts/rebreak text)]]
+        (if warn?
+          [:span
+           {:style (merge stylespec (vis/warn-off-style (first (first warns))))
+            :on-click (when-not disable-popup? click-handler)}
+           [span :style {:visibility "hidden"} (excerpts/rebreak text)]]
+          [:span
+           {:class (str "relative font-bold " (mood/flavor+freshness db excerpt-opinions))
+            :style stylespec
+            :on-click (when-not disable-popup? click-handler)}
+           [segment-count (count excerpt-opinions) text]
+           (excerpts/rebreak text)])]
     (if disable-popup?
       textspan
-      [rc/popover-anchor-wrapper
-       :showing? popup-visible?
-       :position :below-left
-       :style {:display "inline"}
-       :parts {:point-wrapper {:style {:display "inline"}}}
-       :anchor
-       textspan
-       :popover
-       [rc/popover-content-wrapper
-        :parts {:border
-                {:class "sm:w-[70rem]"
-                 :style {:background-color "rgba(255, 255, 255, 0.7)"
-                         :box-shadow "rgba(0, 0, 0, 0.3) 0px 0px 8px"
-                         :border-radius "3px"}}}
-        :arrow-renderer deco/wf-arrow
-        :arrow-length 21
-        :body [sub-opin-component excerpt-opinions :excerpt text :target id-of-text]]])))
+      [hilited-segment-popover
+       :id id
+       :textspan textspan
+       :popup-body
+       [sub-opin-component excerpt-opinions
+        :excerpt excerpt :target id-of-text :warn-off? warn?]])))
+
 
 (defn plain-segment [& {:keys [text]}]
   [:span {:class "font-normal"} (excerpts/rebreak text)])
