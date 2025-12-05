@@ -483,9 +483,10 @@
 (defn thread-opinion-selector [iid]
   (let [vis @(rf/subscribe [:visibility iid])]
     (when vis
-      (if (empty? (:warn-off vis))
-                  [thread-opinion :opid iid]
-                  [thread-opinion-warn-off :opid iid]))))
+      (if (or (empty? (:warn-off vis))
+              (:warn-off-excerpt-only vis))
+        [thread-opinion :opid iid]
+        [thread-opinion-warn-off :opid iid]))))
 
 (defn hidden-items [items]
   (when-not (empty? items)

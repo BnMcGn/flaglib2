@@ -8,6 +8,8 @@
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
    [flaglib2.deco :as deco]
+   [flaglib2.excerpts :as ex]
+   [flaglib2.subscriptions :as subs]
    ))
 
 ;; Mechanical: opinions that should optionally be omitted from some displays, such as lists,
@@ -79,12 +81,6 @@
                  :when mult]
              [flag (* mult effect)])))
 
-;This only has to handle things that are visible, but need a warn off.
-(defn list-item-display-policy [db id]
-  (let [warstats (get-in db [:warstats-store id])
-        word (mood/in-a-word warstats)]
-    (when (#{:restricted :contested} word)
-      (warn-off? warstats))))
 
 
 ;; Other categories where policies/warn-offs will be needed:
@@ -117,23 +113,60 @@
         vis))
     (get visibility-store iid)))
 
+;; Needs opinion-store and opinion-tree-store in db
+(defn concealing-opinions [db id]
+  (let [children (subs/immediate-children db id)]
+    (loop [chld children
+           normal []
+           excerpt []]
+      (if (empty? chld)
+        [normal excerpt]
+        (let [opinion (get-in db [:opinion-store (first chld)])]
+          (cond
+            (not ((:flag opinion) (into #{} (keys concealables))))
+            (recur (rest chld) normal excerpt)
+            (ex/has-excerpt? opinion)
+            (recur (rest chld) normal (conj excerpt (first chld)))
+            :else
+            (recur (rest chld) (conj normal (first chld)) excerpt)))))))
+
+(defn count-of-non-excerpt-concealing-opinion-effects [db id]
+  (let [[non-excerpt _] (concealing-opinions db id)
+        get-effect (fn [iid]
+                     (get-in db [:warstats-store iid :effect]))]
+    (reduce + (map get-effect non-excerpt))))
+
+
+;This only has to handle things that are visible, but need a warn off.
+(defn list-item-display-policy [db id]
+  (let [warstats (get-in db [:warstats-store id])
+        word (mood/in-a-word warstats)
+        warnoff (when (#{:restricted :contested} word)
+                  (warn-off? warstats))
+        nonex (count-of-non-excerpt-concealing-opinion-effects db id)]
+    (cond-> {:warn-off warnoff}
+      (and warnoff (zero? nonex))
+      (assoc :warn-off-excerpt-only true))))
+
 (rf/reg-flow
  {:id :visibility
-  :inputs {:wstore [:warstats-store]
-           :ostore [:opinion-store]}
+  :inputs {:warstats-store [:warstats-store]
+           :opinion-store [:opinion-store]
+           :opinion-tree-store [:opinion-tree-store]}
   :output
-  (fn [{:keys [wstore ostore]}]
-    (let [db {:opinion-store ostore :warstats-store wstore}
-          vis (into {}
-                    (for [id (keys wstore)]
+  (fn [db]
+    (let [vis (into {}
+                    (for [id (keys (:warstats-store db))]
                       [id
-                       {:list-display (list-display-policy db id)
-                        :warn-off (list-item-display-policy db id)
-                        :word (mood/in-a-word (get wstore id) :key id :db db)}]))]
+                       (into (list-item-display-policy db id)
+                             {:list-display (list-display-policy db id)
+                              :word (mood/in-a-word (get-in db [:warstats-store id])
+                                                    :key id :db db)})]))]
       (into {}
             (for [id (keys vis)]
-              [id (update-ancestral-info ostore vis id)]))))
+              [id (update-ancestral-info (:opinion-store db) vis id)]))))
   :path [:visibility]})
+
 
 (rf/reg-sub
  :visibility

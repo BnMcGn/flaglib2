@@ -139,12 +139,11 @@
 ;; :immediate-children now only returns non-tt opinions. Might need to fix this when
 ;; implementing title/text discussions beyond supply. YAGNI for now
 
-(rf/reg-sub
- :immediate-children
- (fn [db [_ key]]
-   (filter
-    #(misc/opinion-not-tt? (get-in db [:opinion-store %1]))
-    (map first (misc/get-sub-tree db [nil key])))))
+(defn immediate-children [db key]
+  (filter
+   #(misc/opinion-not-tt? (get-in db [:opinion-store %1]))
+   (map first (misc/get-sub-tree db [nil key]))))
+(rf/reg-sub :immediate-children :=> immediate-children)
 
 (rf/reg-sub
  :text-tree
@@ -184,10 +183,10 @@
  :<-[:visibility]
  (fn [[db vis] [_ key]]
    (let [subtree (misc/get-sub-tree db [nil key])]
-     (defn visible? [itm]
+     (defn is-visible? [itm]
        (let [v (get vis itm)]
          (= :show (:list-display v))))
-     (walk/postwalk (fn [x] (if (string? x) (if (visible? x) nil x) x)) subtree))))
+     (walk/postwalk (fn [x] (if (string? x) (if (is-visible? x) nil x) x)) subtree))))
 
 (defn target-decision [{:keys [warstats-store text-store text-status]} target]
   (let [text (get text-store target)
