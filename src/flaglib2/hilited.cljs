@@ -115,7 +115,7 @@
           [:span
            {:style (merge stylespec (vis/warn-off-style (first (first warns))))
             :on-click (when-not disable-popup? click-handler)}
-           [span :style {:visibility "hidden"} (excerpts/rebreak text)]]
+           [:span :style {:visibility "hidden"} (excerpts/rebreak text)]]
           [:span
            {:class (str "relative font-bold " (mood/flavor+freshness db excerpt-opinions))
             :style stylespec
@@ -129,7 +129,7 @@
        :textspan textspan
        :popup-body
        [sub-opin-component excerpt-opinions
-        :excerpt excerpt :target id-of-text :warn-off? warn?]])))
+        :excerpt text :target id-of-text :warn-off? warn?]])))
 
 
 (defn plain-segment [& {:keys [text]}]
