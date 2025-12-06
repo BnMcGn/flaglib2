@@ -85,10 +85,17 @@
           :flag :negative-disturbing
           :tree-address (list (tid 6) (tid 7))
           :excerpt "eeeeevil"
-          :clean-comment "This targets an excerpt")})
+          :clean-comment "This targets an excerpt")
+   (tid 8)
+   (assoc plain-opinion
+          :target (tid 1)
+          :iid (tid 8)
+          :flag :negative-out-of-bounds
+          :tree-address (list (tid 0) (tid 1) (tid 8))
+          :clean-comment "This targets an opinion")})
 
 (def opinion-tree
-  `((~(tid 0) (~(tid 1)))
+  `((~(tid 0) (~(tid 1) (~(tid 8))))
     (~(tid 2) (~(tid 3)))
     (~(tid 4) (~(tid 5)))
     (~(tid 6) (~(tid 7)))))
@@ -137,12 +144,15 @@
           :negative-disturbing 4)
    (tid 7)
    (assoc basic-warstat
-          :x-up 2)})
+          :x-up 2)
+   (tid 8)
+   basic-warstat})
 
 (def vis-lister
   {:things1
    [{:id (tid 0) :type :opinion}
     {:id (tid 1) :type :opinion}
+    {:id (tid 8) :type :opinion}
     {:id (tid 2) :type :opinion}
     {:id (tid 3) :type :opinion}
     {:id (tid 4) :type :question}

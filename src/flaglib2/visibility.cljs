@@ -115,7 +115,8 @@
 
 ;; Needs opinion-store and opinion-tree-store in db
 (defn concealing-opinions [db id]
-  (let [children (subs/immediate-children db id)]
+  (let [children (subs/immediate-children db id)
+        cflags (into #{} (keys concealables))]
     (loop [chld children
            normal []
            excerpt []]
@@ -123,7 +124,7 @@
         [normal excerpt]
         (let [opinion (get-in db [:opinion-store (first chld)])]
           (cond
-            (not ((:flag opinion) (into #{} (keys concealables))))
+            (not ((:flag opinion) cflags))
             (recur (rest chld) normal excerpt)
             (ex/has-excerpt? opinion)
             (recur (rest chld) normal (conj excerpt (first chld)))
