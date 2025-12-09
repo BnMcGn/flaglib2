@@ -115,7 +115,7 @@
           [:span
            {:style (merge stylespec (vis/warn-off-style (first (first warns))))
             :on-click (when-not disable-popup? click-handler)}
-           [:span :style {:visibility "hidden"} (excerpts/rebreak text)]]
+           [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]
           [:span
            {:class (str "relative font-bold " (mood/flavor+freshness db excerpt-opinions))
             :style stylespec
