@@ -95,10 +95,11 @@
       :arrow-length 21
       :body popup-body]]))
 
-(defn hilited-segment [& {:keys [text excerpt-opinions id-of-text id disable-popup? sub-opin-component]}]
-  (let [db @(rf/subscribe [:core-db])
-        warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))
-        warn? (not (empty? warns))
+(defn hilited-segment [key index & {:keys [disable-popup? sub-opin-component]}]
+  (let [{:keys [segment-id excerpt-opinions id-of-text text tree-address warn-off?
+                warnoffs start end]}
+        @(rf/subscribe [:segments-segment key index])
+        db @(rf/subscribe [:core-db])
         stylespec (if disable-popup?
                     {}
                     {:padding-top "0.14em" :padding-bottom "0.14em"})
@@ -108,12 +109,12 @@
           ;; check for selection. But we want to get rid of active popup in any case of a click or
           ;; drag.
           (if (empty? (.. rangy (getSelection) (toString)))
-            (rf/dispatch [:toggle-active-popup id])
+            (rf/dispatch [:toggle-active-popup segment-id])
             (rf/dispatch [:reset-active-popup])))
         textspan
-        (if warn?
+        (if warnoff?
           [:span
-           {:style (merge stylespec (vis/warn-off-style (first (first warns))))
+           {:style (merge stylespec (vis/warn-off-style (first (first warn-offs))))
             :on-click (when-not disable-popup? click-handler)}
            [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]
           [:span
@@ -121,70 +122,84 @@
             :style stylespec
             :on-click (when-not disable-popup? click-handler)}
            [segment-count (count excerpt-opinions) text]
-           (excerpts/rebreak text)])]
-    (if disable-popup?
-      textspan
-      [hilited-segment-popover
-       :id id
-       :textspan textspan
-       :popup-body
-       [sub-opin-component excerpt-opinions
-        :excerpt text :target id-of-text :warn-off? warn?]])))
+           (excerpts/rebreak text)])]))
 
-
-(defn plain-segment [& {:keys [text]}]
-  [:span {:class "font-normal"} (excerpts/rebreak text)])
+(defn plain-segment [key index]
+  (let [{:keys [text]} @(rf/subscribe [:segments-segment key index])]
+    [:span {:class "font-normal"} (excerpts/rebreak text)]))
 
 ;;FIXME: implement focus-parent stuff
 (defn parent-segment [& {:keys [text]}]
-  (let [focussed (misc/focus-parent?)
+  (let [{:keys [text]} @(rf/subscribe [:segments-segment key index])
+        focussed (misc/focus-parent?)
         bg (if focussed "bg-white" "bg-neutral-400")]
     [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(defn make-segments [key
-                     db
-                     opids
-                     & {:keys [tree-address focus root-target-url
-                               disable-popup? sub-opin-component]}]
-  (let [current-id (if (empty? tree-address) root-target-url (last tree-address))
-        ;;FIXME: This won't handle alternate texts! Recalc-text-position counts on the text
-        ;; being the one specified as proper in the database :text-store. Reengineering needed
-        ;; if we ever want to display anything else!
-        opins
-        (for [iid opids
-              :let [tpos (excerpts/recalc-text-position db iid)
-                    opinion (get-in db [:opinion-store iid])]
-              :when tpos]
-          (if (= tpos :original)
-            opinion
-            (assoc opinion :text-position tpos)))
-        ;;Should be pre-trimmed, but....
-        text (string/trim (subs/proper-text db key))
-        segpoints (excerpts/excerpt-segment-points opins (count text))
-        level (count tree-address)]
-    (into
+(rf/reg-sub
+ :segments
+ (fn [[_ key] _]
+   {:db rf/app-db
+    :opinion-ids (rf/subscribe [:immediate-children key])})
+ (fn [{:keys [db opinion-ids]} [_ key]]
+   (let [opinion (when (iid? key) (get-in db [:opinion-store key]))
+         tree-address (if opinion (:tree-address opinion) '())
+         opins
+         (for [iid opinion-ids
+               :let [tpos (excerpts/recalc-text-position db iid)
+                     opinion (get-in db [:opinion-store iid])]
+               :when tpos]
+           (if (= tpos :original)
+             opinion
+             (assoc opinion :text-position tpos)))
+         ;;Should be pre-trimmed, but....
+         text (string/trim (subs/proper-text db key))
+         segpoints (excerpts/excerpt-segment-points opins (count text))
+         level (count tree-address)]
+     (into
+      []
+      (for [[start end] (partition 2 1 segpoints)
+            :let [id (str "lvl-" level "-pos-" end)
+                  excerpt-opinions
+                  (for [opin opins
+                        :let [[ostart oend] (:text-position opin)]
+                        :when (excerpts/overlap? start (dec end) ostart
+                                                 (dec (+ ostart oend)))]
+                    (:iid opin))
+                  warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))]]
+        {:segment-type (cond (zero? (count excerpt-opinions)) :plain
+                             (misc/focus? focus tree-address) :hilited
+                             :else :parent)
+         :segment-id (str "lvl-" level "-pos-" end)
+         :excerpt-opinions excerpt-opinions
+         :text (subs text start end)
+         :id-of-text key ;Need this?
+         :tree-address tree-address
+         :warn-offs warns
+         :warn-off? (not (empty? warns))
+         :start start
+         :end end})))))
+
+(rf/reg-sub
+ :segments-segment
+ (fn [[_ key segment] _]
+   (rf/subscribe [:segments key]))
+ (fn [segments [_ _ segment]]
+   (nth segments segment)))
+
+(defn make-segments [key & {:keys [focus root-target-url disable-popup? sub-opin-component]}]
+  (let [segtypes {:plain plain-segment :parent parent-segment :hilited hilited-segment}]
+    [into
      []
-     (for [[start end] (partition 2 1 segpoints)
-           :let [id (str "lvl-" level "-pos-" end)
-                 excerpt-opinions
-                 (for [opin opins
-                       :let [[ostart oend] (:text-position opin)]
-                       :when (excerpts/overlap? start (dec end) ostart (dec (+ ostart oend)))]
-                   (:iid opin))
-                 segtype (if (zero? (count excerpt-opinions))
-                           plain-segment
-                           (if (misc/focus? focus tree-address) hilited-segment parent-segment))]]
-       [segtype
-        :excerpt-opinions excerpt-opinions
-        :id id
-        :text (subs text start end)
-        :id-of-text current-id
-        :root-target-url root-target-url
-        :disable-popup? disable-popup?
-        :tree-address tree-address
-        :focus focus
-        :last-char-pos end
-        :sub-opin-component sub-opin-component]))))
+     (map-indexed
+      (fn [index seg]
+        [(get segtypes (:segment-type seg))
+         key
+         index
+         :root-target-url root-target-url ;Need this?
+         :disable-popup? disable-popup?
+         :focus focus
+         :sub-opin-component sub-opin-component])
+      @(rf/subscribe [:segments key]))]))
 
 (defn hilited-text-core [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
@@ -193,8 +208,6 @@
         text-key (or text-key key)
         text (or text @(rf/subscribe [:proper-text text-key]))
         id (str "hilited-text-" (gensym))
-        coredb @(rf/subscribe [:core-db])
-        opids @(rf/subscribe [:immediate-children key])
         selection-change
         (fn []
           (when (and excerpt offset)
@@ -222,7 +235,7 @@
               :on-mouse-up selection-change
               :on-key-press selection-change}]
             ;;Stray whitespace can confuse location of reply to excerpt, hence the trim
-            (make-segments text-key coredb opids :tree-address tree-address :focus focus
+            (make-segments text-key :focus focus
                            :root-target-url root-target-url :disable-popup? disable-popup?
                            :sub-opin-component sub-opin-component))
       [misc/loading-indicator])))
