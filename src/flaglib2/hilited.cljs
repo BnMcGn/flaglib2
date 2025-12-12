@@ -139,7 +139,7 @@
 (rf/reg-sub
  :segments
  (fn [params]
-   (let [[_ key] (::rf/query-v params)]
+   (let [[_ key] (:re-frame/query-v params)]
      [re-frame.db/app-db
       (rf/subscribe [:immediate-children key])]))
  (fn [[db opinion-ids] [_ key]]
@@ -182,7 +182,7 @@
 (rf/reg-sub
  :segments-segment
  (fn [params]
-   (let [[_ key] (::rf/query-v params)]
+   (let [[_ key] (:re-frame/query-v params)]
      (rf/subscribe [:segments key])))
  (fn [segments [_ _ segment]]
    (nth segments segment)))
