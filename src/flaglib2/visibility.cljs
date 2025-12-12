@@ -124,6 +124,9 @@
         [normal excerpt]
         (let [opinion (get-in db [:opinion-store (first chld)])]
           (cond
+            ;;FIXME: What do we do on missing opinion? Assume it blocks everything!
+            (not opinion)
+            (recur (rest chld) (conj normal (first chld)) excerpt)
             (not ((:flag opinion) cflags))
             (recur (rest chld) normal excerpt)
             (ex/has-excerpt? opinion)

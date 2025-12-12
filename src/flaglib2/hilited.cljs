@@ -1,6 +1,7 @@
 (ns flaglib2.hilited
   (:require
    [re-frame.alpha :as rf]
+   [re-frame.db]
    [clojure.string :as string]
 
    [cljsjs.rangy-textrange]
@@ -97,7 +98,7 @@
 
 (defn hilited-segment [key index & {:keys [disable-popup? sub-opin-component]}]
   (let [{:keys [segment-id excerpt-opinions id-of-text text tree-address warn-off?
-                warnoffs start end]}
+                warn-offs start end]}
         @(rf/subscribe [:segments-segment key index])
         db @(rf/subscribe [:core-db])
         stylespec (if disable-popup?
@@ -112,7 +113,7 @@
             (rf/dispatch [:toggle-active-popup segment-id])
             (rf/dispatch [:reset-active-popup])))
         textspan
-        (if warnoff?
+        (if warn-off?
           [:span
            {:style (merge stylespec (vis/warn-off-style (first (first warn-offs))))
             :on-click (when-not disable-popup? click-handler)}
@@ -129,7 +130,7 @@
     [:span {:class "font-normal"} (excerpts/rebreak text)]))
 
 ;;FIXME: implement focus-parent stuff
-(defn parent-segment [& {:keys [text]}]
+(defn parent-segment [key index]
   (let [{:keys [text]} @(rf/subscribe [:segments-segment key index])
         focussed (misc/focus-parent?)
         bg (if focussed "bg-white" "bg-neutral-400")]
@@ -137,11 +138,12 @@
 
 (rf/reg-sub
  :segments
- (fn [[_ key] _]
-   {:db rf/app-db
-    :opinion-ids (rf/subscribe [:immediate-children key])})
- (fn [{:keys [db opinion-ids]} [_ key]]
-   (let [opinion (when (iid? key) (get-in db [:opinion-store key]))
+ (fn [params]
+   (let [[_ key] (::rf/query-v params)]
+     [re-frame.db/app-db
+      (rf/subscribe [:immediate-children key])]))
+ (fn [[db opinion-ids] [_ key]]
+   (let [opinion (when (misc/iid? key) (get-in db [:opinion-store key]))
          tree-address (if opinion (:tree-address opinion) '())
          opins
          (for [iid opinion-ids
@@ -166,9 +168,7 @@
                                                  (dec (+ ostart oend)))]
                     (:iid opin))
                   warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))]]
-        {:segment-type (cond (zero? (count excerpt-opinions)) :plain
-                             (misc/focus? focus tree-address) :hilited
-                             :else :parent)
+        {:segment-type (if (zero? (count excerpt-opinions)) :plain :hilited)
          :segment-id (str "lvl-" level "-pos-" end)
          :excerpt-opinions excerpt-opinions
          :text (subs text start end)
@@ -181,25 +181,28 @@
 
 (rf/reg-sub
  :segments-segment
- (fn [[_ key segment] _]
-   (rf/subscribe [:segments key]))
+ (fn [params]
+   (let [[_ key] (::rf/query-v params)]
+     (rf/subscribe [:segments key])))
  (fn [segments [_ _ segment]]
    (nth segments segment)))
 
 (defn make-segments [key & {:keys [focus root-target-url disable-popup? sub-opin-component]}]
-  (let [segtypes {:plain plain-segment :parent parent-segment :hilited hilited-segment}]
-    [into
-     []
-     (map-indexed
-      (fn [index seg]
-        [(get segtypes (:segment-type seg))
-         key
-         index
-         :root-target-url root-target-url ;Need this?
-         :disable-popup? disable-popup?
-         :focus focus
-         :sub-opin-component sub-opin-component])
-      @(rf/subscribe [:segments key]))]))
+  (into
+   []
+   (map-indexed
+    (fn [index seg]
+      [(case (:segment-type seg)
+         :plain plain-segment
+         :hilited (if (misc/focus? focus (:tree-address seg))
+                    hilited-segment parent-segment))
+       key
+       index
+       :root-target-url root-target-url ;Need this?
+       :disable-popup? disable-popup?
+       :focus focus
+       :sub-opin-component sub-opin-component])
+    @(rf/subscribe [:segments key]))))
 
 (defn hilited-text-core [& {:keys
                        [text-key text tree-address focus root-target-url disable-popup?
