@@ -123,7 +123,15 @@
             :style stylespec
             :on-click (when-not disable-popup? click-handler)}
            [segment-count (count excerpt-opinions) text]
-           (excerpts/rebreak text)])]))
+           (excerpts/rebreak text)])]
+    (if disable-popup?
+      textspan
+      [hilited-segment-popover
+       :id segment-id
+       :textspan textspan
+       :popup-body
+       [sub-opin-component excerpt-opinions
+        :excerpt text :target id-of-text :warn-off? warn-off?]])))
 
 (defn plain-segment [key index]
   (let [{:keys [text]} @(rf/subscribe [:segments-segment key index])]
