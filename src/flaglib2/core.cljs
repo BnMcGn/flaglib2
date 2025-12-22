@@ -42,7 +42,7 @@
 
 (rf/reg-event-fx
  :initialize
- (fn [_ _]
+ (fn [_ [_ extras]]
    {:db
     (conj
      {:warstats-store {}
@@ -53,7 +53,8 @@
       :window-size (window-size)
       :ipns-host (go/get js/window "IPNSHOST")
       :long-enough? false}
-     (posters/init))
+     (posters/init)
+     extras)
     :fx [[:dispatch [:initialize-local-store]]]}))
 
 ;;Start displaying certain notices
