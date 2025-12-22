@@ -228,13 +228,14 @@
        :empty
        ""
        :failed
-       [disps/thread-excerpt-display :excerpt excerpt :excerpt-class "bg-orange-400"]
+       [disps/thread-excerpt-display :chunks [["bg-orange-400" excerpt]] :not-found true]
        (:started :unstarted :complete)
        (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
          [disps/thread-excerpt-display
-          :excerpt excerpt
-          :leading-context leading
-          :trailing-context trailing
-          :excerpt-class "bg-orange-400"]))
+          (disps/make-excerpt-chunks-from-opinion
+           {:excerpt excerpt
+            :leading-context leading
+            :trailing-context trailing}
+           :excerpt-class "bg-orange-400")]))
       (when-not (empty? raw)
-        [disps/thread-excerpt-display :excerpt raw]))))
+        [disps/thread-excerpt-display :chunks [["" raw]] :not-found true]))))

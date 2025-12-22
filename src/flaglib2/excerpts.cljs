@@ -91,15 +91,22 @@
 (defn next-break [text index]
   (string/index-of text \newline index))
 
-(defn excerpt-context [text position1 position2]
-  (when-not (and (integer? position1) (integer? position2))
+(defn excerpt-context-position [text position offset]
+  (when-not (and (integer? position) (integer? offset))
+    (throw (js/Error. "Position vars must be integers")))
+  (let [text (string/trim text)
+        tstart (previous-break text position)
+        tend (next-break text (+ offset position))]
+    [tstart tend]))
+
+(defn excerpt-context [text position offset]
+  (when-not (and (integer? position) (integer? offset))
     (throw (js/Error. "Position vars must be integers")))
   (let [text (string/trim text)
         tlength (count text)
-        estart position1
-        eend (+ position2 estart)
-        tstart (previous-break text estart)
-        tend (next-break text eend)
+        estart position
+        eend (+ offset estart)
+        [tstart tend] (excerpt-context-position text position offset)
         leading-context (subs text (if tstart (+ 1 tstart) 0) estart)
         excerpt (subs text estart eend)
         trailing-context (subs text eend (or tend tlength))]
