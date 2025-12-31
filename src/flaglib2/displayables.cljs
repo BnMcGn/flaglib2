@@ -215,13 +215,6 @@
        [:span {:style (vis/warn-off-style :negative-disturbing)}
         [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]))))
 
-(defn make-excerpt-chunks-from-opinion [source & {:keys [excerpt-class]}]
-  (let [{:keys [excerpt leading-context trailing-context]} source
-        ex [(if (string? excerpt-class) excerpt-class "") excerpt]]
-    (if (or leading-context trailing-context)
-      [[:normal leading-context] ex [:normal trailing-context]]
-      [ex])))
-
 (defn thread-excerpt-display [& {:keys [chunks not-found]}]
   (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em"
                     :margin-right "1em"}]

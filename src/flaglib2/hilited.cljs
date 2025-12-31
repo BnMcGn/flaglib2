@@ -144,57 +144,6 @@
         bg (if focussed "bg-white" "bg-neutral-400")]
     [:span {:class (str "font-bold relative " bg)} (excerpts/rebreak text)]))
 
-(rf/reg-sub
- :segments
- (fn [params]
-   (let [[_ key] (:re-frame/query-v params)]
-     [re-frame.db/app-db
-      (rf/subscribe [:immediate-children key])]))
- (fn [[db opinion-ids] [_ key]]
-   (let [opinion (when (misc/iid? key) (get-in db [:opinion-store key]))
-         tree-address (if opinion (:tree-address opinion) '())
-         opins
-         (for [iid opinion-ids
-               :let [tpos (excerpts/recalc-text-position db iid)
-                     opinion (get-in db [:opinion-store iid])]
-               :when tpos]
-           (if (= tpos :original)
-             opinion
-             (assoc opinion :text-position tpos)))
-         ;;Should be pre-trimmed, but....
-         text (string/trim (subs/proper-text db key))
-         segpoints (excerpts/excerpt-segment-points opins (count text))
-         level (count tree-address)]
-     (into
-      []
-      (for [[start end] (partition 2 1 segpoints)
-            :let [id (str "lvl-" level "-pos-" end)
-                  excerpt-opinions
-                  (for [opin opins
-                        :let [[ostart oend] (:text-position opin)]
-                        :when (excerpts/overlap? start (dec end) ostart
-                                                 (dec (+ ostart oend)))]
-                    (:iid opin))
-                  warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))]]
-        {:segment-type (if (zero? (count excerpt-opinions)) :plain :hilited)
-         :segment-id (str "lvl-" level "-pos-" end)
-         :excerpt-opinions excerpt-opinions
-         :text (subs text start end)
-         :id-of-text key ;Need this?
-         :tree-address tree-address
-         :warn-offs warns
-         :warn-off? (not (empty? warns))
-         :start start
-         :end end})))))
-
-(rf/reg-sub
- :segments-segment
- (fn [params]
-   (let [[_ key] (:re-frame/query-v params)]
-     (rf/subscribe [:segments key])))
- (fn [segments [_ _ segment]]
-   (nth segments segment)))
-
 (defn make-segments [key & {:keys [focus root-target-url disable-popup? sub-opin-component]}]
   (into
    []

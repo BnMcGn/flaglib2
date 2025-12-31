@@ -6,6 +6,8 @@
    [re-frame.alpha :as rf]
 
    [flaglib2.misc :as misc]
+   [flaglib2.mood :as mood]
+   [flaglib2.visibility :as vis]
    [flaglib2.subscriptions :as subs]))
 
 
@@ -95,9 +97,9 @@
   (when-not (and (integer? position) (integer? offset))
     (throw (js/Error. "Position vars must be integers")))
   (let [text (string/trim text)
-        tstart (previous-break text position)
-        tend (next-break text (+ offset position))]
-    [tstart tend]))
+        cstart (previous-break text position)
+        cend (next-break text (+ offset position))]
+    [cstart cend]))
 
 (defn excerpt-context [text position offset]
   (when-not (and (integer? position) (integer? offset))
@@ -141,6 +143,71 @@
 (defn has-excerpt? [opin]
   (not (empty? (:excerpt opin))))
 
+
+
+
+(defn get-text-position [db opinion]
+  (let [{:keys [target text-position excerpt offset]} opinion
+        tinfo (get-in db [:text-store target])]
+    (when (has-excerpt? opinion)
+      (if (or (not (and text-position (integer? (first text-position))))
+              (and (not (misc/iid? target))
+                   (not (= :initial (:text-source tinfo)))))
+        (find-excerpt-position
+         (create-textdata (subs/proper-text db target))
+         excerpt :offset offset)
+        text-position))))
+
+(defn segments-func [[db opinion-ids] [_ key]]
+   (let [opinion (when (misc/iid? key) (get-in db [:opinion-store key]))
+         tree-address (if opinion (:tree-address opinion) '())
+         opins
+         (for [iid opinion-ids
+               :let [opinion (get-in db [:opinion-store iid])]]
+           (assoc opinion :text-position (get-text-position db opinion)))
+         ;;Should be pre-trimmed, but....
+         text (string/trim (subs/proper-text db key))
+         segpoints (excerpt-segment-points opins (count text))
+         level (count tree-address)]
+     (into
+      []
+      (for [[start end] (partition 2 1 segpoints)
+            :let [id (str "lvl-" level "-pos-" end)
+                  excerpt-opinions
+                  (for [opin opins
+                        :let [[ostart oend] (:text-position opin)]
+                        :when (overlap? start (dec end) ostart
+                                                 (dec (+ ostart oend)))]
+                    (:iid opin))
+                  warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))]]
+        {:segment-type (if (zero? (count excerpt-opinions)) :plain :hilited)
+         :segment-id (str "lvl-" level "-pos-" end)
+         :excerpt-opinions excerpt-opinions
+         :text (subs text start end)
+         :id-of-text key ;Need this?
+         :tree-address tree-address
+         :warn-offs warns
+         :warn-off? (not (empty? warns))
+         :start start
+         :end end}))))
+
+(rf/reg-sub
+ :segments
+ (fn [params]
+   (let [[_ key] (:re-frame/query-v params)]
+     [re-frame.db/app-db
+      (rf/subscribe [:immediate-children key])]))
+ segments-func)
+
+(rf/reg-sub
+ :segments-segment
+ (fn [params]
+   (let [[_ key] (:re-frame/query-v params)]
+     (rf/subscribe [:segments key])))
+ (fn [segments [_ _ segment]]
+   (nth segments segment)))
+
+
 ;; Is the original text position available and applicable?
 ;; If not, generate a new one when possible.
 (defn recalc-text-position [db key]
@@ -161,11 +228,70 @@
                (create-textdata (subs/proper-text db target))
                excerpt :offset offset))))))))
 
+
 (rf/reg-sub
  :text-position-recalc
  :<- [:core-db]
  (fn [db [_ key]]
    (recalc-text-position db key)))
+
+(defn make-excerpt-chunks-from-opinion [source & {:keys [excerpt-class]}]
+  (let [{:keys [excerpt leading-context trailing-context leading trailing]} source
+        leading (or leading-context leading)
+        trailing (or trailing-context trailing)
+        ex [(if (string? excerpt-class) excerpt-class "") excerpt]]
+    (if (or leading trailing)
+      [[:normal leading] ex [:normal trailing]]
+      [ex])))
+
+(defn make-excerpt-chunks-from-opinion-target [db opinion & {:keys [excerpt-class]}]
+  (let [{:keys [target text-position]} opinion
+        ;;FIXME: may want to cache segments, either in app-db or in a subscription.
+        segs (segments-func [db (subs/immediate-children db target)] [nil target])
+        start (first text-position)
+        end (+ start (second text-position))
+        find-seg (fn [segments pos]
+                   (loop [segs segments
+                          index 0]
+                     (when-not (>= index (count segments))
+                       (let [seg (first segs)]
+                         (if (<= (:start seg) pos (:end seg))
+                           index
+                           (recur (rest segs) (inc index)))))))
+        text (string/trim (subs/proper-text db target))
+        [cstart cend] (excerpt-context-position
+                       text (first text-position) (second text-position))
+        start-ind (find-seg segs cstart)
+        end-ind (find-seg segs cend)
+        ])
+  )
+
+(rf/reg-sub
+ :excerpt-context-info
+ :<- [:core-db]
+ (fn [db [_ key]]
+   (if (misc/iid? key)
+     (let [opinion (get-in db [:opinion-store key])
+           {:keys [target text-position excerpt offset]} opinion
+           target-iid? (misc/iid? target)]
+       (when (has-excerpt? opinion)
+         (let [target-tinfo (get-in db [:text-store target])
+               target-vis (get-in db [:visibility target])
+               tpos (get-text-position db opinion)
+               exclass (mood/flavor+freshness db key)]
+           (cond
+             (:warn-off-excerpt-only target-vis)
+             (make-excerpt-chunks-from-opinion-target
+              db (assoc opinion :text-position tpos)
+              :excerpt-class exclass)
+             (:warn-off target-vis)
+             :warn-off
+             tpos
+             (make-excerpt-chunks-from-opinion
+              (excerpt-context (:text target-tinfo) (first tpos) (second tpos))
+              :excerpt-class exclass)
+             :else :not-found)))))))
+
 
 ;;Can an opinion be considered 'bookmark' for an excerpt? As such it might serve as a target
 ;; for inrefs. If so, it should look like a utility opinion.

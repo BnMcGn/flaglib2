@@ -8,7 +8,7 @@
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
    [flaglib2.deco :as deco]
-   [flaglib2.excerpts :as ex]
+   #_[flaglib2.excerpts :as ex]
    [flaglib2.subscriptions :as subs]
    ))
 
@@ -129,7 +129,7 @@
             (recur (rest chld) (conj normal (first chld)) excerpt)
             (not ((:flag opinion) cflags))
             (recur (rest chld) normal excerpt)
-            (ex/has-excerpt? opinion)
+            (not (empty? (:excerpt opinion)))
             (recur (rest chld) normal (conj excerpt (first chld)))
             :else
             (recur (rest chld) (conj normal (first chld)) excerpt)))))))

@@ -138,26 +138,6 @@ And the light shineth in darkness; and the darkness comprehended it not.")
     (is (= 0 (count starts)))
     (is (= 0 (count ends)))))
 
-;;FIXME: broken by change to make-segments. Needs to use app-db
-#_(deftest make-segments
-  (println "in make-segments test")
-  (rf-test/run-test-sync
-   (let [rootkey "http://fake.fake/"
-         iid "pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeeeb"
-         db {:opinion-store {iid
-                             {:excerpt "the"
-                              :target rootkey}}
-             :text-store {rootkey {:text text1}}}]
-     (rf/dispatch-sync [:initialize db])
-
-         res (hilited/make-segments rootkey db [iid])
-         _ (println res)
-         [seg1 seg2 seg3] res
-         [_ [_ text1]] (misc/part-on-true (partial = :text) seg1)
-         [_ [_ text2]] (misc/part-on-true (partial = :text) seg2)
-     (is (= text1 "In "))
-     (is (= text2 "the"))) ))
-
 (def text2
   "This sentence contains\n\na double newline.")
 

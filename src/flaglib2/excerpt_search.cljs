@@ -232,7 +232,7 @@
        (:started :unstarted :complete)
        (let [{:keys [leading trailing]} (excerpts/excerpt-context2 tdat excerpt offset)]
          [disps/thread-excerpt-display
-          (disps/make-excerpt-chunks-from-opinion
+          (excerpts/make-excerpt-chunks-from-opinion
            {:excerpt excerpt
             :leading-context leading
             :trailing-context trailing}
