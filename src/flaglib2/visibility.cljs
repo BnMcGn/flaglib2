@@ -8,7 +8,6 @@
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
    [flaglib2.deco :as deco]
-   #_[flaglib2.excerpts :as ex]
    [flaglib2.subscriptions :as subs]
    ))
 

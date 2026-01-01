@@ -262,15 +262,27 @@
         [cstart cend] (excerpt-context-position
                        text (first text-position) (second text-position))
         start-ind (find-seg segs cstart)
-        end-ind (find-seg segs cend)
-        ])
-  )
+        end-ind (find-seg segs cend)]
+    (into []
+          (for [i (range start-ind (inc end-ind))
+                :let [seg (nth segs i)
+                      in-excerpt? (and (<= start (:start seg)) (>= end (:end seg)))
+                      {:keys [warn-off?]} seg]]
+            [(cond warn-off? :warn-off
+                   in-excerpt? (or excerpt-class "")
+                   :else :normal)
+             (cond
+               (= i start-ind)
+               (subs (:text seg) (- cstart (:start seg)))
+               (= i end-ind)
+               (subs (:text seg) 0 (inc (- cend (:start seq))))
+               :else (:text seq))]))))
 
 (rf/reg-sub
  :excerpt-context-info
  :<- [:core-db]
  (fn [db [_ key]]
-   (if (misc/iid? key)
+   (when (misc/iid? key)
      (let [opinion (get-in db [:opinion-store key])
            {:keys [target text-position excerpt offset]} opinion
            target-iid? (misc/iid? target)]

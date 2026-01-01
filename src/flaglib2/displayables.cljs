@@ -196,12 +196,15 @@
    :hidden hidden
    :sub-opin-component sub-opinion-list])
 
-(defn quote-icon [& {:keys [found style]}]
-  [:img {:style style
-         :src (if found
-                "/static/img/black-wf-quote.svg"
-                "/static/img/red-wf-quote.svg")
-         :title (when-not found "Excerpt Not Found")}])
+(defn quote-icon [& {:keys [status style]}]
+  (let [[src title]
+        (case status
+          :not-found
+          ["/static/img/red-wf-quote.svg" "Excerpt Not Found"]
+          :warn-off
+          ["/static/img/red-wf-quote.svg" "Target Article Restricted"]
+          ["/static/img/black-wf-quote.svg" nil])]
+    [:img {:style style :src src :title title}]))
 
 (defn excerpt-spans [chunks]
   (into
@@ -215,31 +218,30 @@
        [:span {:style (vis/warn-off-style :negative-disturbing)}
         [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]))))
 
-(defn thread-excerpt-display [& {:keys [chunks not-found]}]
+(defn thread-excerpt-display [& {:keys [chunks status]}]
   (let [icon-style {:width "42px" :height "45px" :float "left" :top "-1em"
                     :margin-right "1em"}]
     [:div
      {:class "thread-excerpt italic text-sm mt-2 mb-4 sm:mr-40 mr-6 min-h-[3em] ml-6 sm:break-normal break-all sm:break-words"}
-     [quote-icon :found (not not-found) :style icon-style]
+     [quote-icon :status status :style icon-style]
      [excerpt-spans chunks]]))
 
-(defn thread-excerpt
-  [& {:keys [opinion opinionid text]}]
-  (let [opinion (or opinion
-                    @(rf/subscribe [:opinion-store opinionid]))
+(defn thread-excerpt [& {:keys [opinion opinionid text]}]
+  (let [opinion (or opinion @(rf/subscribe [:opinion-store opinionid]))
         opid (or opinionid (:iid opinion))
-        tpos @(rf/subscribe [:text-position-recalc opid])
-        {:keys [text-position excerpt offset]} opinion
-        {:keys [leading trailing excerpt]}
-        (cond (= tpos :original) opinion
-              (and tpos text) (excerpts/excerpt-context text (first tpos) (second tpos))
-              tpos (let [text @(rf/subscribe [:proper-text (:target opinion)])]
-                     (excerpts/excerpt-context text (first tpos) (second tpos)))
-              :else opinion)]
-    [thread-excerpt-display
-     :leading-context leading :trailing-context trailing :excerpt excerpt
-     :excerpt-class (mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])]))
-
+        cinfo @(rf/subscribe [:excerpt-context-info opid])]
+    (cond
+      (= :not-found cinfo)
+      [thread-excerpt-display
+       :status :not-found
+       :chunks [(mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])
+                (:excerpt opinion)]]
+      (= :warn-off cinfo)
+      [thread-excerpt-display
+       :status :warn-off
+       :chunks [:warn-off (:excerpt opinion)]]
+      (vector? cinfo)
+      [thread-excerpt-display :chunks cinfo])))
 
 (defn reference-root-display [reference & {:keys [minify hide-warstats hide-external-link]}]
   (let [warstats @(rf/subscribe [:warstats-store reference])]
