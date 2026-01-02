@@ -281,14 +281,15 @@
 (rf/reg-sub
  :excerpt-context-info
  :<- [:core-db]
- (fn [db [_ key]]
+ :<- [:visibility]
+ (fn [[db vis] [_ key]]
    (when (misc/iid? key)
      (let [opinion (get-in db [:opinion-store key])
            {:keys [target text-position excerpt offset]} opinion
            target-iid? (misc/iid? target)]
        (when (has-excerpt? opinion)
-         (let [target-tinfo (get-in db [:text-store target])
-               target-vis (get-in db [:visibility target])
+         (let [target-text (subs/proper-text db target)
+               target-vis (get vis target)
                tpos (get-text-position db opinion)
                exclass (mood/flavor+freshness db key)]
            (cond
@@ -300,10 +301,9 @@
              :warn-off
              tpos
              (make-excerpt-chunks-from-opinion
-              (excerpt-context (:text target-tinfo) (first tpos) (second tpos))
+              (excerpt-context target-text (first tpos) (second tpos))
               :excerpt-class exclass)
              :else :not-found)))))))
-
 
 ;;Can an opinion be considered 'bookmark' for an excerpt? As such it might serve as a target
 ;; for inrefs. If so, it should look like a utility opinion.
