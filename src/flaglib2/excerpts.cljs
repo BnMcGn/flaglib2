@@ -97,8 +97,8 @@
   (when-not (and (integer? position) (integer? offset))
     (throw (js/Error. "Position vars must be integers")))
   (let [text (string/trim text)
-        cstart (previous-break text position)
-        cend (next-break text (+ offset position))]
+        cstart (or (previous-break text position) 0)
+        cend (or (next-break text (+ offset position)) (dec (count text)))]
     [cstart cend]))
 
 (defn excerpt-context [text position offset]
@@ -275,8 +275,8 @@
                (= i start-ind)
                (subs (:text seg) (- cstart (:start seg)))
                (= i end-ind)
-               (subs (:text seg) 0 (inc (- cend (:start seq))))
-               :else (:text seq))]))))
+               (subs (:text seg) 0 (inc (- cend (:start seg))))
+               :else (:text seg))]))))
 
 (rf/reg-sub
  :excerpt-context-info
