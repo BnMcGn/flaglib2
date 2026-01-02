@@ -215,7 +215,7 @@
        (= :normal type) [:span (excerpts/rebreak text)]
        (= :warn-off type)
        ;;Whatever flag...
-       [:span {:style (vis/warn-off-style :negative-disturbing)}
+       [:span {:style (vis/warn-off-small-style :negative-disturbing)}
         [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]))))
 
 (defn thread-excerpt-display [& {:keys [chunks status]}]

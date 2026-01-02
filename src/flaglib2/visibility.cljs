@@ -179,7 +179,12 @@
      (:visibility db))))
 
 (defn warn-off-style [flag]
-  (merge (deco/warn-off-stripes flag)
+  (merge (deco/warn-off-stripes flag "64px")
+         {:color "white"
+          :border-color "#444"}))
+
+(defn warn-off-small-style [flag]
+  (merge (deco/warn-off-stripes flag "24px")
          {:color "white"
           :border-color "#444"}))
 

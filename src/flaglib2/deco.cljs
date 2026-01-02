@@ -97,9 +97,9 @@
        color2 " 50%,"
        color1 " 50%)"))
 
-(defn warn-off-stripes [flag]
+(defn warn-off-stripes [flag size]
   {:background (stripes-135 (get-in flags/flags [flag :color]) "#444")
-   :background-size "64px 64px"})
+   :background-size (str size " " size)})
 
 (defn wf-btn-default-disabled []
   ["border-stone-300" "bg-white" "text-zinc-400" "focus:border-stone-300" "focus:bg-white" "hover:border-stone-300" "hover:bg-white" "active:focus:bg-white" "active:focus:border-stone-300" "active:hover:bg-white" "active:hover:border-stone-300"])

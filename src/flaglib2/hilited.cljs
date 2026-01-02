@@ -115,7 +115,7 @@
         textspan
         (if warn-off?
           [:span
-           {:style (merge stylespec (vis/warn-off-style (first (first warn-offs))))
+           {:style (merge stylespec (vis/warn-off-small-style (first (first warn-offs))))
             :on-click (when-not disable-popup? click-handler)}
            [:span {:style {:visibility "hidden"}} (excerpts/rebreak text)]]
           [:span
