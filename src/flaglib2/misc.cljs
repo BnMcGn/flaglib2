@@ -249,6 +249,18 @@
 (defn part-on-true [predicate coll]
   (part-on-index coll (first (keep-indexed #(when (predicate %2) %1) coll))))
 
+(defn splitfilter [predicate coll]
+  (loop [coll coll
+         stor1 []
+         stor2 []]
+    (cond
+      (empty? coll)
+      [stor1 stor2]
+      (predicate (first coll))
+      (recur (rest coll) (conj stor1 (first coll)) stor2)
+      :else
+      (recur (rest coll) stor1 (conj stor2 (first coll))))))
+
 (defn class-string [& colls]
   (string/join " " (flatten colls)))
 

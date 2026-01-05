@@ -451,16 +451,24 @@
               :offset nil])]
           [opinion-extras opid]]]))))
 
+(declare hidden-items)
 (defn excerptless-opinions [target-id]
-  (let [opstore @(rf/subscribe [:opinion-store])
-        idlist @(rf/subscribe [:immediate-children target-id])
-        cdb @(rf/subscribe [:core-db])
-        idlist (remove (partial excerpts/recalc-text-position cdb) idlist)]
-    (when-not (empty? idlist)
-      [:div
-       {:class "mt-4"}
-       [:h3 "Replies:"]
-       (into [:div] (map #(vector thread-opinion :opid %1) idlist))])))
+  (let [idlist @(rf/subscribe [:immediate-children target-id])
+        idlist (remove
+                (fn [id]
+                  (let [cinfo @(rf/subscribe [:excerpt-context-info id])]
+                    (or (not cinfo) (= cinfo :not-found))))
+                idlist)
+        [vislist hidlist]
+        (misc/splitfilter (fn [id]
+                       (let [vis @(rf/subscribe [:visibility id])]
+                         (= :show (:list-display vis))))
+                     idlist)]
+    [:div
+     {:class "mt-4"}
+     [:h3 "Replies:"]
+     (into [:div] (map #(vector thread-opinion :opid %1) idlist))
+     [hidden-items hidlist]]))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])

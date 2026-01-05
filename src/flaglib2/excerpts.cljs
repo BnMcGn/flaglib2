@@ -207,34 +207,6 @@
  (fn [segments [_ _ segment]]
    (nth segments segment)))
 
-
-;; Is the original text position available and applicable?
-;; If not, generate a new one when possible.
-(defn recalc-text-position [db key]
-  (when (misc/iid? key)
-    (let [opinion (get-in db [:opinion-store key])
-          {:keys [target text-position excerpt offset]} opinion]
-      (when (has-excerpt? opinion)
-        (if (misc/iid? target)
-          (if (and text-position (integer? (first text-position)))
-            :original
-            (find-excerpt-position
-             (create-textdata (subs/proper-text db target)) excerpt :offset offset))
-          (let [tinfo (get-in db [:text-store target])]
-            (if (and (= :initial (:text-source tinfo))
-                     (and text-position (integer? (first text-position))))
-              :original
-              (find-excerpt-position
-               (create-textdata (subs/proper-text db target))
-               excerpt :offset offset))))))))
-
-
-(rf/reg-sub
- :text-position-recalc
- :<- [:core-db]
- (fn [db [_ key]]
-   (recalc-text-position db key)))
-
 (defn make-excerpt-chunks-from-opinion [source & {:keys [excerpt-class]}]
   (let [{:keys [excerpt leading-context trailing-context leading trailing]} source
         leading (or leading-context leading)
