@@ -451,9 +451,10 @@
               :offset nil])]
           [opinion-extras opid]]]))))
 
-(declare hidden-items)
+(declare hidden-items unhidden-items)
 (defn excerptless-opinions [target-id]
   (let [idlist @(rf/subscribe [:immediate-children target-id])
+        show? @(rf/subscribe [:visibility-show-all])
         idlist (remove
                 (fn [id]
                   (let [cinfo @(rf/subscribe [:excerpt-context-info id])]
@@ -467,8 +468,10 @@
     [:div
      {:class "mt-4"}
      [:h3 "Replies:"]
-     (into [:div] (map #(vector thread-opinion :opid %1) idlist))
-     [hidden-items hidlist]]))
+     (into [:div] (map #(vector thread-opinion :opid %1) (if show? idlist vislist)))
+     (if show?
+       [unhidden-items (count hidlist)]
+       [hidden-items hidlist])]))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
@@ -516,12 +519,21 @@
           faded (count (filter (partial = :faded) causes))]
       ;;FIXME: add controls for override, perhaps only for logged-in
       (deco/casual-note-heading
-       (str
-        "Opinions not shown: "
-        (when-not (zero? faded)
-          (str faded " below threshold "))
-        (when-not (zero? mech)
-          (str mech " non content "))
-        (when-not (zero? tt)
-          (str tt " text/title thread")))))))
+       [:<>
+        (str
+         "Opinions not shown: "
+         (when-not (zero? faded)
+           (str faded " below threshold "))
+         (when-not (zero? mech)
+           (str mech " non content "))
+         (when-not (zero? tt)
+           (str tt " text/title thread")))
+        [:a {:href (vis/set-show-all js/window.location.href true)} "Show All"]]))))
+
+(defn unhidden-items [some]
+  (when-not (zero? some)
+    (deco/casual-note-heading
+     [:<> "Showing All"
+      [:a {:href (vis/set-show-all js/window.location.href false)}
+       (str "Hide " some " item(s)")]])))
 

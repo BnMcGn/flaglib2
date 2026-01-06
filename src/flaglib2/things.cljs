@@ -94,10 +94,15 @@
 
 (defn thing-visibility-wrapper [things & {:keys [trim]}]
   (let [v @(rf/subscribe [:visibility])
-        [things hidden] (split-things things v)]
-    [:div
-     [thing-displayer things :trim trim]
-     [hidden-things hidden]]))
+        show? @(rf/subscribe [:visibility-show-all])
+        [shown hidden] (split-things things v)]
+    (if show?
+      [:div
+       [thing-displayer things :trim trim]
+       [disp/unhidden-items (count hidden)]]
+      [:div
+       [thing-displayer shown :trim trim]
+       [hidden-things hidden]])))
 
 (defn current-things [spec]
   (let [{:keys [filter things1 ::stack/stack things2]} spec]

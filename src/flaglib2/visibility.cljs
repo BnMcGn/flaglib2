@@ -3,6 +3,7 @@
    [cljs-time.core :as tm]
    [re-frame.alpha :as rf]
    [clojure.string :as string]
+   [goog.uri.utils :as uri]
 
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
@@ -137,7 +138,7 @@
   (let [[non-excerpt _] (concealing-opinions db id)
         get-effect (fn [iid]
                      (get-in db [:warstats-store iid :effect]))]
-    (reduce + (map get-effect non-excerpt))))
+    (reduce + (map get-effect no-excerpt))))
 
 
 ;This only has to handle things that are visible, but need a warn off.
@@ -177,6 +178,15 @@
    (if key
      (get-in db [:visibility key])
      (:visibility db))))
+
+(rf/reg-sub
+ :visibility-show-all
+ :<- [:server-parameters]
+ (fn [params _]
+   (get-in params [:default :showall])))
+
+(defn set-show-all [url val]
+  (uri/setParam url "showall" val))
 
 (defn warn-off-style [flag]
   (merge (deco/warn-off-stripes flag "64px")
