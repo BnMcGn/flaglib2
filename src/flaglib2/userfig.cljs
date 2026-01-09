@@ -15,14 +15,22 @@
 
    ))
 
+(defn proc-user-info [uinfo]
+  (when uinfo
+    (update (misc/decapikey uinfo)
+            :signed-up misc/parse-time)))
+
 (macros/reg-json-fetch
  [:get-user-info
   "/userfig/get-user-info/"]
  ([result]
-  (let [uinfo (misc/decapikey result)
-        uinfo (update uinfo :signed-up misc/parse-time)]
-    {:db (assoc (fetch/db) ::user-info uinfo)}))
+  {:db (assoc (fetch/db) ::user-info (proc-user-info result))})
  nil)
+
+(rf/reg-event-db
+ ::store-user-info
+ (fn [db [_ settings]]
+   (assoc db ::user-info (proc-user-info settings))))
 
 (rf/reg-sub
  ::errors

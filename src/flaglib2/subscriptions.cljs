@@ -2,6 +2,7 @@
   (:require
    [re-frame.alpha :as rf]
    [flaglib2.misc :as misc]
+   [flaglib2.userfig :as userfig]
 
    [clojure.walk :as walk]))
 
@@ -24,7 +25,7 @@
 (rf/reg-sub
  :advanced-options
  (fn [db _]
-   (get-in db [:userfig :advanced])))
+   (get-in db [:userfig/user-info :advanced])))
 
 
 (rf/reg-sub

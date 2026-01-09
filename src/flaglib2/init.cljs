@@ -6,6 +6,7 @@
    [re-frame.alpha :as rf]
    [flaglib2.subscriptions]
    [flaglib2.misc :as misc]
+   [flaglib2.userfig :as userfig]
 
    [day8.re-frame-10x :as tenx]))
 
@@ -14,10 +15,6 @@
  (fn [{:keys [db]} [_ key params]]
    {:db (assoc-in db [:server-parameters (or key :default)] params)}))
 
-(rf/reg-event-db
- ::store-userfig-settings
- (fn [db [_ settings]]
-   (assoc db :userfig (misc/kebabikey (js->clj settings)))))
 
 (rf/reg-fx
  :do-mount
@@ -49,7 +46,7 @@
 (defn ^:export server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
-    (rf/dispatch [::store-userfig-settings (go/get js/window "USERFIGDATA")])
+    (rf/dispatch [:userfig/store-user-info (js->clj (go/get js/window "USERFIGDATA"))])
     (rf/dispatch [(keyword (:entry-point config)) key])))
 
 (def local-store-keys ["advanced"])
