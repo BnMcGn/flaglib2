@@ -5,6 +5,7 @@
    [clojure.string :as string]
    [goog.uri.utils :as uri]
 
+   [flaglib2.init :as init]
    [flaglib2.misc :as misc]
    [flaglib2.mood :as mood]
    [flaglib2.flags :as flags]
@@ -138,18 +139,22 @@
   (let [[non-excerpt _] (concealing-opinions db id)
         get-effect (fn [iid]
                      (get-in db [:warstats-store iid :effect]))]
-    (reduce + (map get-effect no-excerpt))))
+    (reduce + (map get-effect non-excerpt))))
 
 
+(declare warn-off-inactive?)
 ;This only has to handle things that are visible, but need a warn off.
 (defn list-item-display-policy [db id]
   (let [warstats (get-in db [:warstats-store id])
         word (mood/in-a-word warstats)
         warnoff (when (#{:restricted :contested} word)
                   (warn-off? warstats))
+        override (warn-off-inactive? db id)
         nonex (count-of-non-excerpt-concealing-opinion-effects db id)]
-    (cond-> {:warn-off warnoff}
-      (and warnoff (zero? nonex))
+    (cond-> {}
+      override (assoc :warn-off-override true)
+      (not override) (assoc :warn-off warnoff)
+      (and warnoff (not override) (zero? nonex))
       (assoc :warn-off-excerpt-only true))))
 
 (rf/reg-flow
@@ -197,6 +202,23 @@
   (merge (deco/warn-off-stripes flag "24px")
          {:color "white"
           :border-color "#444"}))
+
+(defn warn-off-inactive? [db key]
+  (and (:username db)
+       (get-in db [:local :warn-off-overrides])))
+
+(rf/reg-event-fx
+ :set-warn-off-override
+ [init/save-to-local]
+ (fn [{:keys [db]} [_ key]]
+   (update-in db [:local :warn-off-overrides] #(conj % key))))
+
+(rf/reg-event-fx
+ :remove-warn-off-override
+ [init/save-to-local]
+ (fn [{:keys [db]} [_ key]]
+   (update-in db [:local :warn-off-overrides] #(disj % key))))
+
 
 ;;FIXME: Move to things?
 (defn line-warn-off [id]

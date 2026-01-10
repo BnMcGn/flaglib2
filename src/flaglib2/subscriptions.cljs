@@ -27,7 +27,6 @@
  (fn [db _]
    (get-in db [:userfig/user-info :advanced])))
 
-
 (rf/reg-sub
  :warstats-store
  (fn [db [_ key]]

@@ -5,7 +5,6 @@
    [reagent.dom :as rdom]
    [re-frame.alpha :as rf]
    [flaglib2.subscriptions]
-   [flaglib2.misc :as misc]
    [flaglib2.userfig :as userfig]
 
    [day8.re-frame-10x :as tenx]))
@@ -49,7 +48,7 @@
     (rf/dispatch [:userfig/store-user-info (js->clj (go/get js/window "USERFIGDATA"))])
     (rf/dispatch [(keyword (:entry-point config)) key])))
 
-(def local-store-keys ["advanced"])
+(def local-store-keys ["advanced" "warn-off-overrides"])
 
 (defn do-save-to-local [storg]
   (doseq [[k v] storg]

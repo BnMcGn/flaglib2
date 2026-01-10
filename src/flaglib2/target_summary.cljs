@@ -1,6 +1,7 @@
 (ns flaglib2.target-summary
   (:require
    [re-frame.alpha :as rf]
+   [reagent.core :as r]
 
    [re-com-tailwind.core :as rc]
 
@@ -136,6 +137,25 @@
                                 :border-color (str (flinfo :color) "bb")})}
                (:label flinfo)])))]))
 
+(defn warn-off-toggle [key]
+  (let [vis @(rf/subscribe [:visibility key])
+        iid (misc/iid? key)
+        warnoff (:warn-off vis)
+        excerpts (:warn-off-excerpt-only vis)
+        override (:warn-off-override vis)
+        typedesc (if iid "opinion" "article")
+        segdesc (if excerpts "has restricted portions" "is restricted")
+        model (r/atom override)]
+    (when (or warnoff override)
+      [:div
+       [:span (str "This " typedesc " " segdesc ". Use the checkbox to make it visible.")]
+       [rc/checkbox
+        :model
+        :on-change (fn [new-value]
+                     (if new-value
+                       (rf/dispatch [:set-warn-off-override key])
+                       (rf/dispatch [:remove-warn-off-override key])))]])))
+
 (defn reply-count-long [target]
   (let [warstats @(rf/subscribe [:warstats-store target])
         opinions @(rf/subscribe [:opinion-store])
@@ -256,7 +276,8 @@
      [:div
       {:class "flex flex-col sm:flex-row gap-4"}
       [summary-scores-chart rooturl]
-      [display-other-flags rooturl]]
+      [display-other-flags rooturl]
+      [warn-off-toggle rooturl]]
     [references-summary rooturl]
     [refd-summary rooturl]
     [questions-and-answers rooturl]
@@ -270,7 +291,8 @@
     [:div
      {:class "flex flex-col sm:flex-row gap-4"}
      [summary-scores-chart iid]
-     [display-other-flags iid]]
+     [display-other-flags iid]
+     [warn-off-toggle iid]]
     [references-summary iid]
     [refd-summary iid]
     [questions-and-answers iid]

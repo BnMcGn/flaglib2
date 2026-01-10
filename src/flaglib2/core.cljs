@@ -9,6 +9,7 @@
    [re-frame.alpha :as rf]
    [flaglib2.subscriptions]
    [flaglib2.init :as init]
+   [flaglib2.misc :as misc]
    [flaglib2.fetchers]
    [flaglib2.ipfs :as ip]
    [flaglib2.headlets :as headlets]
@@ -52,7 +53,8 @@
       :hiccup-store {}
       :window-size (window-size)
       :ipns-host (go/get js/window "IPNSHOST")
-      :long-enough? false}
+      :long-enough? false
+      :username (misc/username)}
      (posters/init)
      extras)
     :fx [[:dispatch [:initialize-local-store]]]}))
