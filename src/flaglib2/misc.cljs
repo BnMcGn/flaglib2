@@ -232,7 +232,7 @@
   (when (string? string)
     (let [slen (count string)]
       (if (< len slen)
-        (str (subs string len) "…")
+        (str (subs string 0 len) "…")
         string))))
 
 (defn first-index [itm coll & {:keys [test] :or {test =}}]
