@@ -27,6 +27,7 @@
    [flaglib2.social-card :as scard]
    [flaglib2.userfig :as userfig]
    [flaglib2.visibility :as vis]
+
    [cljs.reader]))
 
 (defn window-size []

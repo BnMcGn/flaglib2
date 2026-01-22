@@ -4,6 +4,9 @@
    [goog.object :as go]
    [reagent.dom :as rdom]
    [re-frame.alpha :as rf]
+
+   [re-com.popover]
+
    [flaglib2.subscriptions]
    [flaglib2.userfig :as userfig]
 
@@ -76,3 +79,35 @@
   (def sroot (tenx/create-shadow-root nil))
   (rdom/render (tenx/create-style-container sroot) sroot))
 
+;;FIXME: Beware the monkeypatch!
+;; Original code doesn't know what to do with spans, especially when split across multiple
+;; lines. Placement also incorrect for some single line spans
+;;FIXME: Arrow only attaches to end of span, not top!
+(defn calculate-optimal-position
+  [node]
+  (let [w (.-innerWidth   js/window) ;; Width/height of the browser window viewport including, if rendered, the vertical scrollbar
+        h (.-innerHeight  js/window)
+        brect-main (.getBoundingClientRect node)
+        y (/ (+ (.-bottom brect-main) (.-top brect-main)) 2)
+        below? (< y (quot h 2))
+        brects (vec (.getClientRects node))
+        multispan? (< 1 (count brects))
+        brect-horiz (cond (not multispan?) brect-main
+                          below? (last brects)
+                          :else (first brects))
+        x (if below? (.-right brect-horiz) (.-left brect-horiz))
+        h-threshold-left  (quot w 3)
+        h-threshold-cent  (* 2 h-threshold-left)
+        [s1 s2]          ["right" "left"]
+        h-position        (cond
+                            (< x h-threshold-left) s1
+                            (< x h-threshold-cent) "center"
+                            :else s2)
+        v-position        (if below? "below" "above")]
+    (keyword (str v-position \- h-position))))
+
+;;We don't do anything here, because calculate-optimal-position needs the node.
+(defn calc-element-midpoint [node] node)
+
+(set! re-com.popover/calculate-optimal-position calculate-optimal-position)
+(set! re-com.popover/calc-element-midpoint calc-element-midpoint)
