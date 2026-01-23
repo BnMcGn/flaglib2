@@ -266,9 +266,11 @@
                exclass (mood/flavor+freshness db key)]
            (cond
              (:warn-off-excerpt-only target-vis)
-             (make-excerpt-chunks-from-opinion-target
-              db (assoc opinion :text-position tpos)
-              :excerpt-class exclass)
+             (if tpos
+               (make-excerpt-chunks-from-opinion-target
+                       db (assoc opinion :text-position tpos)
+                       :excerpt-class exclass)
+               :warn-off)
              (:warn-off target-vis)
              :warn-off
              tpos

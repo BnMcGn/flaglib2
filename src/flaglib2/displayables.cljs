@@ -239,7 +239,7 @@
       (= :warn-off cinfo)
       [thread-excerpt-display
        :status :warn-off
-       :chunks [:warn-off (:excerpt opinion)]]
+       :chunks [[:warn-off (:excerpt opinion)]]]
       (vector? cinfo)
       [thread-excerpt-display :chunks cinfo])))
 
