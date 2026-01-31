@@ -38,12 +38,12 @@
    (selected-url-from-db location db)))
 
 (rf/reg-event-db
- ::choose-adjusted-target
- (fn [db [_ location target]]
-   (assoc-in db (into location [::modified-selection]) target)))
+ ::choose-adjusted-url
+ (fn [db [_ location url]]
+   (assoc-in db (into location [::modified-selection]) url)))
 
 (rf/reg-event-db
- ::choose-original-target
+ ::choose-original-url
  (fn [db [_ location]]
    (assoc-in db (into location [::modified-selection]) (unmodified-selected-from-db location db))))
 

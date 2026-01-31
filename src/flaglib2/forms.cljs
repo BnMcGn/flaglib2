@@ -24,12 +24,12 @@
 
 ;;FIXME: what if user wants to start with reference, not target? way to switch?
 (defn specify-target []
- (let [{:keys [message]} @(rf/subscribe [:target-adjustment])]
-   [:<>
-    [ug/url-search [::fab/specify-target]
-    :placeholder "Target URL or search terms"]
-  (when message
-    [deco/error-msg message])]))
+  (let [{:keys [message]} @(rf/subscribe [:target-adjustment])]
+    [:<>
+     [ug/url-search [::fab/specify-target]
+      :placeholder "Target URL or search terms"]
+     (when message
+       [deco/error-msg message])]))
 
 (defn specify-target-summary []
   (let [selection @(rf/subscribe [:selected-url [::fab/specify-target]])]
@@ -43,7 +43,7 @@
     [rc/button
      :label "Next (Corrected Target)"
      :on-click (fn []
-                 (rf/dispatch [::ug/choose-adjusted-target
+                 (rf/dispatch [::ug/choose-adjusted-url
                                [::fab/specify-target]
                                adjusted])
                  (rf/dispatch [::step/next]))] ))
@@ -52,7 +52,7 @@
   [rc/button
    :label "Next (Accept as Entered)"
    :on-click (fn []
-               (rf/dispatch [::ug/choose-original-target
+               (rf/dispatch [::ug/choose-original-url
                              [::fab/specify-target]])
                (rf/dispatch [::step/next]))])
 
@@ -258,17 +258,54 @@
         :class (misc/class-string (tw-btn-danger))])]))
 
 (defn specify-reference []
-  [ug/url-search [::fab/specify-reference]
-   ;;FIXME: omit target URL
-   :placeholder "Reference URL or search terms"])
+  (let [{:keys [message]} @(rf/subscribe [:reference-adjustment])]
+    [:<>
+     [ug/url-search [::fab/specify-reference]
+          ;;FIXME: omit target URL
+          :placeholder "Reference URL or search terms"]
+     (when message
+       [deco/error-msg message])]))
 
 (defn specify-reference-summary []
   (let [selection @(rf/subscribe [:selected-url [::fab/specify-reference]])
-        text (if (empty? selection) "Set a Reference" (str "Reference: " selection))]
+        text (cond
+               (empty? selection) "Set a Reference"
+               (misc/iid? selection)
+               (str "Reference: Opinion: " @(rf/subscribe [:proper-title selection]))
+               :else (str "Reference: " selection))]
     [step/summary-button :reference text]))
 
+(defn choose-adjusted-reference []
+  (let [{:keys [adjusted]} @(rf/subscribe [:reference-adjustment])]
+    [rc/button
+     :label "Next (Corrected Reference)"
+     :on-click (fn []
+                 (rf/dispatch [::ug/choose-adjusted-url
+                               [::fab/specify-reference]
+                               adjusted])
+                 (rf/dispatch [::step/next]))] ))
+
+(defn choose-original-reference []
+  [rc/button
+   :label "Next (Accept as Entered)"
+   :on-click (fn []
+               (rf/dispatch [::ug/choose-original-url
+                             [::fab/specify-reference]])
+               (rf/dispatch [::step/next]))])
+
 (defn reference-buttons []
-  [step/button-box (step/button-spacer nil [[step/next-button "Accept"]])])
+  (let [url @(rf/subscribe [:selected-url [::fab/specify-reference]])
+        {:keys [message adjusted]} @(rf/subscribe [:reference-adjustment])]
+    [step/button-box
+     (step/button-spacer
+      [[step/previous-button nil]]
+      (cond
+        (and message adjusted)
+        [[choose-original-reference] [choose-adjusted-reference]]
+        message
+        [[choose-adjusted-reference]]
+        :else
+        [(if (empty? url) [step/next-button-disabled] [step/next-button nil])]))]))
 
 (defn opine []
   (let [messages @(rf/subscribe [:opinion-post-messages])]

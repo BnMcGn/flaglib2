@@ -15,6 +15,11 @@
  (fn [db _]
    (misc/target-adjust (ug/unmodified-selected-from-db [::specify-target] db))))
 
+(rf/reg-sub
+ :reference-adjustment
+ (fn [db _]
+   (misc/target-adjust (ug/unmodified-selected-from-db [::specify-reference] db))))
+
 (rf/reg-sub ::review-text :-> ::review-text)
 
 (rf/reg-flow
