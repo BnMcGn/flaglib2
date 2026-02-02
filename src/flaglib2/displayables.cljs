@@ -465,13 +465,14 @@
                        (let [vis @(rf/subscribe [:visibility id])]
                          (= :show (:list-display vis))))
                      idlist)]
-    [:div
-     {:class "mt-4"}
-     [:h3 "Replies:"]
-     (into [:div] (map #(vector thread-opinion :opid %1) (if show? idlist vislist)))
-     (if show?
-       [unhidden-items (count hidlist)]
-       [hidden-items hidlist])]))
+    (when-not (empty? idlist)
+      [:div
+       {:class "mt-4"}
+       [:h3 "Replies:"]
+       (into [:div] (map #(vector thread-opinion :opid %1) (if show? idlist vislist)))
+       (if show?
+         [unhidden-items (count hidlist)]
+         [hidden-items hidlist])])))
 
 (defn opinion-casual [opid]
   (let [opinion @(rf/subscribe [:opinion-store opid])
