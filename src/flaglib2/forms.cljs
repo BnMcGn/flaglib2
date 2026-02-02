@@ -258,11 +258,12 @@
         :class (misc/class-string (tw-btn-danger))])]))
 
 (defn specify-reference []
-  (let [{:keys [message]} @(rf/subscribe [:reference-adjustment])]
+  (let [{:keys [message]} @(rf/subscribe [:reference-adjustment])
+        target (:target @(rf/subscribe [:current-opinion]))]
     [:<>
      [ug/url-search [::fab/specify-reference]
-          ;;FIXME: omit target URL
-          :placeholder "Reference URL or search terms"]
+      :hide #{target}
+      :placeholder "Reference URL or search terms"]
      (when message
        [deco/error-msg message])]))
 

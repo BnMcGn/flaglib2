@@ -7,14 +7,15 @@
 
    [flaglib2.deco :as deco]
    [flaglib2.misc :as misc]
+   [flaglib2.subscriptions :as subs]
    [flaglib2.displayables :as disp]))
 
 
 (rf/reg-sub
  :url-search-results
- (fn [db [_ location]]
+ (fn [db [_ location hide]]
    (let [search (::search (get-in db location))
-         aurls (:flaglib2.fetchers/author-urls db)
+         aurls (subs/author-urls db hide)
          titles (:title-store db)]
      (when (and (not-empty search) aurls)
        (let [fus (js/Fuse. (clj->js (misc/reformat-urls-lists aurls titles))
@@ -90,11 +91,11 @@
            :display-depth 0]
    :on-click (fn [] (rf/dispatch [::enter-search location itm :is-click? true]))])
 
-(defn display-urls-in-categories [location]
+(defn display-urls-in-categories [location & {:keys [hide]}]
   (let [labels {:rooturls "Previous Targets"
                 :references "Previous References"
                 :replies "References from replies to your posts"}
-        aurls @(rf/subscribe [:flaglib2.fetchers/author-urls])]
+        aurls @(rf/subscribe [:flaglib2.fetchers/author-urls hide])]
     [rc/v-box
      :children
      (reduce into
@@ -105,8 +106,8 @@
                       (for [itm (take 20 items)]
                         [:li [suggest-button location itm]]))]))]))
 
-(defn display-searched-urls [location]
-  (let [aurls @(rf/subscribe [:url-search-results location])]
+(defn display-searched-urls [location & {:keys [hide]}]
+  (let [aurls @(rf/subscribe [:url-search-results location hide])]
     (when (not-empty aurls)
       (into [:ul {:class "ml-2 sm:list-inside sm:[list-style-image:url(/static/img/target-simple.svg)]"}]
            (for [itm (take 40 aurls)
@@ -124,7 +125,8 @@
  (fn [db [_ location]]
    (update-in db location assoc ::search "" ::selection "")))
 
-(defn url-search [location & {:keys [placeholder]}]
+(defn url-search [location & {:keys [placeholder hide]}]
+  "hide must be a set of urls to not show in the search suggestions"
   (let [search @(rf/subscribe [::search location])
         search-res @(rf/subscribe [:url-search-results location])
         suppress @(rf/subscribe [::suppress-search-results location])]
@@ -135,8 +137,8 @@
       :model search
       :on-change (fn [ev] (rf/dispatch [::enter-search location ev]))]
      (if (and (not suppress) search-res)
-       [display-searched-urls location]
-       [display-urls-in-categories location])]))
+       [display-searched-urls location :hide hide]
+       [display-urls-in-categories location :hide hide])]))
 
 ;;Unused...
 (defn clear-button [location]

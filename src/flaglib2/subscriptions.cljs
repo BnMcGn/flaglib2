@@ -17,10 +17,17 @@
  (fn [db _]
    (:root-element db)))
 
+(defn author-urls [db hide]
+  (if (not (empty? hide))
+    (into {}
+          (for [[cat items] (:flaglib2.fetchers/author-urls db)]
+            [cat (remove #(hide %) items)]))
+    (:flaglib2.fetchers/author-urls db)))
+
 (rf/reg-sub
  :flaglib2.fetchers/author-urls
- (fn [db _]
-   (:flaglib2.fetchers/author-urls db)))
+ (fn [db [_ hide]]
+   (author-urls db hide)))
 
 (rf/reg-sub
  :advanced-options
