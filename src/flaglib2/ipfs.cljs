@@ -22,11 +22,12 @@
        (.replaceAll (misc/encode-uri-component2 rooturl) "%" "*")
        "/" rtype ".data"))
 
+(def ^:dynamic http-xhrio :http-xhrio)
 (rf/reg-event-fx
  ::request-rooturl-item
  (fn [{:keys [db]} [_ rooturl resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
-   {:http-xhrio {:method :get
+   {http-xhrio {:method :get
                  :uri (rooturl-data-url (:ipns-host db) rooturl resource-type)
                  :timeout 18000
                  :response-format (ajax/text-response-format)
@@ -40,7 +41,7 @@
  ::request-opinion-item
  (fn [{:keys [db]} [_ iid resource-type]]
    ;;FIXME: could add indicator to db that request is pending...
-   {:http-xhrio {:method :get
+   {http-xhrio {:method :get
                  :uri (opinion-data-url (:ipns-host db) iid resource-type)
                  :timeout 18000
                  :response-format (ajax/text-response-format)
@@ -160,7 +161,7 @@
 (rf/reg-event-fx
  ::request-grouped
  (fn [{:keys [db]} _]
-   {:http-xhrio {:method :get
+   {http-xhrio {:method :get
                  :uri (data-url (:ipns-host db) "/subjective/default/grouped.data")
                  :timeout 18000
                  :response-format (ajax/text-response-format)
