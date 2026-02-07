@@ -23,6 +23,8 @@
 
 (def rooturl "http://fake.fake/")
 
+(def created "2020-03-16T06:29:59+0000")
+
 (def opin-template
   ";;OpinML 0.0.1 :s-expression
   (:target \"%s\" :rooturl \"%s\" :flag %s  :comment \"%s\" :created \"%s\" :tree-address %s
@@ -38,14 +40,14 @@
 (def opinions
   [(make-string-opinion
     :iid (tid 0) :target rooturl :rooturl rooturl :flag '(:positive :like)
-    :tree-address (list (tid 0)))
+    :tree-address (list (tid 0)) :created created)
    (make-string-opinion
     :iid (tid 1) :target (tid 0) :rooturl rooturl :flag '(:positive :evidence)
-    :tree-address (list (tid 0) (tid 1)) :reference "http://totally.fake/")
+    :tree-address (list (tid 0) (tid 1)) :reference "http://totally.fake/" :created created)
    (make-string-opinion
     :iid (tid 2) :target "http://looks.fake/" :rooturl "http://looks.fake/"
     :flag '(:negative :evidence) :tree-address (list (tid 2))
-    :reference (tid 0))])
+    :reference (tid 0) :created created)])
 
 (def optree
   (gstring/format "((\"%s\" (\"%s\")))" (tid 0) (tid 1)))
@@ -94,22 +96,18 @@ ERROR - Page not available for extraction
      (rf/dispatch [::ipfs/received-warstats (tid 0) warstat-template])
      (rf/dispatch [::ipfs/received-warstats (tid 1) warstat-template])
      (rf/dispatch [::ipfs/received-warstats (tid 2) warstat-template])
-     (async done
-       (js/setTimeout
-        (fn []
-          (let [rtext @(rf/subscribe [:text-store rooturl])
-                op0 @(rf/subscribe [:opinion-store (tid 0)])
-                ws0 @(rf/subscribe [:warstats-store (tid 0)])
-                refs @(rf/subscribe [:references rooturl])
-                rootrefd @(rf/subscribe [:refd rooturl])
-                oprefd @(rf/subscribe [:refd (tid 0)])]
-            (is (string? (:text rtext)))
-            (is (= "year" (second (misc/ago (:created op0)))))
-            (is (= "year" (second (misc/ago (:tree-freshness ws0)))))
-            (is (= (tid 2) (first rootrefd)))
-            (is (= (tid 2) (first oprefd)))
-            (is (= "http://totally.fake/" (first refs)))
-            (done)))
-        2000)))))
+     (rf/dispatch [::ipfs/complete-debounce])
+     (let [rtext @(rf/subscribe [:text-store rooturl])
+           op0 @(rf/subscribe [:opinion-store (tid 0)])
+           ws0 @(rf/subscribe [:warstats-store (tid 0)])
+           refs @(rf/subscribe [:references rooturl])
+           rootrefd @(rf/subscribe [:refd rooturl])
+           oprefd @(rf/subscribe [:refd (tid 0)])]
+       (is (string? (:text rtext)))
+       (is (= "years" (second (misc/ago (:created op0)))))
+       (is (= "years" (second (misc/ago (:tree-freshness ws0)))))
+       (is (= (tid 2) (first rootrefd)))
+       (is (= (tid 2) (first oprefd)))
+       (is (= "http://totally.fake/" (first refs)))))))
 
 
