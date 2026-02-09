@@ -65,12 +65,12 @@
     "http://totally.fake/" (tid 1) (tid 2)))
 
 (def text
-  "(:text-source \"pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeex\"
+  "(:text-source \"pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeexx\"
  :text
   \"This might be a page text, but probably not.\"
  :competitors
   (\"http://fake.fake/\"
-  \"pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeey\")
+  \"pnnkaeeeebaeebaeebaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebaeeeyy\")
   :initial-message \"INFO - Crawly: url-search 0 results from COMMON-CRAWL
 WARN - Common Crawl: URL not found
 INFO - Crawly: url-search 1 result from INTERNET-ARCHIVE
@@ -96,6 +96,7 @@ ERROR - Page not available for extraction
      (rf/dispatch [::ipfs/received-warstats (tid 0) warstat-template])
      (rf/dispatch [::ipfs/received-warstats (tid 1) warstat-template])
      (rf/dispatch [::ipfs/received-warstats (tid 2) warstat-template])
+     ;;FIXME: Should test that various requests get triggered. See :fake event
      (rf/dispatch [::ipfs/complete-debounce])
      (let [rtext @(rf/subscribe [:text-store rooturl])
            op0 @(rf/subscribe [:opinion-store (tid 0)])

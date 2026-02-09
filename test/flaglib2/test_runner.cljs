@@ -16,5 +16,8 @@
    [figwheel.main.testing :refer [run-tests-async]]
    [cljs-test-display.core]))
 
+
+
+
 (defn -main [& args]
   (run-tests-async 5000 (cljs-test-display.core/init!)))

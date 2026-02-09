@@ -99,7 +99,14 @@
  :refd
  (fn [db [_ key]]
    (if key
-     (get-in db [:refd key])
+     (if (misc/iid? key)
+       (let [root (get-in db [:opinion-store key :rooturl])
+             refds (get-in db [:refd root])]
+         (for [iid refds
+               :let [opinion (get-in db [:opinion-store iid])]
+               :when (and opinion (= key (:reference opinion)))]
+           iid))
+       (get-in db [:refd key]))
      (:refd db))))
 
 (defn proper-text [db key]
