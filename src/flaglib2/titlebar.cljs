@@ -134,28 +134,34 @@
 
 (defn reply-link-menu [body & {:keys [popover-content button-label]}]
   (let [menu? (r/atom nil)
-        tooltip? (r/atom nil)]
-    [rc/popover-anchor-wrapper
-     :class "mr-3"
-     :showing? (and (seq popover-content) tooltip? (not menu?))
-     :position :below-right
-     :popover [rc/popover-content-wrapper
-               :body popover-content]
-     :anchor
-     [rc/popover-anchor-wrapper
-      :showing? menu?
-      :position :below-right
-      :anchor   [rc/button
-                 :class (tw-btn (tw-btn-default))
-                 :label button-label
-                 :attr {:on-mouse-over #(do (reset! tooltip? true) nil)
-                        :on-mouse-out  #(do (reset! tooltip? false) nil)}
-                 :on-click #(do (swap! menu? not) false)]
-      :popover  [rc/popover-content-wrapper
-                 :arrow-width 0
-                 :arrow-length 0
-                 :close-button? false
-                 :body body]]]))
+        tooltip? (r/atom nil)
+        username (misc/username)]
+    (if username
+      [rc/popover-anchor-wrapper
+       :class "mr-3"
+       :showing? (and (seq popover-content) tooltip? (not menu?))
+       :position :below-right
+       :popover [rc/popover-content-wrapper
+                 :body popover-content]
+       :anchor
+       [rc/popover-anchor-wrapper
+        :showing? menu?
+        :position :below-right
+        :anchor   [rc/button
+                   :class (tw-btn (tw-btn-default))
+                   :label button-label
+                   :attr {:on-mouse-over #(do (reset! tooltip? true) nil)
+                          :on-mouse-out  #(do (reset! tooltip? false) nil)}
+                   :on-click #(do (swap! menu? not) false)]
+        :popover  [rc/popover-content-wrapper
+                   :arrow-width 0
+                   :arrow-length 0
+                   :close-button? false
+                   :body body]]]
+      [rc/button
+       :class deco/button-disabled
+       :label "Login to Reply"
+       :disabled? true])))
 
 (defn target-link-url [& {:keys [target excerpt offset flag title-or-text suggest]}]
   (let [base "/opinion/"
