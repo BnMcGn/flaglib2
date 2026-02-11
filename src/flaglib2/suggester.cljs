@@ -42,6 +42,12 @@
         (rf/dispatch [::hide-suggester location])))
     true))
 
+;;FIXME: Don't know what this is supposed to do, or if it is necessary
+(rf/reg-event-db
+ ::hide-suggester
+ (fn [db [_ location]]
+   db))
+
 (rf/reg-event-db
  ::activate-suggestion-next
  (fn [db [_ location]]

@@ -151,7 +151,7 @@ And the light shineth in darkness; and the darkness comprehended it not.")
             :text-store {rootkey {:text text}}
             :opinion-tree-store
             {rootkey (list (list iid))}}]
-    (rf/dispatch-sync [:initialize db])
+    (rf/dispatch [:initialize db])
     (let [res (hilited/make-segments rootkey)
           el (js/document.createElement "div")]
       (rdom/render (into [:div] res) el)
