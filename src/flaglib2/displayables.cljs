@@ -234,8 +234,8 @@
       (= :not-found cinfo)
       [thread-excerpt-display
        :status :not-found
-       :chunks [(mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])
-                (:excerpt opinion)]]
+       :chunks [[(mood/flavor+freshness @(rf/subscribe [:core-db]) [opid])
+                 (:excerpt opinion)]]]
       (= :warn-off cinfo)
       [thread-excerpt-display
        :status :warn-off
