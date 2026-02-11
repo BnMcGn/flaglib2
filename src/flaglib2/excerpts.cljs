@@ -109,7 +109,12 @@
         estart position
         eend (+ offset estart)
         [tstart tend] (excerpt-context-position text position offset)
-        leading-context (subs text (if tstart (+ 1 tstart) 0) estart)
+        leading-context (subs text
+                              (cond
+                                (not tstart) 0
+                                (zero? tstart) 0
+                                :else (+ 1 tstart))
+                               estart)
         excerpt (subs text estart eend)
         trailing-context (subs text eend (or tend tlength))]
     {:leading leading-context :trailing trailing-context :excerpt excerpt}))
