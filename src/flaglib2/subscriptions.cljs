@@ -4,7 +4,8 @@
    [flaglib2.misc :as misc]
    [flaglib2.userfig :as userfig]
 
-   [clojure.walk :as walk]))
+   [clojure.walk :as walk]
+   [clojure.set :as set]))
 
 
 (rf/reg-sub
@@ -92,7 +93,12 @@
  :reference-opinions
  (fn [db [_ key]]
    (if key
-     (get-in db [:reference-opinions key])
+     (if (misc/iid? key)
+       (let [root (get-in db [:opinion-store key :rooturl])
+             refops (get-in db [:reference-opinions root])
+             children (flatten (misc/get-sub-tree db [nil key]))]
+         (into [] (set/intersection (set refops) (set children))))
+       (get-in db [:reference-opinions key]))
      (:reference-opinions db))))
 
 (rf/reg-sub
