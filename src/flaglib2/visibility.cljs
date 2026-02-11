@@ -188,7 +188,7 @@
  :visibility-show-all
  :<- [:server-parameters]
  (fn [params _]
-   (get-in params [:default :showall])))
+   (:showall params)))
 
 (defn set-show-all [url val]
   (uri/setParam url "showall" val))
