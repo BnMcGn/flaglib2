@@ -91,14 +91,21 @@
 
 ;;FIXME: might want magnitude to adjust proportionately to other axes
 (defn display-warstats [& {:keys [warstats target-id class black]}]
-  (let [warstats (or warstats
+  (let [ref-stats
+        {:x-down :x-down-refs :x-up :x-up-refs :x-right :x-right-refs :x-wrong :x-wrong-refs}
+        warstats (or warstats
                      (when target-id
                        @(rf/subscribe [:warstats-store target-id])))
         listof (misc/is-list-of-things? warstats)
         make-icon
         (fn [axis]
           (let [stat (get warstats axis)
-                stat (if (list? stat) (count stat) stat)
+                stat (if (list? stat)
+                       (count stat)
+                       (let [x (if (integer? stat) stat 0)
+                             r (get warstats (get ref-stats axis))
+                             r (if (integer? r) r 0)]
+                         (+ r x)))
                 mag (if (integer? stat) (mood/magnitude stat) 0)
                 opacity (if black "opacity-50" "opacity-25")
                 opacity (when (or (not stat) (zero? stat)) (str " " opacity))

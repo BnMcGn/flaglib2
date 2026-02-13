@@ -59,8 +59,11 @@
         warstats @(rf/subscribe [:warstats-store targetid])
         colsize 20
         col2 70
-        highest (max (:x-right warstats) (:x-wrong warstats)
-                     (:x-up warstats) (:x-down warstats))
+        x-right (+ (int (:x-right warstats)) (int (:x-right-refs warstats)))
+        x-wrong (+ (int (:x-wrong warstats)) (int (:x-wrong-refs warstats)))
+        x-up (+ (int (:x-up warstats)) (int (:x-up-refs warstats)))
+        x-down (+ (int (:x-down warstats)) (int (:x-down-refs warstats)))
+        highest (max x-right x-wrong x-up x-down)
         height-range-adjust
         (fn [val]
           (max 1 (misc/as-in-range
@@ -76,27 +79,27 @@
                :transform (translate (m 3) (m 0))}
          [positive-bar
           :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
-          :label (:x-up warstats)
+          :label x-up
           :title "Up"
-          :height (height-range-adjust (:x-up warstats))
+          :height (height-range-adjust x-up)
           :transform (translate colsize 0)]
          [positive-bar
           :style {:fill "#80ff80" :stroke "black" :strokeWidth "1"}
-          :label (:x-right warstats)
+          :label x-right
           :title "Right"
-          :height (height-range-adjust (:x-right warstats))
+          :height (height-range-adjust x-right)
           :transform (translate col2 0)]
          [negative-bar
           :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
-          :label (:x-down warstats)
+          :label x-down
           :title "Down"
-          :height (height-range-adjust (:x-down warstats))
+          :height (height-range-adjust x-down)
           :transform (translate colsize centerline)]
          [negative-bar
           :style {:fill "#ff8080" :stroke "black" :strokeWidth "1"}
-          :label (:x-wrong warstats)
+          :label x-wrong
           :title "Wrong"
-          :height (height-range-adjust (:x-wrong warstats))
+          :height (height-range-adjust x-wrong)
           :transform (translate col2 centerline)]]])]))
 
 (defn display-summary-word [targetid & {:keys [class]}]
