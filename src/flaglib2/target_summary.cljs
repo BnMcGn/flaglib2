@@ -151,9 +151,9 @@
         model (r/atom override)]
     (when (or warnoff override)
       [:div
-       [:span (str "This " typedesc " " segdesc ". Use the checkbox to make it visible.")]
+       [:span (str "This " typedesc " " segdesc ". Use the checkbox to adjust visibility.")]
        [rc/checkbox
-        :model
+        :model model
         :on-change (fn [new-value]
                      (if new-value
                        (rf/dispatch [:set-warn-off-override key])
