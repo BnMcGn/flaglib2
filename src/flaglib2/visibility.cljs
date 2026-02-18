@@ -161,7 +161,8 @@
  {:id :visibility
   :inputs {:warstats-store [:warstats-store]
            :opinion-store [:opinion-store]
-           :opinion-tree-store [:opinion-tree-store]}
+           :opinion-tree-store [:opinion-tree-store]
+           :local [:local]}
   :output
   (fn [db]
     (let [vis (into {}
@@ -204,20 +205,21 @@
           :border-color "#444"}))
 
 (defn warn-off-inactive? [db key]
-  (and (:username db)
-       (get-in db [:local :warn-off-overrides])))
+  (when (misc/username)
+    (let [ovs (get-in db [:local :warn-off-overrides])]
+      (and (set? ovs) (ovs key)))))
 
 (rf/reg-event-fx
  :set-warn-off-override
  [init/save-to-local]
  (fn [{:keys [db]} [_ key]]
-   (update-in db [:local :warn-off-overrides] #(conj % key))))
+   {:db (update db :warn-off-overrides #(conj (or % #{}) key))}))
 
 (rf/reg-event-fx
  :remove-warn-off-override
  [init/save-to-local]
  (fn [{:keys [db]} [_ key]]
-   (update-in db [:local :warn-off-overrides] #(disj % key))))
+   {:db (update db :warn-off-overrides  #(disj (or % #{}) key))}))
 
 
 ;;FIXME: Move to things?

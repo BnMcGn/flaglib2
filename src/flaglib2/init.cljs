@@ -4,6 +4,7 @@
    [goog.object :as go]
    [reagent.dom :as rdom]
    [re-frame.alpha :as rf]
+   [clojure.reader]
 
    [re-com.popover]
 
@@ -51,24 +52,28 @@
     (rf/dispatch [:userfig/store-user-info (js->clj (go/get js/window "USERFIGDATA"))])
     (rf/dispatch [(keyword (:entry-point config)) key])))
 
-(def local-store-keys ["advanced" "warn-off-overrides"])
+(def local-store-keys [:advanced :warn-off-overrides])
 
 (defn do-save-to-local [storg]
   (doseq [[k v] storg]
     (.setItem js/localStorage (str k) v)))
 
+(defn fetch-local-store []
+  (let [res (into {}
+                  (for [key local-store-keys]
+                    [key (.getItem js/localStorage (str key))]))]
+    (update res :warn-off-overrides clojure.reader/read-string)))
+
 (rf/reg-cofx
  :fetch-local-store
  (fn [cofx _]
-   (assoc cofx :local-store (into {}
-                                  (for [key local-store-keys]
-                                    [(keyword key) (.getItem js/localStorage key)])))))
+   (assoc cofx :local-store (fetch-local-store))))
 
 (rf/reg-event-fx
  :initialize-local-store
  [(rf/inject-cofx :fetch-local-store)]
  (fn [{:keys [db fetch-local-store]}]
-   {:db (assoc db :local fetch-local-store)}))
+   {:db (assoc db :local (or fetch-local-store {}))}))
 
 (def save-to-local [(rf/path :local) (rf/after do-save-to-local)])
 
