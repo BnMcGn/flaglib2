@@ -151,7 +151,10 @@
         model (r/atom override)]
     (when (or warnoff override)
       [:div
-       [:span (str "This " typedesc " " segdesc ". Use the checkbox to adjust visibility.")]
+       {:class "border-[3px] border-black justify-center content-center justify-items-center"
+        :style {:display "grid"}}
+       [:p (str "This " typedesc " " segdesc ".")]
+       [:p "Restore visibility:"]
        [rc/checkbox
         :model model
         :on-change (fn [new-value]
