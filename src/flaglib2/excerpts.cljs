@@ -166,6 +166,7 @@
 (defn segments-func [[db opinion-ids] [_ key]]
    (let [opinion (when (misc/iid? key) (get-in db [:opinion-store key]))
          tree-address (if opinion (:tree-address opinion) '())
+         parent-vis (get-in db [:visibility key])
          opins
          (for [iid opinion-ids
                :let [opinion (get-in db [:opinion-store iid])]]
@@ -192,7 +193,7 @@
          :id-of-text key ;Need this?
          :tree-address tree-address
          :warn-offs warns
-         :warn-off? (not (empty? warns))
+         :warn-off? (and (not (empty? warns)) (not (:warn-off-override parent-vis)))
          :start start
          :end end}))))
 

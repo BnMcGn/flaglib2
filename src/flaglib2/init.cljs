@@ -72,8 +72,8 @@
 (rf/reg-event-fx
  :initialize-local-store
  [(rf/inject-cofx :fetch-local-store)]
- (fn [{:keys [db fetch-local-store]}]
-   {:db (assoc db :local (or fetch-local-store {}))}))
+ (fn [{:keys [db local-store]}]
+   {:db (assoc db :local (or local-store {}))}))
 
 (def save-to-local [(rf/path :local) (rf/after do-save-to-local)])
 

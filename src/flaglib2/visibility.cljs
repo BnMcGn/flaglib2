@@ -154,7 +154,7 @@
     (cond-> {}
       override (assoc :warn-off-override true)
       (not override) (assoc :warn-off warnoff)
-      (and warnoff (not override) (zero? nonex))
+      (and warnoff (zero? nonex))
       (assoc :warn-off-excerpt-only true))))
 
 (rf/reg-flow
