@@ -128,6 +128,9 @@
                   '(:x-up :x-down :x-wrong-source :x-right-source)
                   '(:x-up :x-down :x-right :x-wrong))))]))
 
+(defn display-effect [& {:keys [warstats]}]
+  [:span (or (:effect warstats) "")])
+
 (defn date-stamp [opinion]
   (let [created (:created opinion)
         [quantity unit] (misc/ago (:created opinion))]
@@ -341,6 +344,7 @@
      :date-stamp [date-stamp opinion]
      :author-long [author-long opinion]
      :warstats [display-warstats :warstats warstats]
+     :effect [display-effect :warstats warstats]
      :count [reply-count :warstats warstats]
      ;;FIXME: need proper spec for no visible comment. Factor in hashtags?
      :comment? (not (empty? (:clean-comment opinion)))

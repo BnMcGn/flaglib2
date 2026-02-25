@@ -8,6 +8,7 @@
    [flaglib2.misc :as misc]
    [flaglib2.ipfs]
    [flaglib2.flags :as flags]
+   [flaglib2.titlebar :as tb]
    [flaglib2.displayables :as disp]
    [flaglib2.mood :as mood]))
 
@@ -179,6 +180,51 @@
       [:span "In conversation:"] [:span total]
       [:span "As excerpts:"] [:span excerpts]]]))
 
+(defn score-contribution-section [label items wstore]
+  (let [db @(rf/subscribe [:core-db])
+        small @(rf/subscribe [:window-small?])
+        fields (if small
+                 [:effect :opinion-icon :author-long]
+                 [:effect :opinion-icon :flag-name :date-stamp :author-long :warstats])
+        items (sort-by #(get-in wstore [% :effect] 0) items)]
+    (into [:div [:h4 label]]
+          (for [i items
+                :let [tbstuff (tb/opinion-tb-stuff i db)]]
+            (into [:div {:class (:bg-color tbstuff)}]
+                  (tb/assemble-bar-parts tbstuff fields))))))
+
+(defn score-contributions [targetid]
+  (let [warstats @(rf/subscribe [:warstats-store targetid])
+        wstore @(rf/subscribe [:warstats-store])
+        ostore @(rf/subscribe [:opinion-store])
+        children @(rf/subscribe [:immediate-children targetid])
+        other-flags (into #{} flags/other-flags)
+        children (for [c children
+                       :let [opinion (get ostore c)
+                             wstat (get wstore c)]
+                       :when (and (other-flags (:flag opinion))
+                                  (> 0 (get wstat :effect 0)))]
+                   c)
+        {:keys [x-up-source x-down-source x-right-source x-wrong-source]} warstats]
+
+    (when-not (every?
+               zero?
+               (map
+                count
+                [x-up-source x-down-source x-right-source x-wrong-source children]))
+      [:div
+       [:h3 "Score Contributions"]
+       (when-not (empty? x-up-source)
+         [score-contribution-section "Up" x-up-source])
+       (when-not (empty? x-down-source)
+         [score-contribution-section "Down" x-down-source])
+       (when-not (empty? x-right-source)
+         [score-contribution-section "Right" x-right-source])
+       (when-not (empty? x-wrong-source)
+         [score-contribution-section "Wrong" x-wrong-source])
+       (when-not (empty? children)
+         [score-contribution-section "Flags" children])])))
+
 (defn references-summary [targetid]
   (let [references @(rf/subscribe [:reference-opinions targetid])
         opstore @(rf/subscribe [:opinion-store])]
@@ -284,6 +330,7 @@
       [summary-scores-chart rooturl]
       [display-other-flags rooturl]
       [warn-off-toggle rooturl]]
+    [score-contributions rooturl]
     [references-summary rooturl]
     [refd-summary rooturl]
     [questions-and-answers rooturl]
@@ -299,6 +346,7 @@
      [summary-scores-chart iid]
      [display-other-flags iid]
      [warn-off-toggle iid]]
+    [score-contributions iid]
     [references-summary iid]
     [refd-summary iid]
     [questions-and-answers iid]
