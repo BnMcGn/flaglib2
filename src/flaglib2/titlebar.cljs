@@ -129,7 +129,7 @@
                   '(:x-up :x-down :x-right :x-wrong))))]))
 
 (defn display-effect [& {:keys [warstats]}]
-  [:span (or (:effect warstats) "")])
+  [:span {:class "bold"}(or (:effect warstats) "")])
 
 (defn date-stamp [opinion]
   (let [created (:created opinion)

@@ -190,7 +190,8 @@
     (into [:div [:h4 label]]
           (for [i items
                 :let [tbstuff (tb/opinion-tb-stuff i db)]]
-            (into [:div {:class (:bg-color tbstuff)}]
+            (into [:div {:style  {:background-color (:bg-color tbstuff)}
+                         :class "flex flex-row gap-4 items-center"}]
                   (tb/assemble-bar-parts tbstuff fields))))))
 
 (defn score-contributions [targetid]
