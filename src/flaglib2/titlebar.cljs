@@ -336,7 +336,7 @@
 
 (defn opinion-tb-stuff [iid db & {:keys [reply-excerpt reply-offset warstats]}]
   (let [warstats (or warstats (get (:warstats-store db) iid))
-        opinion (get-in db [:warstats-store iid])]
+        opinion (get-in db [:opinion-store iid])]
     {:tree-address [display-tree-address opinion]
      :icon (flag-icon (:flag opinion))
      :flag-name [flag-name opinion]

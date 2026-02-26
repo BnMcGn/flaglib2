@@ -203,10 +203,9 @@
                        :let [opinion (get ostore c)
                              wstat (get wstore c)]
                        :when (and (other-flags (:flag opinion))
-                                  (> 0 (get wstat :effect 0)))]
+                                  (< 0 (get wstat :effect 0)))]
                    c)
         {:keys [x-up-source x-down-source x-right-source x-wrong-source]} warstats]
-
     (when-not (every?
                zero?
                (map
