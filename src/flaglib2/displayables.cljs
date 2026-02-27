@@ -300,11 +300,14 @@
 
 ;;FIXME: refactor -> *-tb-stuff
 (defn reference [opinion & {:keys [minify style hide-warstats hide-external-link]}]
-  (let [ref (or (:refd-opinion opinion) (:reference opinion))]
+  (let [ref (or (:refd-opinion opinion) (:reference opinion))
+        icon (if (misc/has-effect? @(rf/subscribe [:warstats-store ref]))
+               "/static/img/white-reference.svg"
+               "/static/img/red-reference.svg")]
     [:div
      {:class "text-white bg-black flex flex-row items-center gap-4 pl-2 pb-0.5"
       :style style}
-     [:img {:src "/static/img/white-reference.svg"
+     [:img {:src icon
             :class (if minify "min-w-[21] h-[23] shrink-0" "min-w-[42px] h-[45px]")}]
      [(if (misc/iid? ref) reference-excerpt-display reference-root-display)
       ref :minify minify :hide-warstats hide-warstats :hide-external-link hide-external-link]]))

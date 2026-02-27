@@ -363,7 +363,9 @@
 
 (defn reference-tb-stuff [reference db & {:keys [warstats]}]
   (let [warstats (or warstats (get-in db [:warstats-store reference]))]
-    {:icon "/static/img/white-reference.svg"
+    {:icon (if (misc/has-effect? warstats)
+             "/static/img/white-reference.svg"
+             "/static/img/red-reference.svg")
      :icon-size "min-w-[42px] h-[45px]"
      :icon-size-mini "min-w-[21px] h-[23px]"
      :bg-color "bg-black"

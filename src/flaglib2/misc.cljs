@@ -156,6 +156,10 @@
 (defn is-answered? [warstats]
   (:question-answered warstats))
 
+(defn has-effect? [warstats]
+  (let [effect (:effect warstats)]
+    (and effect (< 0 effect))))
+
 (defn is-list-of-things? [warstats]
   (let [q (is-question? warstats)]
     (when q
