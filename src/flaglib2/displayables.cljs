@@ -159,25 +159,29 @@
                               :hide-text true])])]))
 
 (defn sub-opinion-list [excerpt-opinions
-                        & {:keys [excerpt tree-address root-target-url]}]
+                        & {:keys [excerpt tree-address root-target-url warn-off?]}]
   (let [opstore @(rf/subscribe [:opinion-store])
+        user (misc/username)
         items
         (if (< 1 (count excerpt-opinions))
           (for [itm excerpt-opinions]
             [opinion-summary itm])
-          [[opinion-info (first excerpt-opinions)]])]
+          [[opinion-info (first excerpt-opinions)]])
+        message
+        (cond
+          (empty? user) [:span "Log in to reply to the excerpt"]
+          warn-off? [:span "Excerpt is restricted. See summary page."]
+          :else [:a {:href (misc/excerpt-reply-link
+                            (if (empty? tree-address)
+                              root-target-url
+                              (last tree-address))
+                            excerpt)
+                     :style {:color "black"}
+                     :class "m-0 bold italic bg-gray-300 leading-4"}
+                 "Reply to the excerpt"])]
     (into [:div
            ;;FIXME: what about offset?
-           [:div
-            {:class "mb-2"}
-            [:a {:href (misc/excerpt-reply-link
-                        (if (empty? tree-address)
-                          root-target-url
-                          (last tree-address))
-                        excerpt)
-                 :style {:color "black"}
-                 :class "m-0 bold italic bg-gray-300 leading-4"}
-             "Reply to the excerpt"]]]
+           [:div {:class "mb-2"} message]]
           items)))
 
 (defn hilited-text [& {:keys
