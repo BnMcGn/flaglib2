@@ -51,24 +51,25 @@
  :toggle-active-popup
  (fn [db [_ id]]
    (let [active (::active-popup db)]
-     (assoc db ::active-popup
-            ;;Due to not figuring out the stopPropagation thing:
-            ;; click on hilite when popup active will cause a double cancel, resulting in
-            ;; popup not going away. So parent sends :parent-override, which we handle by wrapping
-            ;; existing id in a vector to deactivate.
-            (if (= id :parent-override)
-              (if (vector? active)
-                nil
-                (if active
-                  [active]
-                  nil))
-              (if (vector? active)
-                (if (= [id] active)
-                  nil
-                  id)
-                (if (= id active)
-                  nil
-                  id)))))))
+     (assoc
+      db ::active-popup
+      ;;Due to not figuring out the stopPropagation thing:
+      ;; click on hilite when popup active will cause a double cancel, resulting in
+      ;; popup not going away. So parent sends :parent-override, which we handle by wrapping
+      ;; existing id in a vector to deactivate.
+      (if (= id :parent-override)
+        (if (vector? active)
+          nil
+          (if active
+            [active]
+            nil))
+        (if (vector? active)
+          (if (= [id] active)
+            nil
+            id)
+          (if (= id active)
+            nil
+            id)))))))
 
 (rf/reg-event-db
  :reset-active-popup
@@ -109,7 +110,10 @@
           ;;Rationale: we want a popup on click unless the user is trying to select an excerpt. So
           ;; check for selection. But we want to get rid of active popup in any case of a click or
           ;; drag.
-          (if (empty? (.. rangy (getSelection) (toString)))
+          ;; Bug in rangy? Contents of visibility:hidden span get selected when clicked
+          ;; We shouldn't be allowing selection of restricted stuff anyways, so this
+          ;; work-around should be ok.
+          (if (or (empty? (.. rangy (getSelection) (toString))) warn-off?)
             (rf/dispatch [:toggle-active-popup segment-id])
             (rf/dispatch [:reset-active-popup])))
         textspan

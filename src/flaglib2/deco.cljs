@@ -63,7 +63,7 @@
 
 (def patch "border-dashed border border-slate-800")
 
-(def button-disabled "text-gray-500 bg-gray-900")
+(def button-disabled "text-gray-500 bg-gray-700")
 
 (defn wf-arrow
   "Render the triangle which connects the popover to the anchor (using SVG)"
