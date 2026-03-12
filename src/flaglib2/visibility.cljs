@@ -147,13 +147,12 @@
 (defn list-item-display-policy [db id]
   (let [warstats (get-in db [:warstats-store id])
         word (mood/in-a-word warstats)
-        warnoff (when (#{:restricted :contested} word)
-                  (warn-off? warstats))
+        warnoff (warn-off? warstats)
         override (warn-off-inactive? db id)
         nonex (count-of-non-excerpt-concealing-opinion-effects db id)]
     (cond-> {}
       override (assoc :warn-off-override true)
-      (not override) (assoc :warn-off warnoff)
+      (and (not override) (#{:restricted :contested} word)) (assoc :warn-off warnoff)
       (and warnoff (zero? nonex))
       (assoc :warn-off-excerpt-only true))))
 

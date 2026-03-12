@@ -183,7 +183,7 @@
                   (for [opin opins
                         :let [[ostart oend] (:text-position opin)]
                         :when (overlap? start (dec end) ostart
-                                                 (dec (+ ostart oend)))]
+                                        (dec (+ ostart oend)))]
                     (:iid opin))
                   warns (vis/warn-off? (vis/flagset-from-multiple db excerpt-opinions))]]
         {:segment-type (if (zero? (count excerpt-opinions)) :plain :hilited)
