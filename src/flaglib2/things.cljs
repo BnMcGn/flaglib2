@@ -23,7 +23,7 @@
           (tb/assemble-bar-parts tbstuff fields))))
 
 (defn display-thing-opinion [tbstuff & {:keys [fields]}]
-  (into [:div {:class (:bg-color tbstuff)}] (tb/assemble-bar-parts tbstuff fields)))
+  (into [:div {:class "child:mr-2"}] (tb/assemble-bar-parts tbstuff fields)))
 
 (defn display-thing-opinion-short [tbstuff & {:keys [fields]}]
   (let [tbstuff (update tbstuff :headline into [:no-fontsize true])]
