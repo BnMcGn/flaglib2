@@ -464,7 +464,7 @@
 (defn excerptless-opinions [target-id]
   (let [idlist @(rf/subscribe [:immediate-children target-id])
         show? @(rf/subscribe [:visibility-show-all])
-        idlist (remove
+        idlist (filter
                 (fn [id]
                   (let [cinfo @(rf/subscribe [:excerpt-context-info id])]
                     (or (not cinfo) (= cinfo :not-found))))
