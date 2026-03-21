@@ -152,9 +152,23 @@
         nonex (count-of-non-excerpt-concealing-opinion-effects db id)]
     (cond-> {}
       override (assoc :warn-off-override true)
-      (and (not override) (#{:restricted :contested} word)) (assoc :warn-off warnoff)
-      (and warnoff (zero? nonex))
+      (and (not override) (not (empty? warnoff)) (#{:restricted :contested} word))
+      (assoc :warn-off warnoff)
+      (and (not (empty? warnoff)) (zero? nonex))
       (assoc :warn-off-excerpt-only true))))
+
+
+(defn visibility-func [db]
+  (let [vis (into {}
+                  (for [id (keys (:warstats-store db))]
+                    [id
+                     (into (list-item-display-policy db id)
+                           {:list-display (list-display-policy db id)
+                            :word (mood/in-a-word (get-in db [:warstats-store id])
+                                                  :key id :db db)})]))]
+    (into {}
+          (for [id (keys vis)]
+            [id (update-ancestral-info (:opinion-store db) vis id)]))))
 
 (rf/reg-flow
  {:id :visibility
@@ -162,18 +176,7 @@
            :opinion-store [:opinion-store]
            :opinion-tree-store [:opinion-tree-store]
            :local [:local]}
-  :output
-  (fn [db]
-    (let [vis (into {}
-                    (for [id (keys (:warstats-store db))]
-                      [id
-                       (into (list-item-display-policy db id)
-                             {:list-display (list-display-policy db id)
-                              :word (mood/in-a-word (get-in db [:warstats-store id])
-                                                    :key id :db db)})]))]
-      (into {}
-            (for [id (keys vis)]
-              [id (update-ancestral-info (:opinion-store db) vis id)]))))
+  :output visibility-func
   :path [:visibility]})
 
 

@@ -12,6 +12,7 @@
    [flaglib2.posters-test]
    [flaglib2.form-test]
    [flaglib2.ipfs-test]
+   [flaglib2.visibility-test]
 
    [figwheel.main.testing :refer [run-tests-async]]
    [cljs-test-display.core]))
