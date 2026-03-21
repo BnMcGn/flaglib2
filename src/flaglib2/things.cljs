@@ -36,7 +36,7 @@
         thing-element (if short display-thing-short display-thing)]
     (into [:<>]
           (for [{:keys [id type hide-author warn-off]} things]
-            (if warn-off
+            (if (not (empty? warn-off))
               [vis/line-warn-off id]
               (case type
               :rooturl
