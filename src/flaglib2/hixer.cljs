@@ -107,7 +107,8 @@
                  :uri (str "/ipns/" (:ipns-host db) "/opinions/" iid "/hiccup.edn")
                  :timeout 18000
                  :response-format (ajax/text-response-format)
-                 :on-success [::received-opinion-hiccup iid]}}))
+                 :on-success [::received-opinion-hiccup iid]
+                 :on-failure [::no-hiccup iid]}}))
 
 (rf/reg-event-fx
  ::received-opinion-hiccup
@@ -124,6 +125,10 @@
      {:db (if pass? (assoc-in db [:hiccup-store key] hiccup) db)
       :fx (into [] (when pass? (extract-hiccup-ids hiccup)))})))
 
+(rf/reg-event-db
+ ::no-hiccup
+ (fn [db]
+   db))
 
 (defn opinion-hiccup [iid]
   (let [hic @(rf/subscribe [:hiccup-store iid])]

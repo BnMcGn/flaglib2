@@ -49,7 +49,7 @@
 (defn ^:export server-side-setup [key config]
   (let [config (js->clj config :keywordize-keys true)]
     (rf/dispatch [::store-server-parameters key config])
-    (rf/dispatch [:userfig/store-user-info (js->clj (go/get js/window "USERFIGDATA"))])
+    (rf/dispatch [::userfig/store-user-info (js->clj (go/get js/window "USERFIGDATA"))])
     (rf/dispatch [(keyword (:entry-point config)) key])))
 
 (def local-store-keys [:advanced :warn-off-overrides])

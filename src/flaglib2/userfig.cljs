@@ -16,7 +16,7 @@
    ))
 
 (defn proc-user-info [uinfo]
-  (when uinfo
+  (when-not (empty? uinfo)
     (update (misc/decapikey uinfo)
             :signed-up misc/parse-time)))
 
