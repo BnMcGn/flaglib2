@@ -102,6 +102,12 @@
           [:li "Target text is being fetched and extracted"]
           [:li "You may supply the article text manually"]
           [:li "Skip to posting if you don't need the article text"]]]
+        :unknown
+        [:div
+         [:h3 "Looking up target"]
+         [:ul
+          [:li "The article text may already be available for comments"]
+          [:li "Skip to posting if you don't need the article text"]]]
         :failure
         [:div
          [:h3 "Text from article at " (misc/url-domain selection) " is not currently available."]
@@ -126,7 +132,7 @@
         (step/stepper-buttons
          :next "Skip to Flagging"
          :buttons [[review-text-button]])
-        :wait
+        (:wait :unknown)
         (step/stepper-buttons
          :next "Skip to Flagging"
          :buttons [[supply-text-button]])

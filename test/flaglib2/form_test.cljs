@@ -44,14 +44,14 @@
      (is (string/index-of text "Skip to Flagging"))
      (is (string/index-of text "Review Text")))))
 
-(deftest decision-wait
+(deftest decision-unknown
   (rf-test/run-test-sync
    (rf/dispatch [::init/store-server-parameters nil {:section "decision-wait"}])
    (rf/dispatch [:mock-make])
    (let [el (js/document.createElement "div")
          _ (rdom/render [step/wf-stepper] el)
          text (. el -innerHTML)]
-     (is (string/index-of text "Waiting for text extraction"))
+     (is (string/index-of text "Looking up target"))
      (is (string/index-of text "Supply Text")))))
 
 (deftest decision-failure
@@ -66,7 +66,7 @@
      (is (string/index-of text "Supply Text"))
 
      ;;These are just defaults, not what would be here in actual use
-     (is (= :wait (:status dec)))
+     (is (= :unknown (:status dec)))
      (is (not (:message dec))))))
 
 (deftest supply-text

@@ -216,9 +216,7 @@
         responses (and warstat (not (zero? (:replies-total warstat))))]
     {:status (cond (and responses have-text) :reviewed
                    have-text :available
-                   ;;FIXME: Not sure that :wait is correct here. Perhaps add an appropriate message
-                   ;; for the NIL circumstance
-                   :else (or (keyword (walk/keywordize-keys (:status status))) :wait))
+                   :else (or (keyword (walk/keywordize-keys (:status status))) :unknown))
      :message (and status (:message status))}))
 
 (rf/reg-sub
