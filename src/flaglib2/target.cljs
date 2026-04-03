@@ -47,30 +47,34 @@
         advanced @(rf/subscribe [:advanced-options])
         reason (if touched-p
                  initial-message
-                 "No discussion has been started on the article, so text extraction probably has not been attempted.")]
-    [:div
-     [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
-     [deco/casual-heading
-      (if advanced
-        (str "Text from article at " (misc/url-domain rooturl) " is not currently available")
-        (str "Discussion of article at " (misc/url-domain rooturl)
-             " has not been opened yet"))]
-     (when advanced
-       [:h4 (str "Reason: " reason)])
-     [:ul
-      (when (not-empty refd)
-        (let [ct (count refd)]
-          [:li (if (= 1 ct)
-                 "1 reference has been made to this URL"
-                 (str ct " references have been made to this URL"))
-           ]))
-      (when advanced
-        [:<>
-         (when-not touched-p
-           [:li "Text extraction will be attempted by the system if you start a new post"])
-         [:li "You may still post flags on this article, though excerpts must be filled by hand"]
-         [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]
-         ])]]))
+                 "No discussion has been started on the article, so text extraction probably has not been attempted.")
+        long-enough @(rf/subscribe [:long-enough?])]
+    (if long-enough
+      [:div
+       [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]
+       [deco/casual-heading
+        (if advanced
+          (str "Text from article at " (misc/url-domain rooturl) " is not currently available")
+          (str "Discussion of article at " (misc/url-domain rooturl)
+               " has not been opened yet"))]
+       (when advanced
+         [:h4 (str "Reason: " reason)])
+       [:ul
+        (when (not-empty refd)
+          (let [ct (count refd)]
+            [:li (if (= 1 ct)
+                   "1 reference has been made to this URL"
+                   (str ct " references have been made to this URL"))
+             ]))
+        (when advanced
+          [:<>
+           (when-not touched-p
+             [:li "Text extraction will be attempted by the system if you start a new post"])
+           [:li "You may still post flags on this article, though excerpts must be filled by hand"]
+           [:li "Alternate texts and titles may be manually inserted under the Text/Title tab"]
+           ])]]
+      [:div
+       [disp/root-title :url rooturl :intro-text "Article: " :display-depth 0]])))
 
 (defn target-root-article [& {:keys [rooturl]}]
   (let [text-info @(rf/subscribe [:text-store rooturl])]
@@ -196,4 +200,5 @@
                         {:flaglib2.ipfs/received-title
                          [::set-target-page-headers :flaglib2.misc/context]}]]
             [:dispatch [:load-rooturl target]]
-            [:dispatch [:mount-registered]]]})))
+            [:dispatch [:mount-registered]]
+            [:dispatch-later {:ms 2000 :dispatch [:long-enough]}]]})))

@@ -41,7 +41,6 @@
       (< size 1536) :xl
       :else :xxl)))
 
-
 (rf/reg-event-fx
  :initialize
  (fn [_ [_ extras]]
@@ -63,8 +62,10 @@
 ;;Start displaying certain notices
 (rf/reg-event-db
  :long-enough
- (fn [db [_ val]]
-   (assoc db :long-enough? val)))
+ (fn [db]
+   (assoc db :long-enough? true)))
+
+(rf/reg-sub :long-enough? :-> :long-enough?)
 
 ;; specify reload hook with ^:after-load metadata
 (defn ^:after-load on-reload []
